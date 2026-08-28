@@ -6,6 +6,27 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 1 — Project Foundation — 2026-08-27
+
+**Added**
+- Next.js 16 App Router application scaffold with TypeScript (strict), Tailwind CSS 4,
+  ESLint 9 (flat config) + Prettier, and the `@/*` → `src/*` path alias.
+- `src/lib/env.ts` — Zod-validated environment configuration (`parseEnv` + frozen `env`).
+- `src/lib/errors/` — normalized `AppError`, `ErrorCode` union, `normalizeError`.
+- `src/lib/validation/` — shared Zod primitives; `src/lib/utils/cn.ts`.
+- Route-level `loading` / `error` / `global-error` / `not-found` and shared
+  `LoadingState` / `EmptyState` / `ErrorState` components.
+- `GET /api/health` liveness probe; passthrough `Providers` wrapper.
+- Vitest 4 + Testing Library test setup; 23 tests across 5 files.
+- `.env.example`, `AGENTS.md`, and the `src/` repository directory skeleton.
+- npm scripts: `dev`, `build`, `start`, `lint`, `typecheck`, `test`, `format`.
+
+**Notes**
+- Toolchain versions are significantly newer than earlier planning assumed (Next 16,
+  Tailwind 4, ESLint 9 flat, Zod 4, Vitest 4). No Firebase yet — that is Layer 3.
+- `next lint` and `next.config`'s `eslint` key were removed in Next 16; lint runs as
+  `eslint .`.
+
 ### Layer 0 — Project Constitution — 2026-08-27
 
 **Added**

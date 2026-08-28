@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+/*
+ * Layer 1 foundation palette — PLACEHOLDER values.
+ * The full Mastery design-system token set (semantic roles, spacing / type / radius
+ * scales, component tokens, accent-color support) is defined in Layer 2.
+ * See docs/DESIGN_SYSTEM.md.
+ */
+
+:root {
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+
+  --background: #ffffff;
+  --surface: #f7f7f8;
+  --foreground: #18181b;
+  --muted: #71717a;
+  --border: #e4e4e7;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --danger: #dc2626;
+  --success: #16a34a;
+  --warning: #d97706;
+  --ring: #2563eb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #09090b;
+    --surface: #18181b;
+    --foreground: #fafafa;
+    --muted: #a1a1aa;
+    --border: #27272a;
+    --primary: #3b82f6;
+    --primary-foreground: #0b1120;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --ring: #3b82f6;
+  }
+}
+
+@theme inline {
+  --font-sans: var(--font-sans);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
