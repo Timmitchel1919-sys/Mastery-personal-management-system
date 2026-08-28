@@ -31,4 +31,24 @@ describe("parseEnv", () => {
     ).toBe("https://x.dev");
     expect(() => parseEnv({ NEXT_PUBLIC_APP_URL: "   " }, { server: false })).toThrow();
   });
+
+  it("defaults the emulator flag to false and accepts explicit values", () => {
+    expect(parseEnv({}, { server: false }).NEXT_PUBLIC_USE_FIREBASE_EMULATORS).toBe("false");
+    expect(
+      parseEnv({ NEXT_PUBLIC_USE_FIREBASE_EMULATORS: "true" }, { server: false })
+        .NEXT_PUBLIC_USE_FIREBASE_EMULATORS,
+    ).toBe("true");
+    expect(() =>
+      parseEnv({ NEXT_PUBLIC_USE_FIREBASE_EMULATORS: "yes" }, { server: false }),
+    ).toThrow(/Invalid environment configuration/);
+  });
+
+  it("treats the Firebase web config as optional", () => {
+    const result = parseEnv({}, { server: false });
+    expect(result.NEXT_PUBLIC_FIREBASE_PROJECT_ID).toBeUndefined();
+    expect(
+      parseEnv({ NEXT_PUBLIC_FIREBASE_PROJECT_ID: " demo " }, { server: false })
+        .NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    ).toBe("demo");
+  });
 });

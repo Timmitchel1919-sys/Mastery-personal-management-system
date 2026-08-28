@@ -1,0 +1,15 @@
+rules_version = '2';
+
+// ─────────────────────────────────────────────────────────────
+// Layer 3 baseline — deny everything.
+//
+// Owner-scoped, content-type- and size-validated rules for
+// users/{uid}/** are added in Layer 4 / Layer 20.
+// ─────────────────────────────────────────────────────────────
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

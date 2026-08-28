@@ -1,0 +1,44 @@
+import { getApps, initializeApp, type FirebaseApp } from "firebase/app";
+import { connectAuthEmulator, getAuth, type Auth } from "firebase/auth";
+import { connectFirestoreEmulator, getFirestore, type Firestore } from "firebase/firestore";
+import { connectStorageEmulator, getStorage, type FirebaseStorage } from "firebase/storage";
+import { EMULATOR_CONFIG, getFirebaseClientConfig, useFirebaseEmulators } from "./config";
+
+export interface FirebaseClient {
+  app: FirebaseApp;
+  auth: Auth;
+  db: Firestore;
+  storage: FirebaseStorage;
+}
+
+declare global {
+  // Survives dev/HMR module re-evaluation so we connect the emulators exactly once.
+  var __masteryEmulatorsConnected: boolean | undefined;
+}
+
+let cached: FirebaseClient | null = null;
+
+/**
+ * Lazily initialize and return the browser Firebase SDK singleton. Safe to call
+ * repeatedly. Connects to the Emulator Suite when `NEXT_PUBLIC_USE_FIREBASE_EMULATORS`
+ * is `true`.
+ */
+export function getFirebaseClient(): FirebaseClient {
+  if (cached) return cached;
+
+  const app = getApps()[0] ?? initializeApp(getFirebaseClientConfig());
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  if (useFirebaseEmulators && !globalThis.__masteryEmulatorsConnected) {
+    const { host, authPort, firestorePort, storagePort } = EMULATOR_CONFIG;
+    connectAuthEmulator(auth, `http://${host}:${authPort}`, { disableWarnings: true });
+    connectFirestoreEmulator(db, host, firestorePort);
+    connectStorageEmulator(storage, host, storagePort);
+    globalThis.__masteryEmulatorsConnected = true;
+  }
+
+  cached = { app, auth, db, storage };
+  return cached;
+}

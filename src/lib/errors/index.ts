@@ -6,3 +6,4 @@ export {
   type AppErrorOptions,
   type ErrorCode,
 } from "./app-error";
+export { mapFirebaseError, mapFunctionsError } from "./firebase-error";

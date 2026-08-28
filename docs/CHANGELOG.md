@@ -6,6 +6,30 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 3 — Firebase Foundation — 2026-08-28
+
+**Added**
+- Firebase project `mastery-personal-mgmt-system` (created via CLI, Web app registered —
+  ADR-0008). Config in `.env.local`; keys documented in `.env.example`.
+- `firebase.json` (Emulator Suite: auth/firestore/storage/functions/ui), `.firebaserc`,
+  `firestore.rules` + `storage.rules` (deny-all baseline), `firestore.indexes.json`.
+- `src/lib/firebase/`: `config`, `client` (browser SDK singleton + emulator connect),
+  `admin` (`server-only` Admin SDK singleton), `timestamps` (`normalizeTimestamps`),
+  `converters` (`makeConverter` — Zod-validated, timestamp-normalizing Firestore converter).
+- `src/lib/errors/firebase-error.ts` — `mapFirebaseError` / `mapFunctionsError`.
+- `functions/` package: `healthCheck` HTTP function, shared `errors` / `validation` /
+  `auth` / `firebase-admin` helpers, region config, per-domain placeholder folders, tests.
+- Security-rule test harness: `tests/rules/**`, `vitest.rules.config.mts`, and the
+  `test:rules` / `emulators` / `functions:build` / `functions:test` npm scripts.
+- Dependencies: `firebase`, `firebase-admin`, `server-only`, `@firebase/rules-unit-testing`,
+  `firebase-tools`.
+
+**Changed**
+- `src/lib/env.ts` gains `NEXT_PUBLIC_FIREBASE_*` (optional) + `NEXT_PUBLIC_USE_FIREBASE_EMULATORS`;
+  empty-string env values are treated as unset.
+- Root `tsconfig.json`, `eslint.config.mjs`, `.prettierignore` exclude `functions/`.
+- ADR-0004 superseded by ADR-0008; `docs/DEPLOYMENT.md` environment↔project-id table filled in.
+
 ### Layer 2 — Mastery Design System — 2026-08-27
 
 **Added**

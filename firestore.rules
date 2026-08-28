@@ -1,0 +1,17 @@
+rules_version = '2';
+
+// ─────────────────────────────────────────────────────────────
+// Layer 3 baseline — deny everything.
+//
+// Owner-scoped rules for users/{uid}/** (read/write only your own data,
+// role immutability, required-field validation) are added in Layer 4
+// (Authentication & User Isolation) together with emulator rule tests.
+// Recovery Center hardening follows in Layer 15 / Layer 20.
+// ─────────────────────────────────────────────────────────────
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -54,7 +54,7 @@ Hosting instead of Vercel. Any Vercel-specific references in the prompt are trea
 ---
 
 ## ADR-0004 — Firebase project id slug `master-personal-manger`
-**Date:** 2026-08-27 · **Status:** pending owner action
+**Date:** 2026-08-27 · **Status:** superseded by ADR-0008
 
 **Context.** The owner wants the project id to be "Master personal manger". Firebase
 project ids must be lowercase, 6–30 chars, `a-z 0-9 -`, starting with a letter — spaces and
@@ -113,3 +113,26 @@ from `@/components/ui`, never from Radix directly.
 ever replaced, the blast radius is limited to `src/components/ui/`. Deferred primitives
 (Accordion, Popover, Toast, Combobox, Slider, DatePicker, Table/DataTable, Pagination,
 CommandPalette) are added by the layers that first need them, following the same pattern.
+
+---
+
+## ADR-0008 — Firebase project id `mastery-personal-mgmt-system`; region `europe-west1`
+**Date:** 2026-08-28 · **Status:** accepted · **Layer:** 3 · **Supersedes:** ADR-0004
+
+**Context.** The owner asked for the Firebase project id
+`mastery-personal-management-system` (matching the GitHub repo name). GCP/Firebase project
+ids are limited to 6–30 characters; that string is 34. The owner authorized creating the
+project via the CLI with the closest valid id. `mastery-personal-manager` (24 chars) was
+already registered globally by another account.
+
+**Decision.** Created **`mastery-personal-mgmt-system`** (28 chars) via
+`firebase projects:create` and registered a Web app. This single cloud project serves
+local dev + (for now) production; the emulator-only test path uses the reserved
+`demo-*` id space and needs no cloud project. Staging/production split is deferred to
+Layer 22. Default Cloud Functions region: **`europe-west1`** (`functions/src/config/region.ts`),
+chosen for EU data locality.
+
+**Consequences.** `.firebaserc` `default` = `mastery-personal-mgmt-system`. Web SDK config
+lives in `.env.local` (git-ignored); `.env.example` documents the keys.
+`docs/DEPLOYMENT.md` §1 holds the environment↔id table. ADR-0004's placeholder slug
+(`master-personal-manger`) is retired.

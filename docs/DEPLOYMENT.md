@@ -9,16 +9,17 @@ in **Layer 22**; this document is the target and is filled in as infrastructure 
 
 | Environment | Purpose | Firebase project id |
 |---|---|---|
-| development | local + shared dev | _TBD_ |
-| test | automated test / emulator CI | _TBD_ (may be emulator-only) |
-| staging | pre-production verification | _TBD_ |
-| production | live | **`master-personal-manger`** _(pending: user to create the project and authorize the exact id — see ADR-0004)_ |
+| development | local (emulators) + shared dev | `mastery-personal-mgmt-system` |
+| test | automated test / emulator CI | `demo-mastery` (emulator-only, no cloud project) |
+| staging | pre-production verification | _TBD — create `mastery-personal-mgmt-stg` before Layer 22_ |
+| production | live | **`mastery-personal-mgmt-system`** |
 
-> The Firebase project is **not created yet**. Layer 3 (Firebase Foundation) is the first
-> layer that needs it. Before starting Layer 3, the user creates the Firebase project(s)
-> in the console and confirms the exact project id(s) here. A Firebase project id must be
-> lowercase, 6–30 chars, `a-z 0-9 -`, starting with a letter — hence the `master-personal-manger`
-> slug rather than "Master personal manger".
+> Created 2026-08-28 (Layer 3). The requested id `mastery-personal-management-system` is 34
+> characters; GCP project ids are capped at 30, so the closest available id was used
+> (ADR-0008). Until staging/prod are split (Layer 22), `mastery-personal-mgmt-system` serves
+> as the single cloud project and `demo-*` ids serve the emulator-only test path.
+> Web SDK config lives in `.env.local` (git-ignored); `.env.example` documents every key.
+> Default Functions region: `europe-west1`.
 
 ## 2. Hosting model
 
