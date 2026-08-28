@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
 export interface LoadingStateProps {
@@ -13,10 +14,7 @@ export function LoadingState({ label = "Loading…", className }: LoadingStatePr
       aria-live="polite"
       className={cn("flex flex-col items-center justify-center gap-3 p-8 text-center", className)}
     >
-      <span
-        aria-hidden="true"
-        className="border-border border-t-primary size-6 animate-spin rounded-full border-2"
-      />
+      <Spinner className="text-muted size-6" />
       <span className="text-muted text-sm">{label}</span>
     </div>
   );

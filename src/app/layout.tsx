@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+import { ThemeScript } from "@/components/theme-script";
 import { Providers } from "@/providers";
 
 export const metadata: Metadata = {
@@ -24,7 +25,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
       <body className="bg-background text-foreground min-h-full font-sans">
         <Providers>{children}</Providers>
       </body>

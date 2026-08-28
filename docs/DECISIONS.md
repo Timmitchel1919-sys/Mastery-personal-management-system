@@ -86,3 +86,30 @@ added later without structural change; no Spanish content required in the first 
 Layer 9 (9A–9E), Layer 10 (10A–10D), Layer 11 (11A–11D), and Layer 15 (15A–15F) built as
 sublayers — 46 discrete build steps in total. One layer/sublayer per work session; do not
 start the next before the current one meets the definition of done.
+
+---
+
+## ADR-0007 — Radix UI primitives + CVA + lucide-react for the design system
+**Date:** 2026-08-27 · **Status:** accepted · **Layer:** 2
+
+**Context.** `docs/DESIGN_SYSTEM.md` requires accessible overlay/menu/listbox components
+(Dialog, DropdownMenu, Tooltip, Select, Tabs, RadioGroup, Checkbox, Switch) with full
+keyboard support, focus trapping, and correct WAI-ARIA semantics. `CLAUDE.md` §3 mandates
+keyboard navigation and accessible focus/labels. Hand-rolling compliant versions of these
+patterns is high-risk and high-maintenance. The Final Master Prompt's stack list does not
+name a headless component library but does list Lucide, clsx, and tailwind-merge.
+
+**Decision.** Add unstyled primitive dependencies:
+- **`@radix-ui/react-*`** (avatar, checkbox, dialog, dropdown-menu, label, radio-group,
+  select, separator, slot, switch, tabs, toggle-group, tooltip) — accessible behavior only;
+  all styling is ours via Tailwind tokens.
+- **`class-variance-authority`** — typed component style variants.
+- **`lucide-react`** — icon set (already named in the prompt's stack).
+
+Components live in `src/components/ui/` as thin styled wrappers; the rest of the app imports
+from `@/components/ui`, never from Radix directly.
+
+**Consequences.** ~13 small runtime deps added. Radix is React 19 compatible. If Radix is
+ever replaced, the blast radius is limited to `src/components/ui/`. Deferred primitives
+(Accordion, Popover, Toast, Combobox, Slider, DatePicker, Table/DataTable, Pagination,
+CommandPalette) are added by the layers that first need them, following the same pattern.

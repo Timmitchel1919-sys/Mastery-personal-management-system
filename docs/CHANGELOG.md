@@ -6,6 +6,28 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 2 — Mastery Design System — 2026-08-27
+
+**Added**
+- Design token layer in `globals.css` — semantic `--color-*` roles + `--font-*`, full
+  light/dark palettes, Tailwind v4 `@theme inline` exposure, reduced-motion base reset.
+- Theme system: `src/lib/theme.ts` (+ `themeStore`), pre-hydration no-flash `ThemeScript`,
+  `ThemeProvider` / `useTheme` (`useSyncExternalStore`), and a `ThemeToggle`
+  (light / dark / system, persisted to `localStorage`).
+- Reusable component library under `src/components/ui/`: Button, IconButton, Spinner,
+  Badge, Card, Skeleton, Separator, VisuallyHidden, Kbd, Avatar, Label, Input, Textarea,
+  FormField, Checkbox, Switch, RadioGroup, Select, Tabs, Dialog, DropdownMenu, Tooltip,
+  Alert, SegmentedControl.
+- Layout helpers: `PageContainer`, `PageHeader`, `Breadcrumbs`.
+- `/design-system` showcase route.
+- Dependencies: `@radix-ui/react-*` primitives, `class-variance-authority`, `lucide-react`
+  (ADR-0007).
+- Tests for Button, FormField, Badge, and theme logic (suite now 9 files / 38 tests).
+
+**Changed**
+- `LoadingState` now renders the shared `Spinner`.
+- Root layout injects the theme script and sets `suppressHydrationWarning`.
+
 ### Layer 1 — Project Foundation — 2026-08-27
 
 **Added**

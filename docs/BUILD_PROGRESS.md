@@ -8,15 +8,15 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 1 — Project Foundation (complete) |
-| **Next approved layer** | Layer 2 — Mastery Design System |
-| **Completed layers** | Layer 0, Layer 1 |
+| **Current layer** | Layer 2 — Mastery Design System (complete) |
+| **Next approved layer** | Layer 3 — Firebase Foundation ⚠️ **needs the Firebase project created + project id confirmed by the owner first** (ADR-0004) |
+| **Completed layers** | Layer 0, Layer 1, Layer 2 |
 | **In-progress work** | none |
-| **Test status** | ✅ `vitest run` — 5 files, 23 tests passing (env, errors, validation, cn, EmptyState) |
-| **Build status** | ✅ `npm run typecheck`, `npm run lint`, `npm run build` all pass. Routes: `/`, `/_not-found`, `/api/health`. Next 16.3.3 (Turbopack). |
+| **Test status** | ✅ `vitest run` — 9 files, 38 tests passing (env, errors, validation, cn, theme, Button, FormField, Badge, EmptyState) |
+| **Build status** | ✅ `typecheck`, `lint`, `test`, `build`, `format:check` all pass. Routes: `/`, `/_not-found`, `/api/health`, `/design-system`. |
 | **Deployment status** | Not deployed. Firebase project not created (needed at Layer 3). Frontend target: Firebase App Hosting. |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 (flat) · Zod 4.1 · Vitest 4.1 + Testing Library · Prettier 3.9 |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 (flat) · Zod 4.1 · Vitest 4.1 + Testing Library · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react |
 
 ---
 
@@ -145,6 +145,70 @@ were removed in Next 16 — linting runs via `eslint .` directly.
   Layer 4 and a later layer respectively.
 - `unrs-resolver` postinstall was blocked by the sandbox; ESLint import resolution still
   works. No action needed unless resolver errors appear later.
+
+---
+
+### Layer 2 — Mastery Design System — ✅ complete (2026-08-27)
+
+Token layer, theme system (dark/light/system, no-flash), and the reusable component
+inventory. Added Radix UI + `class-variance-authority` + `lucide-react` (ADR-0007).
+
+**Created — tokens & theme:**
+- `src/app/globals.css` — full semantic token set (see `docs/DESIGN_SYSTEM.md` §7), light +
+  dark via the 3-block pattern, `@theme inline` exposure, base layer (border default,
+  focus ring, reduced-motion reset), overlay keyframes.
+- `src/lib/theme.ts` — `Theme` type, `resolveTheme` / `applyTheme` / `getSystemTheme` /
+  storage helpers, and `themeStore` (subscribe / getSnapshot / setTheme) for
+  `useSyncExternalStore`.
+- `src/components/theme-script.tsx` — pre-hydration no-flash script, rendered in `<head>`.
+- `src/providers/theme-provider.tsx` — `ThemeProvider` + `useTheme` (via `useSyncExternalStore`).
+- `src/providers/index.tsx` — now wraps `ThemeProvider` → `TooltipProvider` → children.
+- `src/app/layout.tsx` — `<head><ThemeScript /></head>` + `suppressHydrationWarning`.
+
+**Created — components (`src/components/ui/`):** button, icon-button, spinner, badge, card,
+skeleton, separator, visually-hidden, kbd, avatar, label, input, textarea, field
+(`FormField`), checkbox, switch, radio-group, select, tabs, dialog, dropdown-menu, tooltip,
+alert, segmented-control, theme-toggle, plus `index.ts` barrel.
+
+**Created — layout (`src/components/layout/`):** page-container, page-header, breadcrumbs,
+`index.ts`.
+
+**Created — route:** `src/app/design-system/page.tsx` — visual showcase of tokens + every
+component.
+
+**Modified:** `src/components/shared/LoadingState.tsx` now uses the shared `Spinner`.
+Removed `.gitkeep` from `src/components/ui` and `src/components/layout`.
+
+**Tests added (4 files):** `src/lib/theme.test.ts`, `src/components/ui/button.test.tsx`,
+`src/components/ui/field.test.tsx`, `src/components/ui/badge.test.tsx`. Total suite: 9
+files / 38 tests.
+
+**Verification:** `typecheck` ✅ · `lint` ✅ · `test` ✅ (38/38) · `build` ✅ (adds
+`/design-system`) · `format:check` ✅.
+
+**Manual test instructions:**
+1. `npm run dev` → open `http://localhost:3000/design-system`.
+2. Use the theme toggle (top-right): Light / Dark / System. The page recolors with no
+   flash; reload — the choice persists. Set OS to dark with "System" selected → follows OS.
+3. Open the Dialog: focus is trapped, `Esc` closes, focus returns to the trigger.
+4. Open the Dropdown menu: arrow keys move, `Enter` selects, `Esc` closes; "Sign out" is
+   styled as destructive.
+5. Tab through the form controls: every control has a visible focus ring; the Email field
+   shows an inline error and the input gets `aria-invalid` when the value has no `@`.
+6. Hover/focus "Hover me" → tooltip appears after a short delay.
+7. `npm run typecheck && npm run lint && npm test && npm run build` → all green.
+
+**Known limitations:**
+- Token hex values are a first pass (indigo primary / teal accent / zinc neutrals); they
+  can be tuned without structural change.
+- Deferred primitives (Accordion, Popover, Toast, Combobox, Slider, DatePicker,
+  Table/DataTable, Pagination, CommandPalette) are not built yet — added by their
+  consuming layers. The app shell (Sidebar/Topbar/BottomNav) is Layer 5.
+- Component tests cover Button / FormField / Badge / theme logic; overlay primitives
+  (Dialog/DropdownMenu/Tooltip) are verified via the manual steps above and the build,
+  not yet by automated interaction tests.
+- `accentColorPreference` token role exists but no per-user accent switching UI yet
+  (design-system decision + Layer 18).
 
 ---
 

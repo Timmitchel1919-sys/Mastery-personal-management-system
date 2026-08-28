@@ -1,66 +1,240 @@
 @import "tailwindcss";
 
-/*
- * Layer 1 foundation palette — PLACEHOLDER values.
- * The full Mastery design-system token set (semantic roles, spacing / type / radius
- * scales, component tokens, accent-color support) is defined in Layer 2.
- * See docs/DESIGN_SYSTEM.md.
- */
+/* ─────────────────────────────────────────────────────────────
+ * Mastery design system — token layer (Layer 2).
+ * See docs/DESIGN_SYSTEM.md. Components consume the semantic
+ * `--color-*` / `--font-*` tokens below, never raw hex.
+ * ───────────────────────────────────────────────────────────── */
 
+/* `dark:` utilities follow the [data-theme="dark"] attribute set by the
+ * pre-hydration theme script and the ThemeProvider. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ── Light palette (default + explicit) ───────────────────────── */
 :root {
   --font-sans:
     ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
     "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono:
+    ui-monospace, "SF Mono", "Cascadia Code", "Segoe UI Mono", Menlo, Consolas, monospace;
 
   --background: #ffffff;
-  --surface: #f7f7f8;
+  --surface: #fafafa;
+  --surface-raised: #ffffff;
+  --overlay: rgb(9 9 11 / 0.5);
+
   --foreground: #18181b;
-  --muted: #71717a;
+  --muted: #52525b;
+  --subtle: #71717a;
+
   --border: #e4e4e7;
-  --primary: #2563eb;
+  --border-strong: #d4d4d8;
+
+  --primary: #4f46e5;
   --primary-foreground: #ffffff;
-  --danger: #dc2626;
+  --primary-hover: #4338ca;
+
+  --accent: #0d9488;
+  --accent-foreground: #ffffff;
+
   --success: #16a34a;
-  --warning: #d97706;
-  --ring: #2563eb;
+  --success-foreground: #ffffff;
+  --success-subtle: #dcfce7;
+  --warning: #b45309;
+  --warning-foreground: #ffffff;
+  --warning-subtle: #fef3c7;
+  --danger: #dc2626;
+  --danger-foreground: #ffffff;
+  --danger-subtle: #fee2e2;
+  --info: #2563eb;
+  --info-foreground: #ffffff;
+  --info-subtle: #dbeafe;
+
+  --ring: #4f46e5;
+
+  --pillar-spiritual: #7c3aed;
+  --pillar-personal: #0d9488;
+  --pillar-societal: #ea580c;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #09090b;
     --surface: #18181b;
+    --surface-raised: #1f1f23;
+    --overlay: rgb(0 0 0 / 0.6);
+
     --foreground: #fafafa;
     --muted: #a1a1aa;
+    --subtle: #8b8b93;
+
     --border: #27272a;
-    --primary: #3b82f6;
+    --border-strong: #3f3f46;
+
+    --primary: #6366f1;
     --primary-foreground: #0b1120;
-    --danger: #ef4444;
+    --primary-hover: #818cf8;
+
+    --accent: #2dd4bf;
+    --accent-foreground: #042f2e;
+
     --success: #22c55e;
+    --success-foreground: #052e16;
+    --success-subtle: #14532d;
     --warning: #f59e0b;
-    --ring: #3b82f6;
+    --warning-foreground: #422006;
+    --warning-subtle: #713f12;
+    --danger: #ef4444;
+    --danger-foreground: #450a0a;
+    --danger-subtle: #7f1d1d;
+    --info: #3b82f6;
+    --info-foreground: #0b1120;
+    --info-subtle: #1e3a8a;
+
+    --ring: #818cf8;
+
+    --pillar-spiritual: #a78bfa;
+    --pillar-personal: #2dd4bf;
+    --pillar-societal: #fb923c;
   }
 }
 
-@theme inline {
-  --font-sans: var(--font-sans);
-  --color-background: var(--background);
-  --color-surface: var(--surface);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-border: var(--border);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-danger: var(--danger);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-ring: var(--ring);
+/* Explicit choice wins over the OS media query in both directions. */
+:root[data-theme="light"] {
+  --background: #ffffff;
+  --surface: #fafafa;
+  --surface-raised: #ffffff;
+  --overlay: rgb(9 9 11 / 0.5);
+  --foreground: #18181b;
+  --muted: #52525b;
+  --subtle: #71717a;
+  --border: #e4e4e7;
+  --border-strong: #d4d4d8;
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --primary-hover: #4338ca;
+  --accent: #0d9488;
+  --accent-foreground: #ffffff;
+  --success: #16a34a;
+  --success-foreground: #ffffff;
+  --success-subtle: #dcfce7;
+  --warning: #b45309;
+  --warning-foreground: #ffffff;
+  --warning-subtle: #fef3c7;
+  --danger: #dc2626;
+  --danger-foreground: #ffffff;
+  --danger-subtle: #fee2e2;
+  --info: #2563eb;
+  --info-foreground: #ffffff;
+  --info-subtle: #dbeafe;
+  --ring: #4f46e5;
+  --pillar-spiritual: #7c3aed;
+  --pillar-personal: #0d9488;
+  --pillar-societal: #ea580c;
 }
 
+:root[data-theme="dark"] {
+  --background: #09090b;
+  --surface: #18181b;
+  --surface-raised: #1f1f23;
+  --overlay: rgb(0 0 0 / 0.6);
+  --foreground: #fafafa;
+  --muted: #a1a1aa;
+  --subtle: #8b8b93;
+  --border: #27272a;
+  --border-strong: #3f3f46;
+  --primary: #6366f1;
+  --primary-foreground: #0b1120;
+  --primary-hover: #818cf8;
+  --accent: #2dd4bf;
+  --accent-foreground: #042f2e;
+  --success: #22c55e;
+  --success-foreground: #052e16;
+  --success-subtle: #14532d;
+  --warning: #f59e0b;
+  --warning-foreground: #422006;
+  --warning-subtle: #713f12;
+  --danger: #ef4444;
+  --danger-foreground: #450a0a;
+  --danger-subtle: #7f1d1d;
+  --info: #3b82f6;
+  --info-foreground: #0b1120;
+  --info-subtle: #1e3a8a;
+  --ring: #818cf8;
+  --pillar-spiritual: #a78bfa;
+  --pillar-personal: #2dd4bf;
+  --pillar-societal: #fb923c;
+}
+
+/* ── Expose tokens to Tailwind utilities (runtime-swappable) ──── */
+@theme inline {
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
+
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-overlay: var(--overlay);
+
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-subtle: var(--success-subtle);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-subtle: var(--info-subtle);
+
+  --color-ring: var(--ring);
+
+  --color-pillar-spiritual: var(--pillar-spiritual);
+  --color-pillar-personal: var(--pillar-personal);
+  --color-pillar-societal: var(--pillar-societal);
+}
+
+/* ── Base layer ─────────────────────────────────────────────── */
 @layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: var(--color-border);
+  }
+
+  html {
+    color-scheme: light dark;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
-    background: var(--color-background);
+    background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-primary) 25%, transparent);
   }
 
   :focus-visible {
@@ -77,5 +251,29 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+/* Keyframes used by overlay primitives. */
+@keyframes mastery-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes mastery-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes mastery-zoom-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+}
+@keyframes mastery-zoom-out {
+  to {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
   }
 }

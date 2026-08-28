@@ -100,3 +100,31 @@ a story/example in the design-system route, and at least a smoke render test.
   before paint to prevent flash.
 - Optional `accentColorPreference` maps to the `accent` role only; it never overrides
   status colors or contrast requirements.
+
+## 7. Implementation status (Layer 2)
+
+**Tokens** — `src/app/globals.css`: semantic `--color-*` roles (background, surface,
+surface-raised, overlay, foreground, muted, subtle, border, border-strong, primary /
+primary-foreground / primary-hover, accent, success/warning/danger/info + `-foreground` /
+`-subtle`, ring, `pillar-{spiritual,personal,societal}`), `--font-{sans,serif,mono}`,
+light + dark values via the 3-block pattern (`:root` / `@media` / `[data-theme]`), exposed
+to Tailwind v4 with `@theme inline`. Base layer sets default border color, focus-visible
+ring, and a `prefers-reduced-motion` reset. Spacing / radius / shadow / breakpoint scales
+use Tailwind v4 defaults.
+
+**Theme system** — `src/lib/theme.ts` (`Theme`, `resolveTheme`, `applyTheme`, storage
+helpers, `themeStore` for `useSyncExternalStore`), `src/components/theme-script.tsx`
+(pre-hydration no-flash script in `<head>`), `src/providers/theme-provider.tsx`
+(`ThemeProvider` + `useTheme`), `src/components/ui/theme-toggle.tsx`. Preference is stored
+in `localStorage` (key `mastery.theme`); cross-device persistence via the user profile is
+wired in Layer 18. Follows OS changes in `system` mode and cross-tab `storage` events.
+
+**Components built** — `src/components/ui/`: Button, IconButton, Spinner, Badge, Card
+(+ Header/Title/Description/Content/Footer), Skeleton, Separator, VisuallyHidden, Kbd,
+Avatar, Label, Input, Textarea, FormField, Checkbox, Switch, RadioGroup, Select, Tabs,
+Dialog, DropdownMenu, Tooltip, Alert, SegmentedControl, ThemeToggle. `src/components/layout/`:
+PageContainer, PageHeader, Breadcrumbs. Showcase route: `/design-system`.
+
+**Deferred** (added by the first layer that needs them, same wrapper pattern): Accordion,
+Popover, Toast, Combobox, Slider, DatePicker/TimePicker, Table/DataTable, Pagination,
+CommandPalette. The responsive app shell (Sidebar / Topbar / BottomNav) is Layer 5.
