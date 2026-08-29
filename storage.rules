@@ -1,13 +1,25 @@
 rules_version = '2';
 
 // ─────────────────────────────────────────────────────────────
-// Layer 3 baseline — deny everything.
+// Layer 4 — owner-only Storage under users/{uid}/**.
 //
-// Owner-scoped, content-type- and size-validated rules for
-// users/{uid}/** are added in Layer 4 / Layer 20.
+// * Read/write only your own path.
+// * Uploads limited to images and PDFs, max 10 MB.
+// * Everything outside users/{uid}/** is denied.
+// Tighter per-feature validation follows in Layer 20.
 // ─────────────────────────────────────────────────────────────
 service firebase.storage {
   match /b/{bucket}/o {
+
+    match /users/{uid}/{allPaths=**} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+
+      allow write: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/(png|jpeg|webp|gif)|application/pdf');
+    }
+
     match /{allPaths=**} {
       allow read, write: if false;
     }

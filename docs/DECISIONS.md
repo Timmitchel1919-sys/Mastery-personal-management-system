@@ -136,3 +136,25 @@ chosen for EU data locality.
 lives in `.env.local` (git-ignored); `.env.example` documents the keys.
 `docs/DEPLOYMENT.md` §1 holds the environment↔id table. ADR-0004's placeholder slug
 (`master-personal-manger`) is retired.
+
+---
+
+## ADR-0009 — Client-side route protection in Layer 4 (no SSR session yet)
+**Date:** 2026-08-28 · **Status:** accepted · **Layer:** 4
+
+**Context.** Layer 4 uses the Firebase Web SDK on the client only. Server components and
+middleware have no access to the auth state without a session cookie, which requires a
+Cloud Function / route handler to mint and verify an ID-token cookie — meaningful extra
+infrastructure.
+
+**Decision.** Protect authenticated routes on the client: the `(app)` route-group layout
+consumes `useAuth()`, renders a `LoadingState` while the session resolves, and
+`router.replace('/login?next=…')` when unauthenticated. The `(auth)` group redirects
+already-signed-in users to `/dashboard`. Firestore/Storage security rules remain the real
+enforcement boundary — the client guard is UX, not security.
+
+**Consequences.** A brief loading state on protected routes during hydration; no
+server-rendered personalization for authed pages yet. A session-cookie + middleware
+approach can be layered on later (candidate for Layer 5 or Layer 20) without changing the
+`useAuth` contract. `react-hook-form` + `@hookform/resolvers` were added from the approved
+stack list (no ADR needed for those).

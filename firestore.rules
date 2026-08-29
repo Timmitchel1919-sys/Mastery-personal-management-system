@@ -1,17 +1,55 @@
 rules_version = '2';
 
 // ─────────────────────────────────────────────────────────────
-// Layer 3 baseline — deny everything.
+// Layer 4 — owner-only access to users/{uid}/**.
 //
-// Owner-scoped rules for users/{uid}/** (read/write only your own data,
-// role immutability, required-field validation) are added in Layer 4
-// (Authentication & User Isolation) together with emulator rule tests.
-// Recovery Center hardening follows in Layer 15 / Layer 20.
+// * A signed-in user reads/writes only their own data.
+// * `role` is fixed to "user" on create and immutable from the client
+//   afterwards — privilege elevation only ever happens via trusted
+//   server-issued custom claims.
+// * `id` / `createdAt` / `createdBy` are immutable; `updatedBy` must be the
+//   caller. `users` is not listable (no enumerating accounts). No client delete.
+// * Subcollections (goals, tasks, habits, journalEntries, …) inherit owner-only
+//   access. Per-collection field validation is added in Layer 6; Recovery Center
+//   hardening (server-mediated writes) is Layer 15 / Layer 20.
 // ─────────────────────────────────────────────────────────────
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // The user profile document itself — narrow, field-validated rules.
+    match /users/{uid} {
+      allow get: if isOwner(uid);
+      allow list: if false;
+
+      allow create: if isOwner(uid)
+        && request.resource.data.id == uid
+        && request.resource.data.role == 'user'
+        && request.resource.data.createdBy == uid
+        && request.resource.data.updatedBy == uid
+        && request.resource.data.status == 'active';
+
+      allow update: if isOwner(uid)
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.updatedBy == uid;
+
+      allow delete: if false;
+    }
+
+    // Owned subcollections. The explicit {collection} segment keeps this from
+    // matching the users/{uid} profile document above.
+    match /users/{uid}/{collection}/{document=**} {
+      allow read, write: if isOwner(uid);
     }
   }
 }

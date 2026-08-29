@@ -8,15 +8,16 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 3 — Firebase Foundation (complete) |
-| **Next approved layer** | Layer 4 — Authentication & User Isolation |
-| **Completed layers** | Layer 0, Layer 1, Layer 2, Layer 3 |
+| **Current layer** | Layer 4 — Authentication & User Isolation (complete, **awaiting owner review — not committed**) |
+| **Next approved layer** | Layer 5 — Application Shell & Navigation |
+| **Completed layers** | Layer 0, Layer 1, Layer 2, Layer 3 (committed) · Layer 4 (built + verified locally, pending approval) |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 12 files, 53 tests (env, errors, firebase-error, timestamps, converters, validation, cn, theme, Button, FormField, Badge, EmptyState). ✅ rules: `npm run test:rules` — 2 files, 6 tests (Firestore + Storage deny-all, emulator). ✅ functions: 1 file, 5 tests (validateRequest / validateResponse / toHttpsError). |
-| **Build status** | ✅ app: `typecheck`, `lint`, `test`, `build`, `format:check`. ✅ functions: `typecheck`, `lint`, `build` (emits `functions/lib`), `test`. Routes unchanged: `/`, `/_not-found`, `/api/health`, `/design-system`. |
-| **Deployment status** | Not deployed. Firebase project **`mastery-personal-mgmt-system`** created (ADR-0008) with a registered Web app; config in `.env.local`. Emulator Suite wired (auth/firestore/storage/functions/ui). Frontend target: Firebase App Hosting. |
-| **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 (flat) · Zod 4.1 · Vitest 4.1 + Testing Library · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 |
+| **Test status** | ✅ app: `vitest run` — 16 files, 72 tests. ✅ rules: `npm run test:rules` — 2 files, 18 tests (owner-only Firestore + Storage, emulator). ✅ integration: `npm run test:integration` — 1 file, 5 tests (register→profile, sign-in/out, wrong password, user isolation, password reset — Auth + Firestore emulators). ✅ functions: 1 file, 5 tests. |
+| **Build status** | ✅ app: `typecheck`, `lint`, `test`, `build`, `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. Routes: `/`, `/_not-found`, `/api/health`, `/dashboard`, `/design-system`, `/forgot-password`, `/login`, `/register`. |
+| **Git status** | Per `CLAUDE.md` §10 (updated): no auto-commit / auto-push. Layer 4 changes are **local and uncommitted** pending explicit owner approval. |
+| **Deployment status** | Not deployed. Firebase project **`mastery-personal-mgmt-system`** with a registered Web app; config in `.env.local`. Emulator Suite wired. Frontend target: Firebase App Hosting. |
+| **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch · HEAD = `337a376` (Layer 3) |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 |
 
 ---
 
@@ -292,6 +293,103 @@ Root scripts: `test:rules` (wraps `firebase emulators:exec`), `emulators`, `func
   (Layer 22) must install and verify it separately from the app.
 - `re2` / `@firebase/util` / `protobufjs` postinstall scripts were sandbox-blocked during
   install; emulators + tests run fine regardless.
+
+---
+
+### Layer 4 — Authentication & User Isolation — ✅ built + verified locally (2026-08-28) — **not committed, awaiting owner review**
+
+Email/password + Google auth, forgot-password, session persistence, protected routes,
+per-user `users/{uid}` profile creation, and owner-only Firestore/Storage rules replacing
+the Layer 3 deny-all baseline. `CLAUDE.md` §10 was changed by the owner this session to
+require manual commit approval, so this layer is **local only**.
+
+**Created — `src/features/auth/`:**
+- `schema.ts` — `signInSchema` / `signUpSchema` (matching-password refine) /
+  `forgotPasswordSchema`; `userProfileSchema` + `userProfileUpdateSchema` (role enum,
+  language/theme `.catch` fallbacks, audit fields).
+- `auth-errors.ts` — `toAuthError` / `authErrorMessage`: friendly, non-leaky messages by
+  `auth/*` code, built on `mapFirebaseError`.
+- `auth-service.ts` — `authService`: sign-up/in (email), Google popup, sign-out, password
+  reset, `onAuthStateChanged`, `browserLocalPersistence` (graceful fallback). Every method
+  rejects with a normalized `AppError`.
+- `user-profile-repository.ts` — `buildDefaultProfile` (role always `user`, timezone from
+  `Intl`, `en` / `system` defaults) + `userProfileRepository` (`get` / `ensure` / `update`,
+  uid from the auth user, `serverTimestamp` + `version` increment, `userProfileConverter`
+  for reads).
+- `components/` — `AuthCard`, `SignInForm`, `SignUpForm`, `ForgotPasswordForm`
+  (React Hook Form + `zodResolver`, form-level `Alert`, redirect on success),
+  `GoogleSignInButton`, `UserMenu` (avatar + display name/email + sign out).
+- `index.ts` barrel.
+
+**Created — providers / routes:**
+- `src/providers/auth-provider.tsx` — `AuthProvider` + `useAuth`
+  (`status: loading | authenticated | unauthenticated`, `user`, `profile`, action methods,
+  `refreshProfile`); ensures the profile doc on first sign-in.
+- `src/providers/index.tsx` — now `ThemeProvider → AuthProvider → TooltipProvider`.
+- `src/app/(auth)/{layout,login/page,register/page,forgot-password/page}.tsx` — auth-only
+  layout (redirects signed-in users to `/dashboard`); login page wraps `SignInForm` in
+  `<Suspense>` (it reads `?next`).
+- `src/app/(app)/{layout,dashboard/page}.tsx` — client-side protected shell (loading state
+  + redirect to `/login?next=…` when signed out; minimal header with `ThemeToggle` +
+  `UserMenu` — replaced by the real shell in Layer 5) and a placeholder dashboard.
+
+**Modified:**
+- `firestore.rules` — owner-only `users/{uid}` (field-validated create/update, `role`
+  immutable, `id`/`createdAt`/`createdBy` immutable, no client delete, not listable) +
+  `users/{uid}/{collection}/{document=**}` owner-only subcollections (explicit `{collection}`
+  segment so the permissive subcollection rule cannot shadow the profile rules — this was a
+  bug caught by the rules tests during the layer).
+- `storage.rules` — owner-only `users/{uid}/**`, images + PDF only, < 10 MB; deny elsewhere.
+- `src/app/page.tsx` — adds Sign in / Create account buttons.
+- `vitest.setup.ts` — registers Testing Library `cleanup()` in `afterEach` (needed because
+  `globals: false`; a missing cleanup surfaced as duplicate-label failures).
+- `package.json` — deps `react-hook-form`, `@hookform/resolvers`, dev `@testing-library/user-event`;
+  scripts `test:integration`.
+
+**Created — tests:**
+- unit/component (`npm test`): `schema.test.ts`, `auth-errors.test.ts`,
+  `user-profile-repository.test.ts`, `components/SignInForm.test.tsx` (render, validation,
+  submit+redirect, error surface — `useAuth` + `next/navigation` mocked).
+- rules (`npm run test:rules`): `tests/rules/firestore.rules.test.ts` (14 cases: create with
+  role `user`, reject elevated role / foreign uid, own read ok, cross-user read denied, no
+  list, role/createdBy immutable, no delete, subcollection owner ok / cross-user denied);
+  `tests/rules/storage.rules.test.ts` (5 cases).
+- integration (`npm run test:integration`): `tests/integration/auth-flow.test.ts` +
+  `vitest.integration.config.mts` — real `authService` / repository against the Auth +
+  Firestore emulators (journeys: registration → profile, sign-in/out round-trip, wrong
+  password → `AppError`, cross-user read → `permission-denied`, password reset).
+
+**Verification (all green):** `typecheck` ✅ · `lint` ✅ · `test` ✅ (16/72) · `build` ✅
+(8 routes) · `test:rules` ✅ (2/18) · `test:integration` ✅ (1/5) · `format:check` ✅ ·
+functions suite unchanged ✅.
+
+**Manual test instructions:**
+1. `npm run dev`, open `http://localhost:3000` → **Create an account** → register with
+   name / email / password. You land on `/dashboard` greeting your name.
+2. Firebase console → Authentication shows the new user; Firestore shows `users/{uid}` with
+   `role: "user"`, `onboardingCompleted: false`, audit fields.
+3. Use the account menu (top-right) → **Sign out** → you are sent to `/login`.
+4. Sign back in. Visit `/login` while signed in → you are redirected to `/dashboard`.
+5. Open `/dashboard` in a fresh private window (signed out) → redirected to
+   `/login?next=%2Fdashboard`; after signing in you return to `/dashboard`.
+6. `/forgot-password` → submit your email → success message (reset link prints in the
+   Auth emulator console, or is emailed in a real project).
+7. **Google:** click *Continue with Google* (works against a real Firebase project; the
+   emulator shows a provider-picker screen).
+8. `npm run typecheck && npm run lint && npm test && npm run build && npm run test:rules && npm run test:integration` → all pass.
+
+**Known limitations:**
+- Route protection is **client-side only** (ADR-0009) — a brief loading state on protected
+  routes during hydration; no SSR session/middleware yet.
+- The `(app)` header is a stopgap; the responsive sidebar / topbar / bottom-nav shell is
+  Layer 5. `/dashboard` is a placeholder (real aggregation = Layer 7).
+- Email verification is not enforced yet; account deletion / re-auth flows are deferred.
+- Recovery subcollections currently fall under the generic owner-only subcollection rule;
+  server-mediated writes + the privacy gate are Layer 15 / Layer 20.
+- Profile `theme` / `language` are stored but not yet driving `ThemeProvider` / i18n
+  (wired in Layer 18); `ThemeToggle` still uses `localStorage`.
+- No Playwright e2e yet — the critical journeys are covered by the emulator integration
+  test for now (TESTING_STRATEGY allows "e2e or integration").
 
 ---
 

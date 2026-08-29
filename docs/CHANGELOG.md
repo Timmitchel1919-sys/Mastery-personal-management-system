@@ -6,6 +6,32 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 4 — Authentication & User Isolation — 2026-08-28 (built locally, not yet committed)
+
+**Added**
+- `src/features/auth/`: form + profile schemas, `authService` (email + Google + reset +
+  persistence, normalized errors), `auth-errors` message mapping, `userProfileRepository`
+  (`ensure` / `get` / `update`, `buildDefaultProfile` — `role` always `user`), and
+  components `AuthCard`, `SignInForm`, `SignUpForm`, `ForgotPasswordForm`,
+  `GoogleSignInButton`, `UserMenu`.
+- `AuthProvider` + `useAuth` (`src/providers/auth-provider.tsx`); wired into `Providers`.
+- Routes: `(auth)/{login,register,forgot-password}` with a redirect-if-signed-in layout;
+  `(app)/dashboard` behind a client-side auth guard layout.
+- Owner-only `firestore.rules` (field-validated `users/{uid}`, immutable `role`, no client
+  delete, subcollection owner-only) and `storage.rules` (owner-only `users/{uid}/**`,
+  image/PDF, < 10 MB).
+- Tests: auth schema / error / profile unit tests, `SignInForm` component test, expanded
+  Firestore + Storage rules tests, and an Auth+Firestore emulator integration suite
+  (`npm run test:integration`, `vitest.integration.config.mts`).
+- Dependencies: `react-hook-form`, `@hookform/resolvers`, `@testing-library/user-event`.
+
+**Changed**
+- `src/app/page.tsx` gains Sign in / Create account entry buttons.
+- `vitest.setup.ts` registers Testing Library `cleanup()` (`globals: false`).
+- ADR-0009 records the client-side route-protection choice.
+- `CLAUDE.md` §10 (by the owner): no automatic commits/pushes — changes stay local until
+  explicitly approved.
+
 ### Layer 3 — Firebase Foundation — 2026-08-28
 
 **Added**
