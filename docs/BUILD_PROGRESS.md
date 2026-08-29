@@ -8,16 +8,16 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 4 — Authentication & User Isolation (complete, **awaiting owner review — not committed**) |
-| **Next approved layer** | Layer 5 — Application Shell & Navigation |
-| **Completed layers** | Layer 0, Layer 1, Layer 2, Layer 3 (committed) · Layer 4 (built + verified locally, pending approval) |
+| **Current layer** | Layer 5 — Application Shell & Navigation (built + verified locally, **awaiting owner review — not committed**) |
+| **Next approved layer** | Layer 6 — Core Data Model & Repository Layer |
+| **Completed layers** | Layers 0–4 (committed + pushed, HEAD `cf8df1b`) · Layer 5 (built + verified locally, pending approval) |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 16 files, 72 tests. ✅ rules: `npm run test:rules` — 2 files, 18 tests (owner-only Firestore + Storage, emulator). ✅ integration: `npm run test:integration` — 1 file, 5 tests (register→profile, sign-in/out, wrong password, user isolation, password reset — Auth + Firestore emulators). ✅ functions: 1 file, 5 tests. |
-| **Build status** | ✅ app: `typecheck`, `lint`, `test`, `build`, `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. Routes: `/`, `/_not-found`, `/api/health`, `/dashboard`, `/design-system`, `/forgot-password`, `/login`, `/register`. |
-| **Git status** | Per `CLAUDE.md` §10 (updated): no auto-commit / auto-push. Layer 4 changes are **local and uncommitted** pending explicit owner approval. |
+| **Test status** | ✅ app: `vitest run` — 20 files, 91 tests. ✅ rules: `npm run test:rules` — 2 files, 18 tests. ✅ integration: `npm run test:integration` — 1 file, 5 tests. ✅ functions: 1 file, 5 tests. |
+| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (45 routes, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
+| **Git status** | Per `CLAUDE.md` §10: no auto-commit / auto-push. Layer 5 changes are **local and uncommitted** pending explicit owner approval. |
 | **Deployment status** | Not deployed. Firebase project **`mastery-personal-mgmt-system`** with a registered Web app; config in `.env.local`. Emulator Suite wired. Frontend target: Firebase App Hosting. |
-| **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch · HEAD = `337a376` (Layer 3) |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 |
+| **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch · `origin/main` = `cf8df1b` (Layer 4) |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 |
 
 ---
 
@@ -296,7 +296,7 @@ Root scripts: `test:rules` (wraps `firebase emulators:exec`), `emulators`, `func
 
 ---
 
-### Layer 4 — Authentication & User Isolation — ✅ built + verified locally (2026-08-28) — **not committed, awaiting owner review**
+### Layer 4 — Authentication & User Isolation — ✅ complete (2026-08-28) — committed `cf8df1b`, pushed
 
 Email/password + Google auth, forgot-password, session persistence, protected routes,
 per-user `users/{uid}` profile creation, and owner-only Firestore/Storage rules replacing
@@ -390,6 +390,82 @@ functions suite unchanged ✅.
   (wired in Layer 18); `ThemeToggle` still uses `localStorage`.
 - No Playwright e2e yet — the critical journeys are covered by the emulator integration
   test for now (TESTING_STRATEGY allows "e2e or integration").
+
+---
+
+### Layer 5 — Application Shell & Navigation — ✅ built + verified locally (2026-08-28) — **not committed, awaiting owner review**
+
+The responsive protected shell (fixed sidebar / sticky topbar / mobile drawer + bottom
+nav / command palette / breadcrumbs) plus a placeholder route for every module in the
+navigation spec. No business logic — routing, layout, and active states are real; module
+content lands in its planned layer.
+
+**Created — navigation config:**
+- `src/config/navigation.ts` — single source of truth: `NAV_SECTIONS` (Plan / Focus / Act
+  / Grow / Analytics / Private), `SYSTEM_ITEMS`, `DASHBOARD_ITEM`, `BOTTOM_NAV_ITEMS`
+  (Dashboard + the four loop sections), `ALL_NAV_ITEMS` (flattened + href-deduped),
+  `navLabelForHref`, `isNavItemActive`. Labels are English (Layer 18 → i18n keys).
+
+**Created — shell (`src/components/layout/`):**
+- `shell-context.tsx` — `ShellProvider` / `useShell`: sidebar-collapsed (session), drawer
+  open, command-palette open, and the global ⌘/Ctrl-K listener.
+- `app-shell.tsx` — `AppShell`: skip-to-content link, sidebar + topbar + `<main>`, bottom
+  nav, drawer, command palette.
+- `sidebar.tsx` (desktop ≥ lg, collapsible to an icon rail with tooltips) + `sidebar-nav.tsx`
+  (shared nav list, active state via `usePathname`, PRIVATE section visually separated).
+- `topbar.tsx` — mobile nav toggle, breadcrumbs (desktop), `search-trigger.tsx`
+  (opens palette, shows ⌘K), notifications link, `ThemeToggle`, `UserMenu`.
+- `bottom-nav.tsx` — fixed mobile bottom nav (5 items, `env(safe-area-inset-bottom)`).
+- `nav-drawer.tsx` — slide-in `Sheet` with the full nav for < lg.
+- `command-palette.tsx` — `cmdk`-based palette: jump to any destination + actions
+  (light / dark / system theme, sign out).
+- `breadcrumb-trail.tsx` — `BreadcrumbTrail` (client, from `usePathname`) + pure
+  `buildBreadcrumbs`; `module-placeholder.tsx`, `section-landing.tsx`.
+- `src/components/ui/sheet.tsx` — new Radix-Dialog-based side `Sheet` primitive (left/right).
+
+**Created — routes (`src/app/(app)/`):** 37 new pages —
+`plan/*` (10 + landing), `focus/*` (6 + landing), `act/*` (4 + landing),
+`grow/*` (5 + landing), `analytics/*` (4 + landing), `recovery`, `notifications`,
+`settings`. Plus `(app)/loading.tsx` and `(app)/error.tsx` (section error boundary).
+
+**Modified:**
+- `src/app/(app)/layout.tsx` — keeps the auth guard, now renders `<AppShell>` instead of
+  the Layer 4 stopgap header.
+- `src/providers/*` — unchanged (AuthProvider already wired).
+- `package.json` / lock — add `cmdk`.
+
+**Tests added:** `src/config/navigation.test.ts` (config integrity + `isNavItemActive` +
+`navLabelForHref`), `src/components/layout/breadcrumb-trail.test.ts` (`buildBreadcrumbs`),
+`bottom-nav.test.tsx`, `sidebar-nav.test.tsx` (render + active + landmark). Suite: 20
+files / 91 tests.
+
+**Verification (all green):** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (20/91) ·
+`build` ✅ (45 routes, no warnings) · `test:rules` ✅ (2/18, regression) ·
+`test:integration` ✅ (1/5, regression) · `format:check` ✅.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in. The dashboard now renders inside the shell: left sidebar
+   (desktop), sticky topbar, breadcrumbs.
+2. Click any sidebar item (e.g. Plan → Goals) → the placeholder page loads, breadcrumbs
+   read `Dashboard / Plan / Goals`, and the item + its section show the active style.
+3. Collapse the sidebar (top-left toggle) → icon rail with hover tooltips.
+4. Narrow the window below `lg` → sidebar hides, the topbar shows a menu button (opens the
+   drawer) and a bottom nav appears with Dashboard / Plan / Focus / Act / Grow.
+5. Press `⌘K` / `Ctrl-K` (or click Search) → command palette: type "goals" and Enter to
+   navigate; type "dark" → switch theme; "sign out" works.
+6. Tab from the top of any page → the "Skip to content" link appears and focuses `<main>`.
+7. `npm run typecheck && npm run lint && npm test && npm run build` → all pass.
+
+**Known limitations:**
+- Sidebar collapse state is per-session (not persisted) to avoid a hydration flash.
+- "Search" is navigation + actions only; full-text content search arrives once modules
+  have data.
+- Notifications button is a link with no unread indicator (Layer 17).
+- The optional desktop right context panel from the spec is not built yet — added by the
+  first feature that needs it.
+- Recovery Center is listed in the sidebar under PRIVATE; the privacy gate and its removal
+  from search/notifications are Layer 15 / Layer 20.
+- Every module route is a `ModulePlaceholder` / `SectionLanding` — no feature logic yet.
 
 ---
 

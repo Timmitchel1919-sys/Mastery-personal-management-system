@@ -6,7 +6,26 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
-### Layer 4 — Authentication & User Isolation — 2026-08-28 (built locally, not yet committed)
+### Layer 5 — Application Shell & Navigation — 2026-08-28 (built locally, not yet committed)
+
+**Added**
+- `src/config/navigation.ts` — the navigation tree that drives the sidebar, drawer, bottom
+  nav, breadcrumbs, and command palette, plus `isNavItemActive` / `navLabelForHref`.
+- Responsive shell (`src/components/layout/`): `AppShell` + `ShellProvider`/`useShell`,
+  `Sidebar` (collapsible), `SidebarNav`, `Topbar`, `BottomNav`, `NavDrawer`,
+  `CommandPalette` (cmdk), `SearchTrigger`, `BreadcrumbTrail` + `buildBreadcrumbs`,
+  `ModulePlaceholder`, `SectionLanding`.
+- `src/components/ui/sheet.tsx` — Radix-Dialog-based side sheet primitive.
+- 37 placeholder module routes under `src/app/(app)/` (Plan / Focus / Act / Grow /
+  Analytics section landings + items, Recovery Center, Notifications, Settings) plus
+  `(app)/loading.tsx` and `(app)/error.tsx`.
+- Tests: navigation config integrity, `buildBreadcrumbs`, `BottomNav`, `SidebarNav`.
+- Dependency: `cmdk`.
+
+**Changed**
+- `src/app/(app)/layout.tsx` now renders `<AppShell>` in place of the Layer 4 stopgap header.
+
+### Layer 4 — Authentication & User Isolation — 2026-08-28 (committed `cf8df1b`, pushed)
 
 **Added**
 - `src/features/auth/`: form + profile schemas, `authService` (email + Google + reset +

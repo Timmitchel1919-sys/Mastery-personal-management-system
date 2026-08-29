@@ -41,6 +41,16 @@ export {
 } from "./select";
 export { SegmentedControl, SegmentedControlItem } from "./segmented-control";
 export { Separator } from "./separator";
+export {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  type SheetContentProps,
+} from "./sheet";
 export { Skeleton } from "./skeleton";
 export { Spinner, type SpinnerProps } from "./spinner";
 export { Switch } from "./switch";

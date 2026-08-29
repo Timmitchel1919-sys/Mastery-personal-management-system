@@ -158,3 +158,22 @@ server-rendered personalization for authed pages yet. A session-cookie + middlew
 approach can be layered on later (candidate for Layer 5 or Layer 20) without changing the
 `useAuth` contract. `react-hook-form` + `@hookform/resolvers` were added from the approved
 stack list (no ADR needed for those).
+
+---
+
+## ADR-0010 — `cmdk` for the command palette
+**Date:** 2026-08-28 · **Status:** accepted · **Layer:** 5
+
+**Context.** The shell spec (`MASTER_SPEC.md` §3) requires a command palette. It needs
+combobox semantics: type-ahead filtering, arrow-key navigation, `aria-activedescendant`,
+and grouped results. `DESIGN_SYSTEM.md` listed CommandPalette as deferred to its consuming
+layer — this is that layer.
+
+**Decision.** Add **`cmdk`** (1.1.x, React 19 compatible). It ships an accessible,
+unstyled command primitive and reuses `@radix-ui/react-dialog` (already a dependency) for
+the modal. Styling is ours via Tailwind tokens. Used only in
+`src/components/layout/command-palette.tsx`.
+
+**Consequences.** One small dependency. If replaced, the blast radius is a single file.
+The palette currently searches navigation destinations + actions; full-text content search
+is added once modules have data.

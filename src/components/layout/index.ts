@@ -1,3 +1,15 @@
 export { PageContainer, type PageContainerProps } from "./page-container";
 export { PageHeader, type PageHeaderProps } from "./page-header";
 export { Breadcrumbs, type BreadcrumbItem, type BreadcrumbsProps } from "./breadcrumbs";
+export { BreadcrumbTrail, buildBreadcrumbs } from "./breadcrumb-trail";
+export { ModulePlaceholder, type ModulePlaceholderProps } from "./module-placeholder";
+export { SectionLanding } from "./section-landing";
+export { AppShell } from "./app-shell";
+export { ShellProvider, useShell } from "./shell-context";
+export { Sidebar } from "./sidebar";
+export { SidebarNav } from "./sidebar-nav";
+export { Topbar } from "./topbar";
+export { BottomNav } from "./bottom-nav";
+export { NavDrawer } from "./nav-drawer";
+export { CommandPalette } from "./command-palette";
+export { SearchTrigger } from "./search-trigger";
