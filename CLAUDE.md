@@ -187,26 +187,20 @@ If a command does not yet exist for the current layer, say so explicitly in
 
 ## 10. Git workflow
 
-- Single branch: `main`.
-- Remote:
-  `https://github.com/Timmitchel1919-sys/Mastery-personal-management-system.git`
-- Use Conventional Commits, scoped by domain:
-  `feat(goals):`, `feat(calendar):`, `security(recovery):`,
-  `test(rules):`, `perf(dashboard):`, `docs:`, `chore:`.
-- Do not automatically create commits.
-- Do not automatically push changes to GitHub.
-- Keep all implementation changes local until the user explicitly approves the commit.
-- Before committing, report:
-  1. All created, modified, moved, and deleted files.
-  2. A concise summary of the relevant `git diff`.
-  3. TypeScript, lint, test, and build results where applicable.
-  4. Any known errors, limitations, or unresolved issues.
-- Create a commit only after explicit user approval.
-- Push to `origin/main` only after explicit user approval.
-- Never force-push.
-- Never rewrite Git history.
-- Never delete branches or commits without explicit user approval.
-- Do not start the next layer until the current layer has been reviewed and approved by the user.
+- **Single branch: `main`.** When a layer's verification passes (§9) and its definition of
+  done is met (§11), commit it and push straight to `origin/main`. No `develop`, no
+  `feature/*` branches. (Deviation from the PDF's git strategy — ADR-0002.)
+- Remote: `https://github.com/Timmitchel1919-sys/Mastery-personal-management-system.git`
+- Conventional Commits, scoped by domain: `feat(goals):`, `feat(calendar):`,
+  `security(recovery):`, `test(rules):`, `perf(dashboard):`, `docs:`, `chore:`.
+- One commit (or a small tight series) per completed layer. Commit only when acceptance
+  criteria pass.
+- After committing and pushing a layer, report the changed files, a concise `git diff`
+  summary, the verification results, and any known limitations.
+- Never force-push. Never rewrite published history. Never delete branches or commits
+  without the user asking.
+- (History: ADR-0002 policy → manual-approval policy on 2026-08-28 (`75a202f`) → restored
+  to commit-and-push-per-layer on the owner's instruction.)
 
 ## 11. Definition of done (every layer)
 
