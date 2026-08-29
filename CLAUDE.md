@@ -187,13 +187,26 @@ If a command does not yet exist for the current layer, say so explicitly in
 
 ## 10. Git workflow
 
-- **Single branch: `main`.** Every completed layer is committed and pushed straight to
-  `origin/main`. No `develop`, no `feature/*` branches. (Deviation from the PDF's git
-  strategy — recorded as ADR-0002 in `docs/DECISIONS.md`.)
-- Remote: `https://github.com/Timmitchel1919-sys/Mastery-personal-management-system.git`
-- Conventional Commits, scoped by domain: `feat(goals):`, `feat(calendar):`,
-  `security(recovery):`, `test(rules):`, `perf(dashboard):`, `docs:`, `chore:`.
-- Commit only when a layer's acceptance criteria pass. Push after each layer.
+- Single branch: `main`.
+- Remote:
+  `https://github.com/Timmitchel1919-sys/Mastery-personal-management-system.git`
+- Use Conventional Commits, scoped by domain:
+  `feat(goals):`, `feat(calendar):`, `security(recovery):`,
+  `test(rules):`, `perf(dashboard):`, `docs:`, `chore:`.
+- Do not automatically create commits.
+- Do not automatically push changes to GitHub.
+- Keep all implementation changes local until the user explicitly approves the commit.
+- Before committing, report:
+  1. All created, modified, moved, and deleted files.
+  2. A concise summary of the relevant `git diff`.
+  3. TypeScript, lint, test, and build results where applicable.
+  4. Any known errors, limitations, or unresolved issues.
+- Create a commit only after explicit user approval.
+- Push to `origin/main` only after explicit user approval.
+- Never force-push.
+- Never rewrite Git history.
+- Never delete branches or commits without explicit user approval.
+- Do not start the next layer until the current layer has been reviewed and approved by the user.
 
 ## 11. Definition of done (every layer)
 
