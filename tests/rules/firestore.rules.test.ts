@@ -128,19 +128,66 @@ describe("users/{uid} — updates", () => {
   });
 });
 
-describe("users/{uid}/** — subcollections", () => {
-  it("lets the owner read and write their own subcollection docs", async () => {
+function auditedDoc(uid: string, extra: Record<string, unknown> = {}) {
+  return {
+    title: "Ship v1",
+    createdBy: uid,
+    updatedBy: uid,
+    createdAt: "2026-08-28T00:00:00.000Z",
+    updatedAt: "2026-08-28T00:00:00.000Z",
+    ...extra,
+  };
+}
+
+async function seedSubdoc(uid: string, id: string, extra: Record<string, unknown> = {}) {
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    await setDoc(doc(context.firestore(), "users", uid, "goals", id), auditedDoc(uid, extra));
+  });
+}
+
+describe("users/{uid}/** — subcollections (owner + audit fields)", () => {
+  it("lets the owner create an audited subcollection doc and read it back", async () => {
     const db = testEnv.authenticatedContext(ALICE).firestore();
-    await assertSucceeds(setDoc(doc(db, "users", ALICE, "goals", "g1"), { title: "Ship v1" }));
+    await assertSucceeds(setDoc(doc(db, "users", ALICE, "goals", "g1"), auditedDoc(ALICE)));
     await assertSucceeds(getDoc(doc(db, "users", ALICE, "goals", "g1")));
   });
 
+  it("rejects a create whose createdBy is not the caller", async () => {
+    const db = testEnv.authenticatedContext(ALICE).firestore();
+    await assertFails(
+      setDoc(doc(db, "users", ALICE, "goals", "g2"), auditedDoc(ALICE, { createdBy: BOB })),
+    );
+  });
+
+  it("rejects a create that omits audit fields", async () => {
+    const db = testEnv.authenticatedContext(ALICE).firestore();
+    await assertFails(setDoc(doc(db, "users", ALICE, "goals", "g3"), { title: "no audit" }));
+  });
+
+  it("lets the owner update, keeping createdBy / createdAt", async () => {
+    await seedSubdoc(ALICE, "g4");
+    const db = testEnv.authenticatedContext(ALICE).firestore();
+    await assertSucceeds(
+      updateDoc(doc(db, "users", ALICE, "goals", "g4"), {
+        title: "Renamed",
+        updatedBy: ALICE,
+        updatedAt: "2026-08-29T00:00:00.000Z",
+      }),
+    );
+  });
+
+  it("rejects an update that rewrites createdBy", async () => {
+    await seedSubdoc(ALICE, "g5");
+    const db = testEnv.authenticatedContext(ALICE).firestore();
+    await assertFails(
+      updateDoc(doc(db, "users", ALICE, "goals", "g5"), { createdBy: BOB, updatedBy: ALICE }),
+    );
+  });
+
   it("denies cross-user access to subcollection docs", async () => {
-    await testEnv.withSecurityRulesDisabled(async (context) => {
-      await setDoc(doc(context.firestore(), "users", ALICE, "goals", "g1"), { title: "Private" });
-    });
+    await seedSubdoc(ALICE, "g6");
     const db = testEnv.authenticatedContext(BOB).firestore();
-    await assertFails(getDoc(doc(db, "users", ALICE, "goals", "g1")));
-    await assertFails(setDoc(doc(db, "users", ALICE, "goals", "g2"), { title: "Intruder" }));
+    await assertFails(getDoc(doc(db, "users", ALICE, "goals", "g6")));
+    await assertFails(setDoc(doc(db, "users", ALICE, "goals", "g7"), auditedDoc(BOB)));
   });
 });

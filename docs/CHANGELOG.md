@@ -6,7 +6,28 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
-### Layer 5 — Application Shell & Navigation — 2026-08-28 (built locally, not yet committed)
+### Layer 6 — Core Data Model & Repository Layer — 2026-08-28
+
+**Added**
+- `src/lib/validation/domain.ts` — life-pillar / priority / record-status / measurement
+  vocabularies (schemas + types).
+- `src/lib/repository/` — `baseRecordSchema` + `defineRecordSchema`, pagination types
+  (`ListOptions`, `Page`, `pageQuerySchema`, `clampLimit`), audit builders, and
+  `createFirestoreRepository()` — a user-scoped Firestore repository factory with
+  `list / get / create / update / archive / unarchive`, internal uid resolution,
+  audit-field stamping, server-timestamp read-back, and cursor pagination.
+- `src/types/index.ts` re-exports the shared domain + data-access types.
+- Tests: domain primitives, base record, pagination, audit builders (unit) and a full
+  repository lifecycle suite against the Auth + Firestore emulators.
+
+**Changed**
+- `firestore.rules` — generic audit-field enforcement on every `users/{uid}/{collection}/**`
+  write (`createdBy`/`updatedBy` = caller on create; `createdBy`/`createdAt` immutable,
+  `updatedBy` = caller on update); rules tests updated to match.
+- `docs/DATA_MODEL.md`, `docs/SECURITY.md` (Layer 6 checkpoint), ADR-0011.
+- `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`).
+
+### Layer 5 — Application Shell & Navigation — 2026-08-28 (committed `257ce03`, pushed)
 
 **Added**
 - `src/config/navigation.ts` — the navigation tree that drives the sidebar, drawer, bottom

@@ -8,16 +8,16 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 5 — Application Shell & Navigation (built + verified locally, **awaiting owner review — not committed**) |
-| **Next approved layer** | Layer 6 — Core Data Model & Repository Layer |
-| **Completed layers** | Layers 0–4 (committed + pushed, HEAD `cf8df1b`) · Layer 5 (built + verified locally, pending approval) |
+| **Current layer** | Layer 6 — Core Data Model & Repository Layer (complete, committed + pushed) |
+| **Next approved layer** | Layer 7 — Dashboard MVP |
+| **Completed layers** | Layers 0–6 (committed + pushed) |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 20 files, 91 tests. ✅ rules: `npm run test:rules` — 2 files, 18 tests. ✅ integration: `npm run test:integration` — 1 file, 5 tests. ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 24 files, 106 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (owner + audit-field enforcement). ✅ integration: `npm run test:integration` — 2 files, 12 tests (auth-flow 5 + repository 7). ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (45 routes, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
-| **Git status** | Per `CLAUDE.md` §10: no auto-commit / auto-push. Layer 5 changes are **local and uncommitted** pending explicit owner approval. |
+| **Git status** | `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`). |
 | **Deployment status** | Not deployed. Firebase project **`mastery-personal-mgmt-system`** with a registered Web app; config in `.env.local`. Emulator Suite wired. Frontend target: Firebase App Hosting. |
-| **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch · `origin/main` = `cf8df1b` (Layer 4) |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 |
+| **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · (no new deps in Layer 6) |
 
 ---
 
@@ -466,6 +466,70 @@ files / 91 tests.
 - Recovery Center is listed in the sidebar under PRIVATE; the privacy gate and its removal
   from search/notifications are Layer 15 / Layer 20.
 - Every module route is a `ModulePlaceholder` / `SectionLanding` — no feature logic yet.
+
+---
+
+### Layer 6 — Core Data Model & Repository Layer — ✅ complete (2026-08-28) — committed + pushed
+
+The shared data spine: audit/lifecycle schema, domain primitives, a generic user-scoped
+Firestore repository factory (pagination, ownership, audit stamping), and generic
+audit-field enforcement in the rules. No feature schemas — those belong to Layers 8–12.
+
+**Created:**
+- `src/lib/validation/domain.ts` (+ re-export) — `LIFE_PILLARS` / `lifePillarSchema` /
+  `lifePillarsSchema`, `PRIORITIES` / `prioritySchema`, `RECORD_STATUSES` /
+  `recordStatusSchema`, `MEASUREMENT_TYPES` / `measurementTypeSchema`, `idRefSchema`.
+- `src/lib/repository/base-record.ts` — `baseRecordSchema` (id, userId?, status, version,
+  createdAt, updatedAt, createdBy, updatedBy, archivedAt), `defineRecordSchema(fields)`,
+  `BASE_RECORD_KEYS`.
+- `src/lib/repository/pagination.ts` — `ListOptions` / `FieldFilter` / `Page<T>`,
+  `pageQuerySchema`, `clampLimit`, `DEFAULT_PAGE_SIZE` (20) / `MAX_PAGE_SIZE` (100).
+- `src/lib/repository/audit.ts` — `buildCreateAudit(uid)` / `buildUpdateAudit(uid)`
+  (server timestamps + `increment(1)` version).
+- `src/lib/repository/firestore-repository.ts` — `createFirestoreRepository(config)` →
+  `{ list, get, create, update, archive, unarchive }`. uid from client auth
+  (`requireUid()` → `AppError` `unauthenticated`); reads via `makeConverter`; `create` /
+  `update` read back for real server timestamps; `list` fetches `limit + 1`, returns
+  `{ items, nextCursor, hasMore }` with an opaque id cursor.
+- `src/lib/repository/index.ts` barrel; `src/types/index.ts` re-exports the domain +
+  data-access types.
+
+**Modified:**
+- `firestore.rules` — the `users/{uid}/{collection}/{document=**}` rule is split into
+  read / create / update / delete with **audit-field enforcement**: `createdBy` /
+  `updatedBy` == caller on create; `createdBy` / `createdAt` immutable and `updatedBy` ==
+  caller on update.
+- `tests/rules/firestore.rules.test.ts` — subcollection cases rewritten for the audited
+  rule (create needs audit fields; wrong `createdBy` rejected; update can't rewrite
+  `createdBy`; cross-user still denied).
+- `docs/DATA_MODEL.md` §3 / index log, `docs/SECURITY.md` Layer 6 checkpoint, ADR-0011.
+
+**Tests added:** `src/lib/validation/domain.test.ts`, `src/lib/repository/{base-record,
+pagination,audit}.test.ts` (unit), `tests/integration/repository.test.ts` (7 cases against
+the Auth + Firestore emulators: create/get audit shape, cursor pagination across 3 pages,
+version increment + creation-audit immutability on update, archive/unarchive, path-scoped
+reads + cross-user `permission-denied`, `unauthenticated` writes).
+
+**Verification (all green):** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (24/106) ·
+`build` ✅ (45 routes) · `test:rules` ✅ (2/22) · `test:integration` ✅ (2/12) ·
+`format:check` ✅ · functions suite unchanged ✅.
+
+**Manual test instructions:**
+- This layer adds no UI. To exercise it: `npm run test:integration` boots the emulators and
+  runs the full repository lifecycle against them.
+- Or in a scratch script: `createFirestoreRepository({ collectionName: "notes", schema,
+  createSchema, updateSchema })` then `create` / `list({ limit, cursor })` / `update` /
+  `archive` while signed in via `authService`.
+
+**Known limitations:**
+- Client-SDK only — no Admin-SDK (server) repository variant yet (ADR-0011); added when a
+  server code path first needs user-scoped reads.
+- `create` and `update` each do one extra read-back for timestamp consistency.
+- Cursor pagination is forward-only; `orderBy` must be a stored field, and a `where` +
+  non-default `orderBy` needs a composite index (logged in `DATA_MODEL.md` when a domain
+  adds one).
+- Rules enforce audit-field *integrity* generically; per-field domain-value validation
+  (enum ranges, required feature fields) is added by each domain layer.
 
 ---
 

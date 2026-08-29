@@ -84,24 +84,32 @@ Every domain record includes:
 Timestamps are written as Firestore server timestamps and **normalized to ISO 8601 strings
 on read** by the converter.
 
-## 3. Converters
+## 3. Converters & the repository layer (Layer 6)
 
-`lib/firebase/converters.ts` provides `makeConverter(schema)`:
+`src/lib/firebase/converters.ts` provides `makeConverter(schema)` (Layer 3): `fromFirestore`
+runs `normalizeTimestamps` (Firestore Timestamp → ISO string) then `schema.parse`, throwing
+a normalized `AppError` on a bad document; `toFirestore` strips `id` and refreshes
+`updatedAt`. All reads go through `.withConverter(...)`.
 
-```ts
-function makeConverter<T>(schema: ZodSchema<T>): FirestoreDataConverter<T> {
-  return {
-    toFirestore(model)  { /* strip id, set server timestamps, bump version */ },
-    fromFirestore(snap) {
-      const raw = snap.data();
-      const normalized = normalizeTimestamps(raw);           // Timestamp -> ISO string
-      return schema.parse({ ...normalized, id: snap.id });   // Zod validation
-    },
-  };
-}
-```
+`src/lib/repository/` (Layer 6) builds on this:
 
-Repositories attach the converter with `.withConverter(...)`; no un-converted reads.
+- **`baseRecordSchema`** — the audit / lifecycle spine every record carries (`id`,
+  `userId?`, `status`, `version`, `createdAt`, `updatedAt`, `createdBy`, `updatedBy`,
+  `archivedAt`). Feature schemas: `defineRecordSchema({ ...featureFields })`.
+- **`createFirestoreRepository({ collectionName, schema, createSchema, updateSchema })`** —
+  a user-scoped repository with `list / get / create / update / archive / unarchive`.
+  - The uid comes from the client auth state (`requireUid()`); callers never pass one.
+  - `create` writes feature fields + `id` + `userId` + `buildCreateAudit(uid)`
+    (`status:"active"`, `version:1`, `archivedAt:null`, server timestamps, `createdBy/By`),
+    then reads back so the returned entity has real server timestamps.
+  - `update` writes the patch + `buildUpdateAudit(uid)` (server `updatedAt`, `updatedBy`,
+    `version` via `increment(1)`), then re-reads.
+  - `list` is always bounded: fetches `limit + 1`, returns
+    `{ items, nextCursor, hasMore }`; `nextCursor` is the last row's id, re-fetched as a
+    `startAfter` snapshot on the next call. `limit` is clamped to `[1, 100]`.
+- Audit-field integrity is also enforced in `firestore.rules` for every
+  `users/{uid}/{collection}/{document=**}` (Layer 6 §): `createdBy/updatedBy == uid` on
+  create; `createdBy` / `createdAt` immutable and `updatedBy == uid` on update.
 
 ## 4. Linkage & traceability
 
@@ -126,11 +134,16 @@ lists:
   extended per domain) and a note in this file's index log below.
 - No query without a bounded `limit`. No client-side full-collection scans.
 
+The generic repository's default `list` orders by a single field (`updatedAt desc`), which
+needs **no composite index**. As soon as a domain calls `list({ filters, orderBy })` with a
+`where` + a different `orderBy`, that pair needs a composite index in
+`firestore.indexes.json` and a row in the log below.
+
 ### Index log
 
 | Collection | Query shape | Added in |
 |---|---|---|
-| _(populated as domains land)_ | | |
+| _(none yet — no composite queries in Layers 0–6)_ | | |
 
 ## 6. Ownership & security summary
 

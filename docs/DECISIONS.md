@@ -177,3 +177,29 @@ the modal. Styling is ours via Tailwind tokens. Used only in
 **Consequences.** One small dependency. If replaced, the blast radius is a single file.
 The palette currently searches navigation destinations + actions; full-text content search
 is added once modules have data.
+
+---
+
+## ADR-0011 — Client-SDK generic repository factory
+**Date:** 2026-08-28 · **Status:** accepted · **Layer:** 6
+
+**Context.** `ARCHITECTURE.md` §4 calls for user-scoped repositories that resolve the uid
+internally, stamp audit fields, validate reads with Zod, and paginate. Layers 8–12 each
+need a repository per collection; hand-writing ~25 near-identical repositories is wasteful
+and error-prone.
+
+**Decision.** `src/lib/repository/createFirestoreRepository(config)` — a factory that,
+given `{ collectionName, schema, createSchema, updateSchema }`, returns a typed
+`{ list, get, create, update, archive, unarchive }`. It uses the **Firebase Web SDK** and
+takes the uid from the client auth state (`getFirebaseClient().auth.currentUser`), matching
+the Layer 4 pattern. `list` fetches `limit + 1` for `hasMore` and uses the last row's id as
+an opaque cursor (re-fetched as a `startAfter` snapshot). Audit stamping lives in the repo
+(not the converter) to avoid `FieldValue`/type friction; integrity is *also* enforced in
+`firestore.rules`.
+
+**Consequences.** Domain layers write only a schema + `createFirestoreRepository(...)`.
+`create`/`update` do a read-back (one extra read) so returned entities carry real server
+timestamps. Server-side data access (Admin SDK, for SSR / Cloud Functions) is **not** in
+this factory yet — an admin variant with the same interface is added when a server code
+path first needs user-scoped reads (candidate: Layer 13/14/16). Cursor pagination is
+forward-only; `orderBy` must be a stored field.

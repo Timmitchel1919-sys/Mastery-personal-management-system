@@ -92,7 +92,7 @@ touch rules, auth, functions, or storage must satisfy it and add emulator tests.
 |---|---|
 | 3 | safe Firebase init, emulator wiring, env separation scaffold, base deny-all rules |
 | 4 | owner-only rules for `users/**`, role-immutability, rule tests for isolation |
-| 6 | field-validation rules per collection, audit-field enforcement |
+| 6 | ✅ generic audit-field enforcement on every `users/{uid}/{collection}/**` write (`createdBy`/`updatedBy` = caller on create; `createdBy`/`createdAt` immutable, `updatedBy` = caller on update). Per-field domain-value validation is added by each domain layer (8–12). |
 | 13 | AI endpoint auth + input/output validation + rate limits + audit |
 | 15 | Recovery rules, privacy gate, function-mediated sensitive access, partner permission model |
 | 20 | App Check enforcement, CSP, CORS, headers, secret audit, full rules-test sweep |
