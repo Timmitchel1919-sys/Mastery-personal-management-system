@@ -6,6 +6,25 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 8A — Life Vision — 2026-08-29
+
+**Added**
+- `src/features/vision/` — Life Vision as a typed, pillar-linked collection
+  (`users/{uid}/lifeVisions`): `lifeVisionSchema` (10 categories + metadata),
+  `lifeVisionRepository` via `createFirestoreRepository`, `useLifeVision()` hook, and the
+  UI (`LifeVisionView`, `VisionItemForm`, `VisionItemDialog`, `VisionItemCard`).
+- `src/components/shared/PillarSelect` + `PillarBadges` — reusable life-pillar picker and
+  badges (for 8B–8G and Layer 12).
+- `/plan/vision` now renders the real feature (was a placeholder).
+- Tests: vision schema, `LifeVisionView` (mocked hook), `PillarSelect`, and a life-vision
+  emulator integration test.
+
+**Changed**
+- `vitest.setup.ts` — jsdom polyfills (`ResizeObserver`, pointer capture, `scrollIntoView`)
+  for Radix `Select` in component tests.
+- `docs/DATA_MODEL.md`, `docs/SECURITY.md`; ADR-0013 (vision modeling + deferring
+  per-collection rule validation to Layer 20).
+
 ### Layer 7 — Dashboard MVP — 2026-08-28
 
 **Added**

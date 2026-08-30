@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { LifeVisionView } from "@/features/vision";
 
-export const metadata = { title: "Life Vision" };
+export const metadata: Metadata = { title: "Life Vision" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Life Vision"
-      description="Mission, values, purpose, and long-term direction linked to your life pillars."
-      plannedLayer={8}
-    />
-  );
+  return <LifeVisionView />;
 }

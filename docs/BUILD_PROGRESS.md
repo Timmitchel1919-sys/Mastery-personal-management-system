@@ -8,11 +8,11 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 7 — Dashboard MVP (complete, committed + pushed) |
-| **Next approved layer** | Layer 8 — Plan Domain (8A Life Vision first) |
-| **Completed layers** | Layers 0–7 (committed + pushed) |
+| **Current layer** | Layer 8A — Life Vision (complete, committed + pushed) |
+| **Next approved layer** | Layer 8B — Five-Year & One-Year Plans |
+| **Completed layers** | Layers 0–7 · Layer 8A (committed + pushed) |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 27 files, 119 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 3 files, 14 tests (auth-flow 5 + repository 7 + dashboard 2). ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 30 files, 133 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 4 files, 16 tests (auth-flow 5 + repository 7 + dashboard 2 + life-vision 2). ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (45 routes, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
 | **Git status** | `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`). |
 | **Deployment status** | Not deployed. Firebase project **`mastery-personal-mgmt-system`** with a registered Web app; config in `.env.local`. Emulator Suite wired. Frontend target: Firebase App Hosting. |
@@ -595,6 +595,73 @@ user — emulators). Suite: 27 files / 119 tests.
 - Widgets the prompt lists but that need later infra are not built yet: energy check-in
   (Layer 9), focus timer (Layer 9), today's schedule (Layer 9C), weekly progress chart
   (Layer 8/12), notifications summary (Layer 17).
+
+---
+
+### Layer 8A — Life Vision — ✅ complete (2026-08-29) — committed + pushed
+
+First slice of the Plan domain and the first CRUD feature on the Layer 6 repository. Users
+keep a small set of typed, pillar-linked vision items (`users/{uid}/lifeVisions`).
+
+**Created — `src/features/vision/`:**
+- `schema.ts` — `LIFE_VISION_CATEGORIES` (10: mission / values / purpose / legacy / three
+  directions / vision-statement / future-self / principle) + `LIFE_VISION_CATEGORY_META`
+  (label, description, default pillars). `lifeVisionSchema = defineRecordSchema({ category,
+  title (≤160), content (≤4000), pillarIds (1–3) })`, plus create/update schemas.
+- `vision-repository.ts` — `lifeVisionRepository = createFirestoreRepository({ collectionName:
+  "lifeVisions", … })` + `listActiveVisions()` (bounded fetch, filter `status === "active"`
+  client-side — no `status` index yet; ADR-0013).
+- `use-life-vision.ts` — `useLifeVision()`: fetch-in-effect + `create` / `update` / `archive`
+  that mutate the local list; `reload`.
+- `components/` — `VisionItemForm` (RHF + zodResolver; category `Select` pre-fills pillars,
+  `Controller` + `PillarSelect`), `VisionItemDialog` (create / edit), `VisionItemCard`
+  (category label, content, pillar badges, edit + archive-with-confirm), `LifeVisionView`
+  (PageHeader + breadcrumbs, loading skeleton / error / empty state, items grouped by
+  category).
+- `index.ts` barrel.
+
+**Created — shared:** `src/components/shared/PillarSelect.tsx` (3-pillar checkbox group,
+canonical order) + `PillarBadges.tsx` (tinted badges). Reused by 8B–8G and Layer 12.
+
+**Modified:**
+- `src/app/(app)/plan/vision/page.tsx` — renders `<LifeVisionView />` (was a placeholder).
+- `vitest.setup.ts` — jsdom polyfills for `ResizeObserver` / pointer-capture /
+  `scrollIntoView` so Radix `Select` renders in component tests.
+- `docs/DATA_MODEL.md` (annotate `lifeVisions`), `docs/SECURITY.md` (Layer 6 note),
+  ADR-0013.
+
+**Tests added:** `schema.test.ts` (category enum, 1–3 pillars, title/content limits,
+metadata coverage), `components/LifeVisionView.test.tsx` (empty state, category grouping +
+pillar badges, add dialog opens, error + retry — `useLifeVision` mocked),
+`src/components/shared/PillarSelect.test.tsx` (toggle → canonical-order array),
+`tests/integration/life-vision.test.ts` (create/list/update/archive with pillars + audit;
+scoped to the signed-in user — emulators). Suite: 30 files / 133 tests.
+
+**Verification (all green):** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (30/133) ·
+`build` ✅ (45 routes) · `test:rules` ✅ (2/22) · `test:integration` ✅ (4/16) ·
+`format:check` ✅ · functions suite unchanged ✅.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Plan → Life Vision**. Empty state with "Add your first item".
+2. Add a Personal mission: pick the category (pillars pre-fill), write a title + detail,
+   optionally adjust pillars → **Add item**. It appears under a "Personal mission" heading
+   with pillar badges.
+3. Add a couple more in different categories → they group by category in the canonical
+   order.
+4. Edit one (pencil) → change the text/pillars → **Save changes**.
+5. Archive one (trash → confirm) → it disappears. Reload the page → your items persist;
+   the archived one stays gone.
+6. Firestore console → `users/{uid}/lifeVisions/{id}` shows `category`, `pillarIds` array,
+   audit fields; `status: "archived"` on the removed one.
+
+**Known limitations:**
+- Vision items don't yet link *down* to five-year/one-year plans — that traceability is
+  wired in 8B–8H (the planning cascade).
+- `listActiveVisions()` filters archived client-side; fine for the expected size, revisit
+  with a `(status, createdAt)` index if a user ever has hundreds.
+- No reordering within a category; items sort by creation time.
+- Per-collection domain-value rules are deferred to Layer 20 (ADR-0013) — write shape is
+  enforced by the Zod schemas in the repository, ownership + audit by the catch-all rule.
 
 ---
 

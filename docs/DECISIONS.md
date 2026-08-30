@@ -230,3 +230,35 @@ tasks, habits, KPIs, and the Life Score. There is almost no domain data to aggre
 each placeholder widget's body for real data; the page, hook, layout, and states already
 exist. `quickNotes` is added to `DATA_MODEL.md`. Greeting/date are client-clock derived,
 guarded by a `useMounted()` hook to stay hydration-safe.
+
+---
+
+## ADR-0013 — Life Vision as a typed, pillar-linked collection; domain rule-validation deferred
+**Date:** 2026-08-29 · **Status:** accepted · **Layer:** 8A
+
+**Context.** `PRODUCT_REQUIREMENTS.md` §2 lists ten kinds of vision content (mission, core
+values, purpose, legacy, three directions, vision statements, future-self, principles),
+each linked to one or more life pillars. `DATA_MODEL.md` has `users/{uid}/lifeVisions/{visionId}`
+(a collection).
+
+**Decision.**
+- Model Life Vision as a **collection of typed items** (`category` enum + `title` +
+  `content` + `pillarIds: LifePillar[]` (1–3)), not one big singleton document. Fits the
+  "each item links to pillars" requirement and the Layer 6 `createFirestoreRepository`
+  cleanly.
+- `listActiveVisions()` fetches a bounded page (100) and filters `status === "active"` in
+  JS — avoids a `(status, createdAt)` composite index while collections are small. A real
+  index + query is added if/when a vision collection grows large.
+- Shared **`PillarSelect`** / **`PillarBadges`** components (in `components/shared/`) —
+  every Plan/Analytics domain (8B–8G, 12) links pillars, so they are built once here.
+- **Per-collection domain-value validation in `firestore.rules` is deferred to Layer 20.**
+  Firestore OR-combines every matching rule, so a stricter `match /users/{uid}/lifeVisions/...`
+  block cannot tighten the Layer 6 catch-all `match /users/{uid}/{collection}/{document=**}`
+  without restructuring it. Layer 20 (Security Hardening) does that restructuring for all
+  domains at once. Until then, write shape is enforced by the repository's Zod
+  `createSchema`/`updateSchema`, and the catch-all still enforces ownership + audit-field
+  integrity.
+
+**Consequences.** 8B–8G reuse the pillar components and the same feature shape
+(schema + repository + hook + view + dialog). Layer 20 gains a defined task: split the
+subcollection rules per collection with domain-value checks.

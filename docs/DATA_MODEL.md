@@ -15,7 +15,7 @@ extend it in Layers 8–12.
 users/{uid}                                   profile, preferences, role
 
 # Plan
-users/{uid}/lifeVisions/{visionId}
+users/{uid}/lifeVisions/{visionId}            typed vision items, pillar-linked (Layer 8A)
 users/{uid}/fiveYearPlans/{planId}
 users/{uid}/yearPlans/{planId}
 users/{uid}/quarterPlans/{planId}
