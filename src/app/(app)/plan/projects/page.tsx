@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { ProjectsView } from "@/features/projects";
 
-export const metadata = { title: "Projects" };
+export const metadata: Metadata = { title: "Projects" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Projects"
-      description="Project delivery with milestones, dependencies, and risks."
-      plannedLayer={8}
-    />
-  );
+  return <ProjectsView />;
 }

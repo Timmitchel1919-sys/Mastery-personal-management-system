@@ -25,3 +25,13 @@ export async function listActiveGoals(): Promise<Goal[]> {
   });
   return page.items.filter((goal) => goal.status === "active");
 }
+
+export interface GoalOption {
+  id: string;
+  title: string;
+}
+
+/** Active goals as `{ id, title }` — for pickers that link something to a goal. */
+export async function listGoalOptions(): Promise<GoalOption[]> {
+  return (await listActiveGoals()).map((goal) => ({ id: goal.id, title: goal.title }));
+}

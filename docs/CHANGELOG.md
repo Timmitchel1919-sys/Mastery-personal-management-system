@@ -6,6 +6,23 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 8E — Projects — 2026-08-30
+
+**Added**
+- `src/features/projects/` — `projectSchema` / `projectCreateSchema` /
+  `projectUpdateSchema` / `projectFormSchema` + `projectInputFromForm` (status, priority,
+  owner, start/end dates, manual progress, free-text dependencies / risks lists, goal link,
+  pillars); `projectRepository`, `useProjects()`, and the UI (`ProjectsView`, `ProjectForm`,
+  `ProjectDialog`, `ProjectCard`).
+- `listGoalOptions()` / `GoalOption` + `useGoalOptions()` in `src/features/goals/` — active
+  goals for the project's goal picker.
+- `/plan/projects` renders the real feature.
+- Tests: project schemas + `projectInputFromForm`, `ProjectsView` (mocked hooks), and a
+  projects emulator integration test.
+
+**Changed**
+- `docs/DATA_MODEL.md` annotation for `projects`.
+
 ### Layer 8D — Goals — 2026-08-29
 
 **Added**

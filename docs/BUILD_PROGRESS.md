@@ -8,11 +8,11 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 8D — Goals (complete, committed + pushed) |
-| **Next approved layer** | Layer 8E — Projects |
-| **Completed layers** | Layers 0–7 · Layer 8A · 8B · 8C · 8D (committed + pushed) |
+| **Current layer** | Layer 8E — Projects (complete, committed + pushed) |
+| **Next approved layer** | Layer 8F — Milestones |
+| **Completed layers** | Layers 0–7 · Layer 8A · 8B · 8C · 8D · 8E (committed + pushed) |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 35 files, 162 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 6 files, 22 tests (auth-flow 5 + repository 7 + dashboard 2 + life-vision 2 + plans 4 + goals 2). ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 37 files, 174 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 7 files, 24 tests (auth-flow 5 + repository 7 + dashboard 2 + life-vision 2 + plans 4 + goals 2 + projects 2). ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (45 routes, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
 | **Git status** | `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`). |
 | **Deployment status** | Not deployed. Firebase project **`mastery-personal-mgmt-system`** with a registered Web app; config in `.env.local`. Emulator Suite wired. Frontend target: Firebase App Hosting. |
@@ -819,6 +819,69 @@ progress/current/status → archive; user scoping — emulators). Suite: 35 file
 - `listActiveGoals` filters archived client-side (same trade-off as 8A/8B).
 - Parent-plan picker only lists *active* plans; a goal whose plan was archived shows no
   parent chip.
+
+### Layer 8E — Projects — ✅ complete (2026-08-30) — committed + pushed
+
+Projects (`users/{uid}/projects`) — delivery vehicles that sit under a goal and roll up to
+life pillars. Carry an expected outcome, owner, start/end dates, status, priority, manual
+progress, and free-text **dependencies** / **risks** lists.
+
+**Created — `src/features/projects/`:**
+- `schema.ts` — `PROJECT_STATUSES` (planned / active / blocked / complete / cancelled),
+  `PROJECT_STATUS_LABEL`. One `projectFieldsSchema` → `projectSchema` (stored),
+  `projectCreateSchema` (`.refine` end≥start, transform-free), `projectUpdateSchema`
+  (`.partial()`), `projectFormSchema` (string dates) + `projectInputFromForm`. `dependencies`
+  / `risks` are `string[]` (≤30 items, each ≤240 chars).
+- `project-repository.ts` — `projectRepository` via `createFirestoreRepository` +
+  `listActiveProjects()`.
+- `use-projects.ts` — `useProjects()`: load + create / update / archive + reload
+  (fetch-in-effect + `refreshToken`).
+- `components/` — `ProjectForm` (RHF + zod; title, description, expected outcome, **goal
+  Select**, pillars, owner / start / end, status, priority, progress, dependencies / risks
+  textareas → line arrays, review notes), `ProjectDialog`, `ProjectCard` (status + priority
+  badges, progress bar, owner / date-range / goal-title / risk-count metadata row, pillar
+  badges, archive-confirm), `ProjectsView` (sorted by priority → status → end date).
+- `index.ts` barrel.
+
+**Created — goals feature:** `listGoalOptions()` + `GoalOption` in `goal-repository.ts` and
+`useGoalOptions()` in `use-goal-options.ts` — the user's active goals, for the project
+form's goal picker and the card's goal-title lookup. `src/features/goals/index.ts` exports
+the new symbols.
+
+**Modified:** `src/app/(app)/plan/projects/page.tsx` renders `<ProjectsView />` (was a
+placeholder). `docs/DATA_MODEL.md` annotation.
+
+**Tests added:** `src/features/projects/schema.test.ts` (create requires fields, null goal
+vs empty date, end≥start, progress / list-length / enum bounds, `projectFormSchema` +
+`projectInputFromForm` mapping), `components/ProjectsView.test.tsx` (empty / card with
+status·priority·progress·risk-count / new-project dialog / error + retry — `useProjects` +
+`useGoalOptions` mocked), `tests/integration/projects.test.ts` (project linked to a goal;
+create → list → update progress/status → archive; user scoping — emulators). Suite: 37
+files / 174 tests.
+
+**Verification (all green):** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (37/174) ·
+`build` ✅ (45 routes; `/plan/projects` real) · `test:integration` ✅ (7 files / 24 tests) ·
+`format` ✅ · `test:rules` not run (rules untouched) · functions suite unchanged ✅.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Plan → Projects**. Empty state → "Add your first project".
+2. Create a project: title, description, expected outcome, pick a **goal** (needs a goal
+   from 8D to appear), pillars, owner, end date, status, priority, progress, a few
+   dependencies / risks (one per line) → **Create project**. The card shows both badges, a
+   progress bar, the owner, date range, goal title, and "N risks".
+3. Edit → change progress / status → **Save changes** (bar + badge update).
+4. Archive (trash → confirm) → gone; reload persists.
+5. Firestore console → `users/{uid}/projects/{id}` with `goalId`, `dependencies`, `risks`,
+   `projectStatus`, `priority`, audit fields.
+
+**Known limitations:**
+- Project → milestones / tasks are established from the child side when those land
+  (8F / 10); the project record stores no child-id arrays.
+- `progress` is manual — no roll-up from milestones / tasks yet.
+- `listActiveProjects` filters archived client-side (same trade-off as 8A–8D).
+- Goal picker only lists *active* goals; a project whose goal was archived shows no goal
+  chip.
+- `dependencies` / `risks` are free text, not links to other project records.
 
 ---
 

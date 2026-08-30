@@ -18,6 +18,12 @@ export {
   type GoalStatus,
   type ReviewFrequency,
 } from "./schema";
-export { goalRepository, listActiveGoals } from "./goal-repository";
+export {
+  goalRepository,
+  listActiveGoals,
+  listGoalOptions,
+  type GoalOption,
+} from "./goal-repository";
 export { useGoals } from "./use-goals";
+export { useGoalOptions } from "./use-goal-options";
 export { GoalsView } from "./components/GoalsView";
