@@ -8,11 +8,11 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 6 — Core Data Model & Repository Layer (complete, committed + pushed) |
-| **Next approved layer** | Layer 7 — Dashboard MVP |
-| **Completed layers** | Layers 0–6 (committed + pushed) |
+| **Current layer** | Layer 7 — Dashboard MVP (complete, committed + pushed) |
+| **Next approved layer** | Layer 8 — Plan Domain (8A Life Vision first) |
+| **Completed layers** | Layers 0–7 (committed + pushed) |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 24 files, 106 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (owner + audit-field enforcement). ✅ integration: `npm run test:integration` — 2 files, 12 tests (auth-flow 5 + repository 7). ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 27 files, 119 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 3 files, 14 tests (auth-flow 5 + repository 7 + dashboard 2). ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (45 routes, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
 | **Git status** | `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`). |
 | **Deployment status** | Not deployed. Firebase project **`mastery-personal-mgmt-system`** with a registered Web app; config in `.env.local`. Emulator Suite wired. Frontend target: Firebase App Hosting. |
@@ -530,6 +530,71 @@ reads + cross-user `permission-denied`, `unauthenticated` writes).
   adds one).
 - Rules enforce audit-field *integrity* generically; per-field domain-value validation
   (enum ranges, required feature fields) is added by each domain layer.
+
+---
+
+### Layer 7 — Dashboard MVP — ✅ complete (2026-08-28) — committed + pushed
+
+The dashboard **aggregation service** (one batched user-scoped read; widgets never read
+Firestore directly) plus real widgets for the data that exists today and honest,
+module-linked empty states for the rest. **Quick Notes** is fully functional
+end-to-end. See ADR-0012.
+
+**Created — `src/features/dashboard/`:**
+- `dashboard-aggregate.ts` — `DashboardAggregate` type + `loadDashboardAggregate()` (one
+  `Promise.all` pass; today: quick notes; `null`/`[]` + `// Layer N` markers for
+  goals/tasks/habits/KPIs/Life Score). `greetingForHour` / `greetingText` / `formatToday`.
+- `quick-note.ts` — `quickNoteSchema` (`defineRecordSchema({ body })`), create/update
+  schemas, and `quickNoteRepository = createFirestoreRepository({ collectionName: "quickNotes", … })`.
+- `use-dashboard.ts` — `useDashboard()` hook: fetch-in-effect with a cancel flag + a
+  `refreshToken` for retry; exposes `{ status, aggregate, error, reload, profile, user }`.
+- `components/` — `GreetingWidget` (profile name, never hardcoded; locale/timezone date;
+  hydration-safe via `useMounted`), `StatTile`, `QuickNotesWidget` (add / inline-edit /
+  archive against the repo, optimistic local list, inline error), `PlaceholderWidget`
+  (empty state + module link + planned-layer chip), `RecoveryShortcut` (no sensitive
+  detail), `DashboardView` (loading skeleton / error state / grid).
+- `index.ts` barrel.
+- `src/hooks/use-mounted.ts` — `useMounted()` (`useSyncExternalStore`, SSR-false →
+  client-true, no hydration mismatch).
+
+**Modified:**
+- `src/app/(app)/dashboard/page.tsx` — renders `<DashboardView />` (was a Layer 4 stub).
+- `docs/DATA_MODEL.md` — adds `users/{uid}/quickNotes/{noteId}` to the collection map.
+
+**Tests added:** `dashboard-aggregate.test.ts` (greeting + date helpers),
+`quick-note.test.ts` (schemas), `components/DashboardView.test.tsx` (greets by profile
+name / email-derived fallback, empty states + module links, privacy-safe recovery
+shortcut, error state + retry — `useDashboard` mocked), `tests/integration/dashboard.test.ts`
+(aggregate returns the user's quick notes + `null` placeholders; scoped to the signed-in
+user — emulators). Suite: 27 files / 119 tests.
+
+**Verification (all green):** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (27/119) ·
+`build` ✅ (45 routes) · `test:rules` ✅ (2/22) · `test:integration` ✅ (3/14) ·
+`format:check` ✅ · functions suite unchanged ✅.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → `/dashboard` greets you by your profile name with today's
+   date; three stat tiles show `—` (Focus / Tasks / Habits, arriving in Layers 9–10).
+2. **Quick notes:** type a note, **Add** → it appears with "just now". Edit it (pencil) →
+   Save. Delete it (trash) → it disappears. Reload the page → your notes persist.
+3. Firebase console → Firestore shows `users/{uid}/quickNotes/{id}` with `body` + audit
+   fields (`createdBy`/`updatedBy` = your uid, `version` bumps on edit,
+   `status: "archived"` after delete).
+4. Every placeholder widget links to its module route and shows its planned layer.
+5. The Recovery shortcut links to `/recovery` and shows only "Private check-in".
+6. `npm run typecheck && npm run lint && npm test && npm run build && npm run test:integration`
+   → all pass.
+
+**Known limitations:**
+- Only Quick Notes has real data; every other widget is an empty state until its layer
+  (8–13) extends `loadDashboardAggregate()`.
+- Delete uses `archive()` (soft delete); archived notes are simply filtered from the list —
+  no "archived notes" view or hard delete yet.
+- The greeting is computed once per mount (no live minute-tick); the date uses the
+  profile timezone, falling back to the browser timezone then UTC.
+- Widgets the prompt lists but that need later infra are not built yet: energy check-in
+  (Layer 9), focus timer (Layer 9), today's schedule (Layer 9C), weekly progress chart
+  (Layer 8/12), notifications summary (Layer 17).
 
 ---
 

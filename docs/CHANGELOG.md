@@ -6,6 +6,23 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 7 — Dashboard MVP — 2026-08-28
+
+**Added**
+- `src/features/dashboard/` — `loadDashboardAggregate()` (one batched user-scoped read;
+  widgets never read Firestore themselves), `DashboardAggregate` type, greeting/date
+  helpers, `useDashboard()` hook, and widgets: `GreetingWidget`, `StatTile`,
+  `QuickNotesWidget`, `PlaceholderWidget`, `RecoveryShortcut`, `DashboardView`.
+- **Quick Notes** — `users/{uid}/quickNotes` via `createFirestoreRepository`, with
+  add / inline-edit / archive in the UI. First end-to-end use of the Layer 6 repository.
+- `src/hooks/use-mounted.ts` — hydration-safe client-only flag.
+- Tests: greeting/date helpers, quick-note schemas, `DashboardView` (mocked hook), and a
+  dashboard aggregate emulator integration test.
+
+**Changed**
+- `src/app/(app)/dashboard/page.tsx` renders the real `<DashboardView />`.
+- `docs/DATA_MODEL.md` adds `quickNotes`; ADR-0012 records the MVP scoping.
+
 ### Layer 6 — Core Data Model & Repository Layer — 2026-08-28
 
 **Added**

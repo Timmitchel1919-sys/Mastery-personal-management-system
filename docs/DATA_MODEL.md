@@ -54,6 +54,7 @@ users/{uid}/reports/{reportId}
 
 # System
 users/{uid}/notifications/{notificationId}
+users/{uid}/quickNotes/{noteId}                 dashboard quick-capture notes (Layer 7)
 
 # Recovery — separately protected (see RECOVERY_PRIVACY.md)
 users/{uid}/recoveryProfiles/{profileId}

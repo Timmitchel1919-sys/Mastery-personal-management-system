@@ -203,3 +203,30 @@ timestamps. Server-side data access (Admin SDK, for SSR / Cloud Functions) is **
 this factory yet — an admin variant with the same interface is added when a server code
 path first needs user-scoped reads (candidate: Layer 13/14/16). Cursor pagination is
 forward-only; `orderBy` must be a stored field.
+
+---
+
+## ADR-0012 — Dashboard MVP: aggregation service now, Quick Notes as the one live widget
+**Date:** 2026-08-28 · **Status:** accepted · **Layer:** 7
+
+**Context.** Layer 7 ("Dashboard MVP") lands before Layers 8–12, which create goals,
+tasks, habits, KPIs, and the Life Score. There is almost no domain data to aggregate yet.
+
+**Decision.**
+- Build the real deliverable — **`loadDashboardAggregate()`**: one batched, user-scoped
+  read pass returning a typed `DashboardAggregate`. Future domains add their query to its
+  `Promise.all`; widgets never read Firestore directly (`ARCHITECTURE.md` §5). Fields for
+  not-yet-built features return `null` / `[]` with a `// Layer N` marker.
+- Ship **Quick Notes** as a fully functional widget: `users/{uid}/quickNotes` via the
+  Layer 6 `createFirestoreRepository`, with add / edit / archive in the UI. It is the one
+  end-to-end proof of the schema → repo → rules → aggregation → UI path, and "Quick notes"
+  is an explicit dashboard widget in the prompt.
+- Every other widget (priorities, goal progress, habit streaks, milestones, Life Score,
+  KPI overview, AI Coach, focus/tasks/habits stat tiles) is wired to the aggregate and
+  renders a clear empty state that links to its module, labelled with its planned layer.
+- The Recovery shortcut shows **no** streak/count/detail — just a private way in.
+
+**Consequences.** When Layers 8–12 arrive they extend `loadDashboardAggregate()` and swap
+each placeholder widget's body for real data; the page, hook, layout, and states already
+exist. `quickNotes` is added to `DATA_MODEL.md`. Greeting/date are client-clock derived,
+guarded by a `useMounted()` hook to stay hydration-safe.
