@@ -51,3 +51,21 @@ export async function listActivePlans(horizon: PlanHorizon): Promise<Plan[]> {
   });
   return page.items.filter((plan) => plan.status === "active");
 }
+
+export interface PlanOption {
+  id: string;
+  title: string;
+  horizon: PlanHorizon;
+}
+
+/** Every active plan across all tiers — for pickers that link something to a plan. */
+export async function listAllPlanOptions(): Promise<PlanOption[]> {
+  const perTier = await Promise.all(
+    (Object.keys(PLAN_REPOSITORIES) as PlanHorizon[]).map((horizon) =>
+      listActivePlans(horizon).then((plans) =>
+        plans.map((plan) => ({ id: plan.id, title: plan.title, horizon })),
+      ),
+    ),
+  );
+  return perTier.flat();
+}

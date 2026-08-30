@@ -21,7 +21,10 @@ export {
   PLAN_REPOSITORIES,
   getPlanRepository,
   listActivePlans,
+  listAllPlanOptions,
   type PlanRepository,
+  type PlanOption,
 } from "./repositories";
 export { usePlans } from "./use-plans";
+export { usePlanOptions } from "./use-plan-options";
 export { PlansView } from "./components/PlansView";

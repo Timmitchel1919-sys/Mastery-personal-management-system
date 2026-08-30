@@ -8,11 +8,11 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 8C — Quarterly / Monthly / Weekly Planning (complete, committed + pushed) |
-| **Next approved layer** | Layer 8D — Goals |
-| **Completed layers** | Layers 0–7 · Layer 8A · 8B · 8C (committed + pushed) |
+| **Current layer** | Layer 8D — Goals (complete, committed + pushed) |
+| **Next approved layer** | Layer 8E — Projects |
+| **Completed layers** | Layers 0–7 · Layer 8A · 8B · 8C · 8D (committed + pushed) |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 33 files, 150 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 5 files, 20 tests (auth-flow 5 + repository 7 + dashboard 2 + life-vision 2 + plans 4, now covering all five tiers). ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 35 files, 162 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 6 files, 22 tests (auth-flow 5 + repository 7 + dashboard 2 + life-vision 2 + plans 4 + goals 2). ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (45 routes, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
 | **Git status** | `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`). |
 | **Deployment status** | Not deployed. Firebase project **`mastery-personal-mgmt-system`** with a registered Web app; config in `.env.local`. Emulator Suite wired. Frontend target: Firebase App Hosting. |
@@ -757,6 +757,68 @@ components or schema.
 **Known limitations:**
 - Same as 8B: `parentId` unused until 8H; archived filtered client-side; no reordering.
 - The tiers are not yet linked to each other (quarter → year → five-year) — 8H cascade.
+
+---
+
+### Layer 8D — Goals — ✅ complete (2026-08-29) — committed + pushed
+
+Measurable goals (`users/{uid}/goals`) that link to a plan and roll up to life pillars.
+Richer schema than plans: priority, measurement type / target / current / unit, review
+frequency.
+
+**Created — `src/features/goals/`:**
+- `schema.ts` — `GOAL_STATUSES` (not-started / in-progress / on-hold / achieved / dropped),
+  `REVIEW_FREQUENCIES`, `PRIORITY_LABEL`. One `goalFieldsSchema` → `goalSchema` (stored),
+  `goalCreateSchema` (`.refine` target≥start, transform-free), `goalUpdateSchema`
+  (`.partial()`), `goalFormSchema` (string dates, `number | null` measure fields) +
+  `goalInputFromForm`.
+- `goal-repository.ts` — `goalRepository` via `createFirestoreRepository` +
+  `listActiveGoals()`.
+- `use-goals.ts` — `useGoals()`: load + create / update / archive + reload.
+- `components/` — `GoalForm` (RHF + zod; title, description, **parent-plan Select grouped
+  by tier**, pillars, start/target dates, status, priority, progress, measurement type +
+  current/target/unit, review frequency, notes), `GoalDialog`, `GoalCard` (status +
+  priority badges, progress bar, measure summary "8 / 21 km", parent-plan chip, pillar
+  badges, archive-confirm), `GoalsView` (sorted by priority → status → target date).
+- `index.ts` barrel.
+
+**Created — plans feature:** `listAllPlanOptions()` + `usePlanOptions()` in
+`src/features/plans/` — the user's active plans across all five tiers, for the goal form's
+parent picker and the card's parent-title lookup.
+
+**Modified:** `src/app/(app)/plan/goals/page.tsx` renders `<GoalsView />` (was a
+placeholder). `docs/DATA_MODEL.md` annotation.
+
+**Tests added:** `src/features/goals/schema.test.ts` (create requires fields, null vs empty
+date, date ordering, progress/unit/enum bounds, `goalFormSchema` + `goalInputFromForm`
+mapping), `components/GoalsView.test.tsx` (empty / card with status·priority·progress·measure
+/ new-goal dialog / error + retry — `useGoals` + `usePlanOptions` mocked),
+`tests/integration/goals.test.ts` (goal linked to a plan; create → list → update
+progress/current/status → archive; user scoping — emulators). Suite: 35 files / 162 tests.
+
+**Verification (all green):** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (35/162) ·
+`build` ✅ (45 routes; `/plan/goals` real) · `test:rules` ✅ (2/22) · `test:integration` ✅
+(6/22) · `format:check` ✅ · functions suite unchanged ✅.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Plan → Goals**. Empty state → "Add your first goal".
+2. Create a goal: title, description, pick a **parent plan** (grouped by tier — needs a
+   plan from 8B/8C to appear), pillars, target date, status, priority, measurement
+   (e.g. Count, current 3, target 12, unit "books"), progress, review frequency → **Create
+   goal**. The card shows both badges, a progress bar, "3 / 12 books", the target date, and
+   the plan title.
+3. Edit → change progress/current/status → **Save changes** (bar + measure update).
+4. Archive (trash → confirm) → gone; reload persists.
+5. Firestore console → `users/{uid}/goals/{id}` with `parentPlanId`, `measurementType`,
+   `targetValue`/`currentValue`, `priority`, audit fields.
+
+**Known limitations:**
+- Goal → milestones / projects / tasks / habits / KPIs are established from the child side
+  when those land (8E/8F/10/12); the goal record stores no child-id arrays.
+- `progress` is manual — no auto-derivation from `currentValue / targetValue` yet.
+- `listActiveGoals` filters archived client-side (same trade-off as 8A/8B).
+- Parent-plan picker only lists *active* plans; a goal whose plan was archived shows no
+  parent chip.
 
 ---
 

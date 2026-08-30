@@ -6,6 +6,22 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 8D — Goals — 2026-08-29
+
+**Added**
+- `src/features/goals/` — `goalSchema` / `goalCreateSchema` / `goalUpdateSchema` /
+  `goalFormSchema` + `goalInputFromForm` (priority, measurement type / current / target /
+  unit, review frequency, parent-plan link, pillars); `goalRepository`, `useGoals()`, and
+  the UI (`GoalsView`, `GoalForm`, `GoalDialog`, `GoalCard`).
+- `listAllPlanOptions()` + `usePlanOptions()` in `src/features/plans/` — active plans
+  across every tier for the goal's parent-plan picker.
+- `/plan/goals` renders the real feature.
+- Tests: goal schemas + `goalInputFromForm`, `GoalsView` (mocked hooks), and a goals
+  emulator integration test.
+
+**Changed**
+- `docs/DATA_MODEL.md` annotation for `goals`.
+
 ### Layer 8C — Quarterly / Monthly / Weekly Planning — 2026-08-29
 
 **Added**

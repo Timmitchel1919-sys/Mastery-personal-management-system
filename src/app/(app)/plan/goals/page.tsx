@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { GoalsView } from "@/features/goals";
 
-export const metadata = { title: "Goals" };
+export const metadata: Metadata = { title: "Goals" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Goals"
-      description="Measurable goals with milestones, projects, tasks, habits, and KPIs."
-      plannedLayer={8}
-    />
-  );
+  return <GoalsView />;
 }
