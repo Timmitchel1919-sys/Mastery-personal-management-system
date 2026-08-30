@@ -48,6 +48,12 @@ describe("PlansView", () => {
     expect(screen.getByText(/no five-year plans yet/i)).toBeInTheDocument();
   });
 
+  it("is parameterized by planning horizon", () => {
+    render(<PlansView horizon="week" />);
+    expect(screen.getByRole("heading", { name: "Weekly Plans" })).toBeInTheDocument();
+    expect(screen.getByText(/no weekly plans yet/i)).toBeInTheDocument();
+  });
+
   it("renders a plan card with progress and status", () => {
     hookValue.items = [plan];
     render(<PlansView horizon="five-year" />);

@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { PlansView } from "@/features/plans";
 
-export const metadata = { title: "Weekly Plans" };
+export const metadata: Metadata = { title: "Weekly Plans" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Weekly Plans"
-      description="Weekly priorities that feed your daily actions."
-      plannedLayer={8}
-    />
-  );
+  return <PlansView horizon="week" />;
 }

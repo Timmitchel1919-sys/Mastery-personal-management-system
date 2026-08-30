@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { PlansView } from "@/features/plans";
 
-export const metadata = { title: "Quarterly Plans" };
+export const metadata: Metadata = { title: "Quarterly Plans" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Quarterly Plans"
-      description="Quarter objectives that cascade from your one-year plan."
-      plannedLayer={8}
-    />
-  );
+  return <PlansView horizon="quarter" />;
 }

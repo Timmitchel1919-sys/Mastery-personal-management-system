@@ -24,16 +24,19 @@ function makePlanRepository(horizon: PlanHorizon): PlanRepository {
   });
 }
 
-/** Layer 8B wires the two long-horizon tiers; 8C adds quarter / month / week. */
-export const PLAN_REPOSITORIES: Partial<Record<PlanHorizon, PlanRepository>> = {
+/** All five planning tiers (8B: five-year / one-year · 8C: quarter / month / week). */
+export const PLAN_REPOSITORIES: Record<PlanHorizon, PlanRepository> = {
   "five-year": makePlanRepository("five-year"),
   "one-year": makePlanRepository("one-year"),
+  quarter: makePlanRepository("quarter"),
+  month: makePlanRepository("month"),
+  week: makePlanRepository("week"),
 };
 
 export function getPlanRepository(horizon: PlanHorizon): PlanRepository {
   const repository = PLAN_REPOSITORIES[horizon];
   if (!repository) {
-    throw new AppError(`No repository is wired for the "${horizon}" planning tier yet`, {
+    throw new AppError(`No repository is wired for the "${horizon}" planning tier`, {
       code: "unavailable",
     });
   }

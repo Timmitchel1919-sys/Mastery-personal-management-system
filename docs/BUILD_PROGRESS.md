@@ -8,11 +8,11 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 8B — Five-Year & One-Year Plans (complete, committed + pushed) |
-| **Next approved layer** | Layer 8C — Quarterly / Monthly / Weekly Planning |
-| **Completed layers** | Layers 0–7 · Layer 8A · Layer 8B (committed + pushed) |
+| **Current layer** | Layer 8C — Quarterly / Monthly / Weekly Planning (complete, committed + pushed) |
+| **Next approved layer** | Layer 8D — Goals |
+| **Completed layers** | Layers 0–7 · Layer 8A · 8B · 8C (committed + pushed) |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 33 files, 149 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 5 files, 20 tests (auth-flow 5 + repository 7 + dashboard 2 + life-vision 2 + plans 4). ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 33 files, 150 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 5 files, 20 tests (auth-flow 5 + repository 7 + dashboard 2 + life-vision 2 + plans 4, now covering all five tiers). ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (45 routes, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
 | **Git status** | `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`). |
 | **Deployment status** | Not deployed. Firebase project **`mastery-personal-mgmt-system`** with a registered Web app; config in `.env.local`. Emulator Suite wired. Frontend target: Firebase App Hosting. |
@@ -721,10 +721,42 @@ separate collections, defaults + progress/status update + archive, user scoping,
 
 **Known limitations:**
 - `parentId` is stored but always `null` — real parent linking (vision → 5yr → 1yr) is 8H.
-- Quarter / month / week tiers are not wired yet (their routes still show the placeholder);
-  8C adds three `PLAN_REPOSITORIES` entries + three route files.
 - `listActivePlans` filters archived client-side (same trade-off as 8A).
 - No inline reordering; cards sort by plan status then start date.
+
+---
+
+### Layer 8C — Quarterly / Monthly / Weekly Planning — ✅ complete (2026-08-29) — committed + pushed
+
+Wires the three shorter planning tiers onto the shared model from 8B (ADR-0014). No new
+components or schema.
+
+**Modified:**
+- `src/features/plans/repositories.ts` — `PLAN_REPOSITORIES` is now a full
+  `Record<PlanHorizon, PlanRepository>` (adds `quarter` / `month` / `week`).
+- `src/app/(app)/plan/quarterly|monthly|weekly/page.tsx` — render
+  `<PlansView horizon="quarter|month|week" />` (were `ModulePlaceholder`).
+- `tests/integration/plans.test.ts` — the "each tier in its own collection" test loops over
+  all five `PLAN_HORIZONS`; the "unwired tier throws" test becomes "a repository is wired
+  for every tier".
+- `src/features/plans/components/PlansView.test.tsx` — a `horizon="week"` render asserts the
+  view is parameterized by horizon.
+- `docs/DATA_MODEL.md` annotations already noted these three as Layer 8C.
+
+**Verification (all green):** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (33/150) ·
+`build` ✅ (45 routes; `/plan/quarterly|monthly|weekly` now real) · `test:rules` ✅ (2/22) ·
+`test:integration` ✅ (5/20) · `format:check` ✅ · functions suite unchanged ✅.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Plan → Quarterly / Monthly / Weekly Plans**. Each is the
+   full plan CRUD screen (add / edit / archive) against its own collection.
+2. Create one plan in each tier → they're independent; the sidebar/breadcrumbs use the
+   correct tier label.
+3. Firestore console shows `users/{uid}/quarterPlans`, `monthPlans`, `weekPlans`.
+
+**Known limitations:**
+- Same as 8B: `parentId` unused until 8H; archived filtered client-side; no reordering.
+- The tiers are not yet linked to each other (quarter → year → five-year) — 8H cascade.
 
 ---
 

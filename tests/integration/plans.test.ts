@@ -1,7 +1,7 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { authService } from "@/features/auth/auth-service";
 import { getPlanRepository, listActivePlans } from "@/features/plans/repositories";
-import type { PlanCreate } from "@/features/plans/schema";
+import { PLAN_HORIZONS, type PlanCreate, type PlanHorizon } from "@/features/plans/schema";
 
 function planInput(
   fields: Pick<PlanCreate, "horizon" | "title" | "objective" | "pillarIds"> & Partial<PlanCreate>,
@@ -53,32 +53,32 @@ afterAll(async () => {
 });
 
 describe("plan repositories", () => {
-  it("keeps each tier in its own collection", async () => {
+  it("keeps every tier in its own collection", async () => {
     await signUpFresh("alice");
 
-    await getPlanRepository("five-year").create(
-      planInput({
-        horizon: "five-year",
-        title: "Financial base",
-        objective: "Build resilience.",
-        startDate: "2026-01-01",
-        endDate: "2030-12-31",
-        pillarIds: ["personal"],
-      }),
-    );
-    await getPlanRepository("one-year").create(
-      planInput({
-        horizon: "one-year",
-        title: "Save 20%",
-        objective: "Grow the buffer.",
-        pillarIds: ["personal"],
-      }),
-    );
+    const titleByHorizon: Record<PlanHorizon, string> = {
+      "five-year": "Financial base",
+      "one-year": "Save 20%",
+      quarter: "Ship the MVP",
+      month: "Draft the plan",
+      week: "Outline it",
+    };
 
-    expect((await listActivePlans("five-year")).map((plan) => plan.title)).toEqual([
-      "Financial base",
-    ]);
-    expect((await listActivePlans("one-year")).map((plan) => plan.title)).toEqual(["Save 20%"]);
+    for (const horizon of PLAN_HORIZONS) {
+      await getPlanRepository(horizon).create(
+        planInput({
+          horizon,
+          title: titleByHorizon[horizon],
+          objective: `Objective for ${horizon}.`,
+          pillarIds: ["personal"],
+        }),
+      );
+    }
+
+    for (const horizon of PLAN_HORIZONS) {
+      const plans = await listActivePlans(horizon);
+      expect(plans.map((plan) => plan.title)).toEqual([titleByHorizon[horizon]]);
+    }
   });
 
   it("defaults, then updates progress and status, then archives", async () => {
@@ -124,7 +124,9 @@ describe("plan repositories", () => {
     expect(await listActivePlans("one-year")).toHaveLength(0);
   });
 
-  it("does not wire the shorter tiers until Layer 8C", () => {
-    expect(() => getPlanRepository("quarter")).toThrow();
+  it("wires a repository for every planning tier", () => {
+    for (const horizon of PLAN_HORIZONS) {
+      expect(() => getPlanRepository(horizon)).not.toThrow();
+    }
   });
 });

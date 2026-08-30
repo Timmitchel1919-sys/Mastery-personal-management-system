@@ -6,6 +6,18 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 8C — Quarterly / Monthly / Weekly Planning — 2026-08-29
+
+**Added**
+- `/plan/quarterly`, `/plan/monthly`, `/plan/weekly` render the shared `PlansView` — full
+  plan CRUD for the three shorter tiers.
+
+**Changed**
+- `PLAN_REPOSITORIES` is now a complete `Record<PlanHorizon, PlanRepository>` (adds
+  `quarter` / `month` / `week`).
+- `tests/integration/plans.test.ts` covers all five tiers; `PlansView` test adds a
+  `horizon="week"` case.
+
 ### Layer 8B — Five-Year & One-Year Plans — 2026-08-29
 
 **Added**
