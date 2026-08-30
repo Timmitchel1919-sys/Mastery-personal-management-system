@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { MilestonesView } from "@/features/milestones";
 
-export const metadata = { title: "Milestones" };
+export const metadata: Metadata = { title: "Milestones" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Milestones"
-      description="Checkpoints for goals and projects."
-      plannedLayer={8}
-    />
-  );
+  return <MilestonesView />;
 }

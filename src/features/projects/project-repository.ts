@@ -25,3 +25,16 @@ export async function listActiveProjects(): Promise<Project[]> {
   });
   return page.items.filter((project) => project.status === "active");
 }
+
+export interface ProjectOption {
+  id: string;
+  title: string;
+}
+
+/** Active projects as `{ id, title }` — for pickers that link something to a project. */
+export async function listProjectOptions(): Promise<ProjectOption[]> {
+  return (await listActiveProjects()).map((project) => ({
+    id: project.id,
+    title: project.title,
+  }));
+}

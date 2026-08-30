@@ -8,11 +8,11 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 8E — Projects (complete, committed + pushed) |
-| **Next approved layer** | Layer 8F — Milestones |
-| **Completed layers** | Layers 0–7 · Layer 8A · 8B · 8C · 8D · 8E (committed + pushed) |
+| **Current layer** | Layer 8F — Milestones (complete, committed + pushed) |
+| **Next approved layer** | Layer 8G — Roadmaps |
+| **Completed layers** | Layers 0–7 · Layer 8A · 8B · 8C · 8D · 8E · 8F (committed + pushed) |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 37 files, 174 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 7 files, 24 tests (auth-flow 5 + repository 7 + dashboard 2 + life-vision 2 + plans 4 + goals 2 + projects 2). ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 39 files, 188 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 8 files, 26 tests (auth-flow 5 + repository 7 + dashboard 2 + life-vision 2 + plans 4 + goals 2 + projects 2 + milestones 2). ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (45 routes, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
 | **Git status** | `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`). |
 | **Deployment status** | Not deployed. Firebase project **`mastery-personal-mgmt-system`** with a registered Web app; config in `.env.local`. Emulator Suite wired. Frontend target: Firebase App Hosting. |
@@ -882,6 +882,74 @@ files / 174 tests.
 - Goal picker only lists *active* goals; a project whose goal was archived shows no goal
   chip.
 - `dependencies` / `risks` are free text, not links to other project records.
+
+### Layer 8F — Milestones — ✅ complete (2026-08-30) — committed + pushed
+
+Milestones (`users/{uid}/milestones`) — checkpoints on the way to a goal or a project.
+Polymorphic parent (`parentType` = `goal` / `project` / `none` + `parentId`), a due date, a
+completion state, manual progress, free-text dependencies, and evidence / notes.
+
+**Created — `src/features/milestones/`:**
+- `schema.ts` — `MILESTONE_STATUSES` (upcoming / in-progress / done / missed),
+  `MILESTONE_PARENT_TYPES` (none / goal / project) + labels. One `milestoneFieldsSchema` →
+  `milestoneSchema` (stored), `milestoneCreateSchema` (`.refine`: a linked milestone must
+  name its parent, a standalone one must not; transform-free), `milestoneUpdateSchema`
+  (`.partial()`), `milestoneFormSchema` (string date, `.refine` parent picked) +
+  `milestoneInputFromForm`.
+- `milestone-repository.ts` — `milestoneRepository` via `createFirestoreRepository` +
+  `listActiveMilestones()`.
+- `use-milestones.ts` — `useMilestones()`: load + create / update / archive + reload
+  (fetch-in-effect + `refreshToken`).
+- `components/` — `MilestoneForm` (RHF + zod; title, description, **"Belongs to" type
+  Select → goal/project Select** driven by `useWatch`, pillars, due date, status, progress,
+  dependencies textarea → line array, evidence), `MilestoneDialog`, `MilestoneCard` (status
+  badge, progress bar, due-date / parent-label / dependency-count metadata row, pillar
+  badges, archive-confirm), `MilestonesView` (sorted by status → due date).
+- `index.ts` barrel.
+
+**Created — projects feature:** `listProjectOptions()` + `ProjectOption` in
+`project-repository.ts` and `useProjectOptions()` in `use-project-options.ts` — active
+projects for the milestone form's project picker. `src/features/projects/index.ts` exports
+the new symbols.
+
+**Modified:** `src/app/(app)/plan/milestones/page.tsx` renders `<MilestonesView />` (was a
+placeholder). `docs/DATA_MODEL.md` annotation.
+
+**Tests added:** `src/features/milestones/schema.test.ts` (create requires fields,
+parent/parentId consistency both ways, null vs empty date, progress / list-length / enum
+bounds, `milestoneFormSchema` refine + `milestoneInputFromForm` mapping),
+`components/MilestonesView.test.tsx` (empty / card with status·progress·parent-label·dep-count
+/ new-milestone dialog / error + retry — `useMilestones` + `useGoalOptions` +
+`useProjectOptions` mocked), `tests/integration/milestones.test.ts` (milestone linked to a
+goal; create → list → update progress/status → archive; user scoping — emulators). Suite:
+39 files / 188 tests.
+
+**Verification (all green):** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (39/188) ·
+`build` ✅ (45 routes; `/plan/milestones` real) · `test:integration` ✅ (8 files / 26 tests)
+· `format` ✅ · `test:rules` not run (rules untouched) · functions suite unchanged ✅.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Plan → Milestones**. Empty state → "Add your first milestone".
+2. Create a milestone: title, set **Belongs to** = Goal (needs a goal from 8D) or Project
+   (needs a project from 8E) → pick the parent, pillars, due date, status, progress, a few
+   dependencies (one per line), evidence → **Create milestone**. The card shows the status
+   badge, a progress bar, the due date, "Goal: …" / "Project: …", and "N dependencies".
+3. Set **Belongs to** = Standalone → the parent picker disappears and no parent is required.
+4. Edit → change progress / status → **Save changes** (bar + badge update).
+5. Archive (trash → confirm) → gone; reload persists.
+6. Firestore console → `users/{uid}/milestones/{id}` with `parentType`, `parentId`,
+   `dueDate`, `milestoneStatus`, `dependencies`, audit fields.
+
+**Known limitations:**
+- The parent link is a bare `parentType` + `parentId` pair — no Firestore-side referential
+  integrity; deleting/archiving the goal or project leaves the milestone pointing at it and
+  the card simply shows no parent label (pickers list only *active* parents).
+- `progress` and `milestoneStatus` are independent and manual — no auto-sync (e.g. progress
+  100 does not set status `done`).
+- `listActiveMilestones` filters archived client-side (same trade-off as 8A–8E).
+- Goal → milestones / project → milestones are not surfaced from the parent side yet; that
+  roll-up arrives with the planning cascade (8H) / dashboard work.
+- `dependencies` are free text, not links to other records.
 
 ---
 

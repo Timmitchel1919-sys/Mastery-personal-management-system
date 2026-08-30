@@ -6,6 +6,23 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 8F — Milestones — 2026-08-30
+
+**Added**
+- `src/features/milestones/` — `milestoneSchema` / `milestoneCreateSchema` /
+  `milestoneUpdateSchema` / `milestoneFormSchema` + `milestoneInputFromForm` (polymorphic
+  parent goal/project/none, due date, completion state, manual progress, free-text
+  dependencies, evidence/notes, pillars); `milestoneRepository`, `useMilestones()`, and the
+  UI (`MilestonesView`, `MilestoneForm`, `MilestoneDialog`, `MilestoneCard`).
+- `listProjectOptions()` / `ProjectOption` + `useProjectOptions()` in
+  `src/features/projects/` — active projects for the milestone's parent picker.
+- `/plan/milestones` renders the real feature.
+- Tests: milestone schemas + parent-consistency refine + `milestoneInputFromForm`,
+  `MilestonesView` (mocked hooks), and a milestones emulator integration test.
+
+**Changed**
+- `docs/DATA_MODEL.md` annotation for `milestones`.
+
 ### Layer 8E — Projects — 2026-08-30
 
 **Added**

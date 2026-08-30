@@ -13,6 +13,12 @@ export {
   type ProjectFormValues,
   type ProjectStatus,
 } from "./schema";
-export { projectRepository, listActiveProjects } from "./project-repository";
+export {
+  projectRepository,
+  listActiveProjects,
+  listProjectOptions,
+  type ProjectOption,
+} from "./project-repository";
 export { useProjects } from "./use-projects";
+export { useProjectOptions } from "./use-project-options";
 export { ProjectsView } from "./components/ProjectsView";

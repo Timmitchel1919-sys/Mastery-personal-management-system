@@ -23,7 +23,7 @@ users/{uid}/monthPlans/{planId}              shared "plan" shape (Layer 8C)
 users/{uid}/weekPlans/{planId}               shared "plan" shape (Layer 8C)
 users/{uid}/goals/{goalId}                    measurable goal, parentPlanId + pillars (Layer 8D)
 users/{uid}/projects/{projectId}              delivery vehicle, goalId + pillars, deps/risks (Layer 8E)
-users/{uid}/milestones/{milestoneId}
+users/{uid}/milestones/{milestoneId}         checkpoint, polymorphic parent (goal|project|none) + pillars (Layer 8F)
 users/{uid}/roadmaps/{roadmapId}
 
 # Focus
