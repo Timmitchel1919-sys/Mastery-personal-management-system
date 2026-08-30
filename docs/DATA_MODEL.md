@@ -16,11 +16,11 @@ users/{uid}                                   profile, preferences, role
 
 # Plan
 users/{uid}/lifeVisions/{visionId}            typed vision items, pillar-linked (Layer 8A)
-users/{uid}/fiveYearPlans/{planId}
-users/{uid}/yearPlans/{planId}
-users/{uid}/quarterPlans/{planId}
-users/{uid}/monthPlans/{planId}
-users/{uid}/weekPlans/{planId}
+users/{uid}/fiveYearPlans/{planId}            shared "plan" shape (Layer 8B)
+users/{uid}/yearPlans/{planId}                shared "plan" shape (Layer 8B)
+users/{uid}/quarterPlans/{planId}            shared "plan" shape (Layer 8C)
+users/{uid}/monthPlans/{planId}              shared "plan" shape (Layer 8C)
+users/{uid}/weekPlans/{planId}               shared "plan" shape (Layer 8C)
 users/{uid}/goals/{goalId}
 users/{uid}/projects/{projectId}
 users/{uid}/milestones/{milestoneId}

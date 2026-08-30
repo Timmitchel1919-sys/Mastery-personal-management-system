@@ -13,6 +13,9 @@ export const isoDateTimeSchema = z.string().refine((value) => !Number.isNaN(Date
   message: "Expected an ISO 8601 date-time string",
 });
 
+/** Calendar date only, `YYYY-MM-DD` (planning tiers are date-granular). */
+export const isoDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected a YYYY-MM-DD date");
+
 export const paginationQuerySchema = z.object({
   limit: z.number().int().positive().max(100).default(20),
   cursor: z.string().trim().min(1).optional(),

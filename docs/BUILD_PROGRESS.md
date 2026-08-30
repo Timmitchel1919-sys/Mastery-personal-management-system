@@ -8,11 +8,11 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 8A — Life Vision (complete, committed + pushed) |
-| **Next approved layer** | Layer 8B — Five-Year & One-Year Plans |
-| **Completed layers** | Layers 0–7 · Layer 8A (committed + pushed) |
+| **Current layer** | Layer 8B — Five-Year & One-Year Plans (complete, committed + pushed) |
+| **Next approved layer** | Layer 8C — Quarterly / Monthly / Weekly Planning |
+| **Completed layers** | Layers 0–7 · Layer 8A · Layer 8B (committed + pushed) |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 30 files, 133 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 4 files, 16 tests (auth-flow 5 + repository 7 + dashboard 2 + life-vision 2). ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 33 files, 149 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 5 files, 20 tests (auth-flow 5 + repository 7 + dashboard 2 + life-vision 2 + plans 4). ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (45 routes, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
 | **Git status** | `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`). |
 | **Deployment status** | Not deployed. Firebase project **`mastery-personal-mgmt-system`** with a registered Web app; config in `.env.local`. Emulator Suite wired. Frontend target: Firebase App Hosting. |
@@ -662,6 +662,69 @@ scoped to the signed-in user — emulators). Suite: 30 files / 133 tests.
 - No reordering within a category; items sort by creation time.
 - Per-collection domain-value rules are deferred to Layer 20 (ADR-0013) — write shape is
   enforced by the Zod schemas in the repository, ownership + audit by the catch-all rule.
+
+---
+
+### Layer 8B — Five-Year & One-Year Plans — ✅ complete (2026-08-29) — committed + pushed
+
+A shared **plan** model + one reusable view parameterized by planning horizon. Layer 8C
+then just wires the three shorter tiers and their routes. See ADR-0014.
+
+**Created — `src/features/plans/`:**
+- `schema.ts` — `PLAN_HORIZONS` (five-year / one-year / quarter / month / week) +
+  `PLAN_HORIZON_META` (label, route, collection name, description); `PLAN_STATUSES`
+  (planned / active / complete / abandoned). One `planFieldsSchema` → `planSchema` (stored),
+  `planCreateSchema` (every field explicit, `.refine` date ordering, **no transforms**),
+  `planUpdateSchema` (`.partial()`). `planFormSchema` (string dates incl. `""`) +
+  `planInputFromForm(values, parentId)` (`"" → null`).
+- `repositories.ts` — `makePlanRepository(horizon)`; `PLAN_REPOSITORIES: Partial<Record<…>>`
+  wired for `five-year` / `one-year`; `getPlanRepository` throws for an unwired tier;
+  `listActivePlans(horizon)`.
+- `use-plans.ts` — `usePlans(horizon)`: load + `create` / `update` / `archive` + `reload`.
+- `components/` — `PlanForm` (RHF + zod; title, objective, desired outcomes & key measures
+  as one-per-line textareas via `Controller`, start/end date, status `Select`, progress
+  number, review notes, `PillarSelect`), `PlanDialog`, `PlanCard` (status badge, date
+  range, `Progress` bar, first outcomes, pillar badges, archive-confirm), `PlansView`.
+- `index.ts` barrel.
+
+**Created — shared:** `src/components/ui/progress.tsx` — hand-rolled `Progress`
+(`role="progressbar"`, clamped, no new dependency). Reused by 8C–8G and Layer 12.
+
+**Created — validation:** `isoDateSchema` (`YYYY-MM-DD`) in `src/lib/validation`.
+
+**Modified:** `src/app/(app)/plan/five-year/page.tsx` + `.../one-year/page.tsx` render
+`<PlansView horizon=… />`. `docs/DATA_MODEL.md` annotations; ADR-0014.
+
+**Tests added:** `src/features/plans/schema.test.ts` (create requires all fields, null vs
+empty date, date ordering, progress/enum bounds, list caps; `planFormSchema` +
+`planInputFromForm` mapping), `components/PlansView.test.tsx` (empty / card with
+progressbar + status / new-plan dialog opens / error + retry — `usePlans` mocked),
+`src/components/ui/progress.test.tsx`, `tests/integration/plans.test.ts` (tiers stay in
+separate collections, defaults + progress/status update + archive, user scoping,
+`getPlanRepository("quarter")` throws). Suite: 33 files / 149 tests.
+
+**Verification (all green):** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (33/149) ·
+`build` ✅ (45 routes) · `test:rules` ✅ (2/22) · `test:integration` ✅ (5/20) ·
+`format:check` ✅ · functions suite unchanged ✅.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Plan → Five-Year Plans**. Empty state → "Add your first plan".
+2. **New plan**: title, objective, a few outcomes/measures (one per line), start/end dates
+   (end before start → inline error), status, progress %, pillars → **Create plan**.
+   The card shows the status badge, date range, a progress bar, and pillar badges.
+3. Edit it (pencil) → change progress/status → **Save changes** (the bar updates).
+4. Archive it (trash → confirm) → gone; reload → still gone, others persist.
+5. **Plan → One-Year Plans** is the same screen against a different collection —
+   five-year and one-year plans don't mix.
+6. Firestore console → `users/{uid}/fiveYearPlans/{id}` and `users/{uid}/yearPlans/{id}`
+   with `horizon`, `planStatus`, `progress`, `pillarIds`, audit fields.
+
+**Known limitations:**
+- `parentId` is stored but always `null` — real parent linking (vision → 5yr → 1yr) is 8H.
+- Quarter / month / week tiers are not wired yet (their routes still show the placeholder);
+  8C adds three `PLAN_REPOSITORIES` entries + three route files.
+- `listActivePlans` filters archived client-side (same trade-off as 8A).
+- No inline reordering; cards sort by plan status then start date.
 
 ---
 

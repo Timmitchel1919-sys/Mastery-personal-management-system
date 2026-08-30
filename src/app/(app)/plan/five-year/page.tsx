@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { PlansView } from "@/features/plans";
 
-export const metadata = { title: "Five-Year Plans" };
+export const metadata: Metadata = { title: "Five-Year Plans" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Five-Year Plans"
-      description="Long-horizon plans with objectives, desired outcomes, and key measures."
-      plannedLayer={8}
-    />
-  );
+  return <PlansView horizon="five-year" />;
 }

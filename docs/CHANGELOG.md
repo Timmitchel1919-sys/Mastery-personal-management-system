@@ -6,6 +6,23 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 8B — Five-Year & One-Year Plans — 2026-08-29
+
+**Added**
+- `src/features/plans/` — one shared plan model (`planSchema` / `planCreateSchema` /
+  `planUpdateSchema` / `planFormSchema` + `planInputFromForm`), a `PlanRepository` per
+  tier collection (`PLAN_REPOSITORIES` wired for `five-year` / `one-year`), `usePlans(horizon)`,
+  and the UI (`PlansView`, `PlanForm`, `PlanDialog`, `PlanCard`).
+- `src/components/ui/progress.tsx` — hand-rolled `Progress` bar (no new dependency).
+- `isoDateSchema` (`YYYY-MM-DD`) in `src/lib/validation`.
+- `/plan/five-year` and `/plan/one-year` render the real feature.
+- Tests: plan schemas + `planInputFromForm`, `PlansView` (mocked hook), `Progress`, and a
+  plans emulator integration test.
+
+**Changed**
+- `docs/DATA_MODEL.md` annotations; ADR-0014 (one plan shape across five tier collections;
+  transform-free create schemas).
+
 ### Layer 8A — Life Vision — 2026-08-29
 
 **Added**

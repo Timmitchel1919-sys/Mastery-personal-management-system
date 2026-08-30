@@ -40,6 +40,7 @@ export {
   SelectValue,
 } from "./select";
 export { SegmentedControl, SegmentedControlItem } from "./segmented-control";
+export { Progress, type ProgressProps } from "./progress";
 export { Separator } from "./separator";
 export {
   Sheet,

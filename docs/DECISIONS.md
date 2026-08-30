@@ -262,3 +262,32 @@ each linked to one or more life pillars. `DATA_MODEL.md` has `users/{uid}/lifeVi
 **Consequences.** 8B–8G reuse the pillar components and the same feature shape
 (schema + repository + hook + view + dialog). Layer 20 gains a defined task: split the
 subcollection rules per collection with domain-value checks.
+
+---
+
+## ADR-0014 — One plan shape across five tier collections; transform-free create schemas
+**Date:** 2026-08-29 · **Status:** accepted · **Layer:** 8B (applies through 8C)
+
+**Context.** `DATA_MODEL.md` lists five planning-tier collections (`fiveYearPlans`,
+`yearPlans`, `quarterPlans`, `monthPlans`, `weekPlans`). Their fields are identical
+(objective, desired outcomes, key measures, dates, status, progress, review notes,
+pillars, parent link). Also: `createFirestoreRepository`'s config types `createSchema` as
+`ZodType<TCreate>` (output = input), so a create schema with Zod transforms/defaults does
+not type-check against it.
+
+**Decision.**
+- One `planFieldsSchema` → `planSchema` (stored, via `defineRecordSchema`),
+  `planCreateSchema` (`.refine` for date ordering, **no transforms, no defaults** — every
+  field explicit), `planUpdateSchema` (`.partial()`).
+- A separate `planFormSchema` holds the form's own shape (string dates incl. `""`); a pure
+  `planInputFromForm(values, parentId)` maps it to `PlanCreate` (`"" → null`) on submit.
+- `repositories.ts` builds a `PlanRepository` per tier from the shared schemas;
+  `PLAN_REPOSITORIES` is a `Partial<Record<PlanHorizon, …>>` — **8B wires `five-year` /
+  `one-year`; 8C adds `quarter` / `month` / `week`.** `getPlanRepository` throws for an
+  unwired tier. `PlansView` / `usePlans` are parameterized by `horizon`.
+- The plan's own lifecycle is `planStatus` (`planned`/`active`/`complete`/`abandoned`),
+  kept separate from the base record `status` (`active`/`archived`).
+
+**Consequences.** 8C is ~5 lines (3 repo entries + 3 route files reusing `PlansView`).
+Feature schemas across the app should keep `createSchema` transform-free and do any
+string→typed mapping in an explicit helper (pattern for later domains).
