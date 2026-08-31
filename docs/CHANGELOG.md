@@ -6,6 +6,22 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 9B — Deep Work — 2026-08-31
+
+**Added**
+- `src/features/deep-work/` — a logbook of focused sessions: `deepWorkSessionSchema` +
+  create/update/form + `deepWorkInputFromForm` (intended outcome, goal/project link,
+  start/end time, distraction log, energy & focus-quality ratings, completion notes,
+  status); `computeSessionScore` (pure, derived 0–100); `summarizeDeepWork` (pure stats);
+  `deepWorkRepository` (collection `focusSessions`) + `listRecentDeepWork`; `useDeepWork`;
+  UI (`DeepWorkView`, `DeepWorkForm`, `DeepWorkDialog`, `DeepWorkCard`, `DeepWorkStats`).
+- `/focus/deep-work` renders the real feature.
+- Tests: schema, score, stats unit tests, `DeepWorkView` (mocked hooks), and a deep-work
+  emulator integration test.
+
+**Changed**
+- `docs/DATA_MODEL.md` annotation for `focusSessions`.
+
 ### Layer 9A — Pomodoro — 2026-08-31 — opens the Focus domain
 
 **Added**

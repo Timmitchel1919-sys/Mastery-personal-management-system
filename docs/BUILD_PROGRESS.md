@@ -8,11 +8,11 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 9A — Pomodoro (complete, committed + pushed) |
-| **Next approved layer** | Layer 9B — Deep Work |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9A (committed + pushed) |
+| **Current layer** | Layer 9B — Deep Work (complete, committed + pushed) |
+| **Next approved layer** | Layer 9C — Calendar |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9A · 9B (committed + pushed) |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 47 files, 233 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 11 files, 32 tests (… + roadmaps 2 + cascade 2 + pomodoro 2). ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 51 files, 255 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 12 files, 34 tests (… + pomodoro 2 + deep-work 2). ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (45 routes, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
 | **Git status** | `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`). |
 | **Deployment status** | Not deployed. Firebase project **`mastery-personal-mgmt-system`** with a registered Web app; config in `.env.local`. Emulator Suite wired. Frontend target: Firebase App Hosting. |
@@ -1178,6 +1178,83 @@ newest-first; user scoping — emulators). Suite: 47 files / 233 tests.
 - Editing / deleting a past session is not offered; `notes` is stored but not yet editable.
 - Changing the interval lengths mid-session is not possible — end the session and start a
   new one.
+
+### Layer 9B — Deep Work — ✅ complete (2026-08-31) — committed + pushed
+
+A logbook of focused sessions in `users/{uid}/focusSessions` — intended outcome, goal /
+project link, start / end time, a distraction log, energy and focus-quality ratings (1–5),
+completion notes, and a **derived** session score.
+
+**Created — `src/features/deep-work/`:**
+- `schema.ts` — `DEEP_WORK_STATUSES` (planned / in-progress / completed / abandoned).
+  `deepWorkSessionSchema` (base record + `title`, `intendedOutcome`, `goalId`, `projectId`,
+  `plannedMinutes`, `startedAt`/`endedAt`, `actualMinutes`, `energyLevel`, `focusQuality`,
+  `distractions: string[]`, `completionNotes`, `sessionStatus`). `deepWorkCreateSchema`
+  (`.refine` end ≥ start, transform-free), `deepWorkUpdateSchema` (`.partial()`),
+  `deepWorkFormSchema` (datetime-local strings) + `deepWorkInputFromForm` — which fills
+  `actualMinutes` from start/end when it is left at 0. `startedAt`/`endedAt` are kept as
+  verbatim `YYYY-MM-DDTHH:mm` wall-clock strings (no timezone model until Layer 9C).
+- `deep-work-score.ts` — `computeSessionScore` (pure, 0–100 from focus quality, energy,
+  planned-vs-actual adherence, and distraction count; `null` until completed; never
+  stored).
+- `deep-work-stats.ts` — `summarizeDeepWork` (pure: sessions / completed / focus minutes /
+  distractions / avg score / avg focus quality / last-7-days minutes).
+- `deep-work-repository.ts` — `deepWorkRepository` (collection `focusSessions`) + bounded
+  `listRecentDeepWork(limit=30)` (`createdAt desc`, archived filtered client-side).
+- `use-deep-work.ts` — `useDeepWork()`: load + create / update / archive + reload +
+  memoized stats.
+- `components/` — `DeepWorkForm` (RHF + zod; title, outcome, goal/project Selects, planned/
+  actual minutes, status, start/end `datetime-local`, energy & focus 1–5 Selects,
+  distraction-log textarea, completion notes), `DeepWorkDialog`, `DeepWorkCard` (status +
+  score badges, minute totals, energy/focus/distraction/link/time row, notes),
+  `DeepWorkStats` tiles, `DeepWorkView` (stats + card grid, sorted newest-first by the
+  repo).
+- `index.ts` barrel.
+
+**Modified:** `src/app/(app)/focus/deep-work/page.tsx` renders `<DeepWorkView />` (was a
+placeholder). `docs/DATA_MODEL.md` annotation. (Nav item `/focus/deep-work` already
+existed.) Reuses `useGoalOptions` / `useProjectOptions`.
+
+**Tests added:** `schema.test.ts` (core fields, rating/minute bounds, end ≥ start, null
+timestamps, 50-entry distraction cap, form → input incl. derived actual minutes),
+`deep-work-score.test.ts` (null until completed; 100 for a perfect session; drops with poor
+inputs; over-running the plan is not a bonus), `deep-work-stats.test.ts` (empty; completed
+only counts toward focus time / averages; 7-day window),
+`components/DeepWorkView.test.tsx` (empty / card with status·score·ratings·link / new-session
+dialog / error + retry — `useDeepWork` + option hooks mocked),
+`tests/integration/deep-work.test.ts` (session linked to a goal; create → list → update →
+archive; user scoping — emulators). Suite: 51 files / 255 tests.
+
+**Verification (all green):** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (51/255) ·
+`build` ✅ (46 routes; `/focus/deep-work` real) · `test:integration` ✅ (12 files / 34
+tests) · `format:check` ✅ · `test:rules` not run (rules untouched) · functions suite
+unchanged ✅.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Focus → Deep Work**. Empty state → "Log your first session".
+2. **New session**: title, intended outcome, optionally a goal / project, planned minutes,
+   set Status to **Completed**, pick a start and end time, leave **Actual (min)** at 0,
+   pick energy and focus quality, add a couple of distraction lines, completion notes →
+   **Log session**. The card shows a status badge, a **Score N** badge, "85/90 min" style
+   totals, energy/focus, the distraction count, the linked title, and the start time; the
+   stat tiles update.
+3. Edit → change the ratings or status → **Save changes** (score recomputes).
+4. Archive (trash → confirm) → gone; reload persists.
+5. Firestore console → `users/{uid}/focusSessions/{id}` with `sessionStatus`,
+   `distractions`, `energyLevel`/`focusQuality`, `startedAt`/`endedAt`, audit fields.
+
+**Known limitations:**
+- No live timer — Deep Work is a *log* you fill in; the running-timer experience is
+  Pomodoro's (Layer 9A). "Actual (min)" auto-fills from start/end only when left at 0.
+- `startedAt`/`endedAt` carry no timezone (`YYYY-MM-DDTHH:mm` wall-clock) — the calendar
+  layer (9C) introduces the timezone model; existing values are treated as local.
+- The session score is a fixed heuristic, not user-tunable, and is recomputed on every
+  render rather than stored (so historical scores shift if the formula changes).
+- `distractions` is a plain line list with no timestamps — it is not a live "log as you
+  go" during a session.
+- `listRecentDeepWork` fetches the 30 newest and filters archived client-side; stats are
+  over that window only.
+- `task` linkage from the spec is deferred to Layer 10; goal / project linkage is wired.
 
 ---
 

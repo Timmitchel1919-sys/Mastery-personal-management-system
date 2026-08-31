@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { DeepWorkView } from "@/features/deep-work";
 
-export const metadata = { title: "Deep Work" };
+export const metadata: Metadata = { title: "Deep Work" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Deep Work"
-      description="Focused work sessions with intended outcomes and a distraction log."
-      plannedLayer={9}
-    />
-  );
+  return <DeepWorkView />;
 }
