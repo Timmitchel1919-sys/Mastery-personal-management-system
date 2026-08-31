@@ -6,8 +6,10 @@ import { BreadcrumbTrail, PageContainer, PageHeader } from "@/components/layout"
 import { EmptyState, ErrorState } from "@/components/shared";
 import { Button, Skeleton } from "@/components/ui";
 import { usePlans } from "../use-plans";
+import { usePlanTierOptions } from "../use-plan-tier-options";
 import {
   PLAN_HORIZON_META,
+  PLAN_PARENT_HORIZON,
   PLAN_STATUSES,
   planInputFromForm,
   type Plan,
@@ -21,6 +23,7 @@ const STATUS_ORDER = new Map(PLAN_STATUSES.map((status, index) => [status, index
 export function PlansView({ horizon }: { horizon: PlanHorizon }) {
   const meta = PLAN_HORIZON_META[horizon];
   const { status, items, error, reload, create, update, archive } = usePlans(horizon);
+  const { options: parentOptions } = usePlanTierOptions(PLAN_PARENT_HORIZON[horizon]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Plan | null>(null);
 
@@ -99,8 +102,9 @@ export function PlansView({ horizon }: { horizon: PlanHorizon }) {
         onOpenChange={setDialogOpen}
         horizon={horizon}
         plan={editing}
+        parentOptions={parentOptions}
         onSubmit={async (values) => {
-          const input = planInputFromForm(values, editing?.parentId ?? null);
+          const input = planInputFromForm(values);
           if (editing) await update(editing.id, input);
           else await create(input);
         }}

@@ -19,12 +19,17 @@ import {
 import { PillarSelect } from "@/components/shared";
 import { normalizeError } from "@/lib/errors";
 import {
+  PLAN_HORIZON_META,
   PLAN_STATUS_LABEL,
   PLAN_STATUSES,
   planFormSchema,
   type PlanFormValues,
   type PlanHorizon,
 } from "../schema";
+import type { PlanOption } from "../repositories";
+
+// Radix Select items cannot use an empty-string value.
+const NO_PARENT = "__none__";
 
 function linesToArray(text: string): string[] {
   return text
@@ -36,6 +41,10 @@ function linesToArray(text: string): string[] {
 
 export interface PlanFormProps {
   horizon: PlanHorizon;
+  /** Tier one step up, or `null` for five-year plans (the top of the cascade). */
+  parentHorizon: PlanHorizon | null;
+  /** Active plans of `parentHorizon`, for the parent-plan picker. */
+  parentOptions: PlanOption[];
   defaultValues?: Partial<PlanFormValues>;
   submitLabel: string;
   onSubmit: (values: PlanFormValues) => Promise<void>;
@@ -44,6 +53,8 @@ export interface PlanFormProps {
 
 export function PlanForm({
   horizon,
+  parentHorizon,
+  parentOptions,
   defaultValues,
   submitLabel,
   onSubmit,
@@ -69,6 +80,7 @@ export function PlanForm({
       progress: defaultValues?.progress ?? 0,
       reviewNotes: defaultValues?.reviewNotes ?? "",
       pillarIds: defaultValues?.pillarIds ?? [],
+      parentId: defaultValues?.parentId ?? "",
     },
   });
 
@@ -94,6 +106,37 @@ export function PlanForm({
       <FormField label="Title" error={errors.title?.message}>
         <Input placeholder="A short name for this plan" {...register("title")} />
       </FormField>
+
+      {parentHorizon ? (
+        <Controller
+          control={control}
+          name="parentId"
+          render={({ field }) => (
+            <FormField
+              label={`Parent ${PLAN_HORIZON_META[parentHorizon].label.replace(/s$/, "")}`}
+              htmlFor="plan-parent"
+              error={errors.parentId?.message}
+            >
+              <Select
+                value={field.value || NO_PARENT}
+                onValueChange={(next) => field.onChange(next === NO_PARENT ? "" : next)}
+              >
+                <SelectTrigger id="plan-parent">
+                  <SelectValue placeholder="None" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NO_PARENT}>None</SelectItem>
+                  {parentOptions.map((option) => (
+                    <SelectItem key={option.id} value={option.id}>
+                      {option.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormField>
+          )}
+        />
+      ) : null}
 
       <FormField label="Objective" error={errors.objective?.message}>
         <Textarea

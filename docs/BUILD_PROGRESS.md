@@ -8,11 +8,11 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 8G — Roadmaps (complete, committed + pushed) |
-| **Next approved layer** | Layer 8H — Planning Cascade |
-| **Completed layers** | Layers 0–7 · Layer 8A · 8B · 8C · 8D · 8E · 8F · 8G (committed + pushed) |
+| **Current layer** | Layer 8H — Planning Cascade (complete, committed + pushed) — **Plan domain (Layer 8) done** |
+| **Next approved layer** | Layer 9A — Pomodoro (Focus domain) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) complete (committed + pushed) |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 41 files, 201 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 9 files, 28 tests (auth-flow 5 + repository 7 + dashboard 2 + life-vision 2 + plans 4 + goals 2 + projects 2 + milestones 2 + roadmaps 2). ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 43 files, 210 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 10 files, 30 tests (auth-flow 5 + repository 7 + dashboard 2 + life-vision 2 + plans 4 + goals 2 + projects 2 + milestones 2 + roadmaps 2 + cascade 2). ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (45 routes, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
 | **Git status** | `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`). |
 | **Deployment status** | Not deployed. Firebase project **`mastery-personal-mgmt-system`** with a registered Web app; config in `.env.local`. Emulator Suite wired. Frontend target: Firebase App Hosting. |
@@ -1018,6 +1018,86 @@ archive; user scoping — emulators). Suite: 41 files / 201 tests.
   only *active* goals / projects, so a link to an archived one shows no chip.
 - `listActiveRoadmaps` filters archived client-side (same trade-off as 8A–8F).
 - No Gantt / calendar visualisation yet — the card shows a simple vertical phase list.
+
+### Layer 8H — Planning Cascade — ✅ complete (2026-08-31) — committed + pushed — **closes the Plan domain**
+
+Two parts: (1) **wire `plan.parentId`** so planning tiers actually link up the cascade, and
+(2) a **read-only cascade view** at `/plan/cascade` that walks every plan-domain
+parent-child id reference into one tree, with a "not yet linked" panel for records that
+have no parent. Nothing here auto-creates records (spec §8H).
+
+**Part 1 — plan-tier parent link (`src/features/plans/`):**
+- `schema.ts` — `PLAN_PARENT_HORIZON: Record<PlanHorizon, PlanHorizon | null>`
+  (five-year → null, one-year → five-year, quarter → one-year, month → quarter,
+  week → month). `planFormSchema` gains `parentId: z.string()`; `planInputFromForm(values)`
+  now reads `values.parentId || null` (the old 2-arg form is gone — only `PlansView` called
+  it).
+- `use-plan-tier-options.ts` — `usePlanTierOptions(horizon | null)` loads one tier's active
+  plans as `PlanOption[]` (empty for a `null` tier).
+- `PlanForm` / `PlanDialog` — render a **Parent {tier}** Select (with a "None" sentinel)
+  for every tier except five-year; `PlansView` feeds it from `usePlanTierOptions` and drops
+  the old `editing?.parentId` plumbing.
+
+**Part 2 — cascade view (`src/features/cascade/`):**
+- `build-cascade.ts` — **pure** `buildCascade(input)` → `{ roots, unlinked, counts }`.
+  Node kinds `plan | goal | project | milestone | roadmap`. Nests child plans under
+  `parentId`, goals under `parentPlanId`, projects under `goalId`, milestones under their
+  `parentType`/`parentId` goal or project, roadmaps under `linkedGoalId` (preferred) or
+  `linkedProjectId`. A link that points at a missing/inactive record → `danglingParent:
+  true` and the record still surfaces (as a root for plans, in the unlinked list
+  otherwise). `counts` = total / linked / unlinked / per-kind.
+- `use-cascade.ts` — `useCascade()` loads all five plan tiers + goals + projects +
+  milestones + roadmaps via their existing `listActive*` helpers in parallel, memoizes
+  `buildCascade`.
+- `components/` — `CascadeNodeRow` (recursive, native `<details>` disclosure, kind badge +
+  `next/link` to the record's screen + status + "parent link broken" flag), `CascadeView`
+  (counts card, the tree, the "not yet linked" grouped panel, loading / empty / error).
+- `index.ts` barrel.
+
+**Modified:** `src/config/navigation.ts` — new **Planning Cascade** item (`/plan/cascade`,
+`Workflow` icon). `src/app/(app)/plan/cascade/page.tsx` renders `<CascadeView />` (new
+route). `src/features/plans/index.ts` exports `PLAN_PARENT_HORIZON` + `usePlanTierOptions`.
+`docs/DATA_MODEL.md` §4. `src/features/plans/schema.test.ts` +
+`components/PlansView.test.tsx` updated for the `parentId` form field / new hook.
+
+**Tests added:** `src/features/cascade/build-cascade.test.ts` (full chain nesting; unlinked
+grouping + counts; dangling plan parent; dangling project parent still listed; roadmap
+prefers goal over project), `components/CascadeView.test.tsx` (empty / tree + counts +
+unlinked panel with working record links / error + retry — `useCascade` mocked),
+`tests/integration/cascade.test.ts` (five-year → one-year → goal → project → milestone plus
+a goal-linked roadmap, built from `listActive*`; an orphan goal lands in `unlinked`; user
+scoping — emulators). Suite: 43 files / 210 tests.
+
+**Verification (all green):** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (43/210) ·
+`build` ✅ (46 routes; `/plan/cascade` real) · `test:integration` ✅ (10 files / 30 tests) ·
+`format:check` ✅ · `test:rules` not run (rules untouched) · functions suite unchanged ✅.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Plan → One-Year Plans**. Create or edit a one-year plan and
+   pick a **Parent Five-Year** plan (needs a five-year plan to exist). Repeat down the tiers
+   (quarter → one-year, month → quarter, week → month).
+2. Give a Goal a **parent plan** (8D), a Project a **goal** (8E), a Milestone a goal /
+   project (8F), a Roadmap a linked goal / project (8G).
+3. **Plan → Planning Cascade**. The tree shows five-year plans at the top with everything
+   nested beneath; each row links to that record's screen; the counts card shows total /
+   linked / not-yet-linked.
+4. Remove a parent link (set it back to "None") → the record moves to the **Not yet linked**
+   panel on reload.
+5. Point a record at a record you then archive → it shows "parent link broken" and sits in
+   the unlinked panel (plans stay as roots with the flag).
+
+**Known limitations:**
+- Read-only — no drag-to-reparent, no "create child" action from the tree, no bulk linking.
+  Re-parenting is done on each record's own screen.
+- Loads every active plan-domain record on each visit (bounded to 100 per collection, 9
+  parallel reads) and rebuilds the tree client-side; no server aggregation, no caching
+  between visits, no realtime.
+- The cascade stops at the plan domain — Vision items (8A) are not yet cascade parents, and
+  Day / Task (Layer 10) are out of scope until that domain exists.
+- "Active only": a record linked to an *archived* parent shows "parent link broken" exactly
+  like a deleted one — the two cases aren't distinguished.
+- A single milestone/project/roadmap appears once, under its nearest resolved parent; it is
+  not also shown under its grandparents as a flattened breadcrumb.
 
 ---
 

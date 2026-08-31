@@ -11,6 +11,9 @@ let hookValue: Record<string, unknown>;
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/plan/five-year" }));
 vi.mock("../use-plans", () => ({ usePlans: () => hookValue }));
+vi.mock("../use-plan-tier-options", () => ({
+  usePlanTierOptions: () => ({ options: [], loading: false }),
+}));
 
 import { PlansView } from "./PlansView";
 

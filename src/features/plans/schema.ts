@@ -53,6 +53,18 @@ export const PLAN_HORIZON_META: Record<PlanHorizon, PlanHorizonMeta> = {
   },
 };
 
+/**
+ * The tier a plan's cascade parent lives in (Layer 8H). Five-year plans sit at the top,
+ * so they have no parent tier. Each shorter tier links up to the one above it.
+ */
+export const PLAN_PARENT_HORIZON: Record<PlanHorizon, PlanHorizon | null> = {
+  "five-year": null,
+  "one-year": "five-year",
+  quarter: "one-year",
+  month: "quarter",
+  week: "month",
+};
+
 export const PLAN_STATUSES = ["planned", "active", "complete", "abandoned"] as const;
 export const planStatusSchema = z.enum(PLAN_STATUSES);
 export type PlanStatus = (typeof PLAN_STATUSES)[number];
@@ -116,6 +128,8 @@ export const planFormSchema = z
     progress: z.number().int().min(0).max(100),
     reviewNotes: z.string().trim().max(4000),
     pillarIds: lifePillarsSchema,
+    /** Empty string = no parent; otherwise the id of a plan one tier up (Layer 8H). */
+    parentId: z.string(),
   })
   .refine((data) => !data.startDate || !data.endDate || data.startDate <= data.endDate, {
     path: ["endDate"],
@@ -123,10 +137,7 @@ export const planFormSchema = z
   });
 export type PlanFormValues = z.infer<typeof planFormSchema>;
 
-export function planInputFromForm(
-  values: PlanFormValues,
-  parentId: string | null = null,
-): PlanCreate {
+export function planInputFromForm(values: PlanFormValues): PlanCreate {
   return {
     horizon: values.horizon,
     title: values.title,
@@ -139,6 +150,6 @@ export function planInputFromForm(
     progress: values.progress,
     reviewNotes: values.reviewNotes,
     pillarIds: values.pillarIds,
-    parentId,
+    parentId: values.parentId || null,
   };
 }

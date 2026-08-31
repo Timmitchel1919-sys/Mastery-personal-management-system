@@ -1,6 +1,7 @@
 export {
   PLAN_HORIZONS,
   PLAN_HORIZON_META,
+  PLAN_PARENT_HORIZON,
   PLAN_STATUSES,
   PLAN_STATUS_LABEL,
   planHorizonSchema,
@@ -27,4 +28,5 @@ export {
 } from "./repositories";
 export { usePlans } from "./use-plans";
 export { usePlanOptions } from "./use-plan-options";
+export { usePlanTierOptions } from "./use-plan-tier-options";
 export { PlansView } from "./components/PlansView";

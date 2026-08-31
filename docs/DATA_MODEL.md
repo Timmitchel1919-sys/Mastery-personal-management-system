@@ -117,13 +117,18 @@ a normalized `AppError` on a bad document; `toFirestore` strips `id` and refresh
 Cross-entity links are stored as id references plus a denormalized label where useful for
 lists:
 
-- `goal.parentPlanId`, `project.goalId`, `milestone.goalId | milestone.projectId`,
+- `plan.parentId` (a plan one tier up — five-year ← one-year ← quarter ← month ← week;
+  wired in the plan form in Layer 8H), `goal.parentPlanId`, `project.goalId`,
+  `milestone.parentType + milestone.parentId` (goal | project | none),
+  `roadmap.linkedGoalId | roadmap.linkedProjectId`,
   `task.goalId | projectId | milestoneId | parentTaskId`, `habit.goalId`, `kpi.goalId`,
   `event.goalId | projectId | taskId | timeBlockId`, `journalEntry.goalId`, etc.
 - Each record also carries `pillarIds: string[]` (one or more of `spiritual` / `personal`
   / `societal`).
-- The planning cascade (Layer 8H) walks these references to show a task's chain up to its
-  originating vision. Missing links are allowed; the chain simply stops.
+- The planning cascade (Layer 8H) walks these references to show each record's chain up to
+  its originating plan. Missing links are allowed; the chain simply stops and the record is
+  listed under "not yet linked". `src/features/cascade/build-cascade.ts` is the pure
+  builder; it is a **read-only derived view** — it never creates or mutates records.
 
 ## 5. Indexing approach
 

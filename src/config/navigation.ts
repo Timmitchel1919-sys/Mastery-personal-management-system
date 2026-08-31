@@ -29,6 +29,7 @@ import {
   Target,
   Timer,
   TrendingUp,
+  Workflow,
   Zap,
   type LucideIcon,
 } from "lucide-react";
@@ -86,6 +87,13 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Projects", href: "/plan/projects", icon: FolderKanban, plannedLayer: 8 },
       { label: "Milestones", href: "/plan/milestones", icon: Milestone, plannedLayer: 8 },
       { label: "Roadmaps", href: "/plan/roadmaps", icon: Route, plannedLayer: 8 },
+      {
+        label: "Planning Cascade",
+        href: "/plan/cascade",
+        icon: Workflow,
+        description: "Trace every record up to your vision",
+        plannedLayer: 8,
+      },
     ],
   },
   {

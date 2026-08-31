@@ -86,6 +86,7 @@ describe("planFormSchema + planInputFromForm", () => {
     progress: 0,
     reviewNotes: "",
     pillarIds: ["personal"],
+    parentId: "",
   };
 
   it("allows empty date strings but still checks ordering", () => {
@@ -96,12 +97,16 @@ describe("planFormSchema + planInputFromForm", () => {
     ).toBe(false);
   });
 
-  it("maps form values to a repository input, empty dates → null", () => {
-    const input = planInputFromForm(formValues, "vision-1");
+  it("maps form values to a repository input, empty dates → null, blank parent → null", () => {
+    const input = planInputFromForm(formValues);
     expect(input.startDate).toBeNull();
     expect(input.endDate).toBeNull();
-    expect(input.parentId).toBe("vision-1");
+    expect(input.parentId).toBeNull();
     expect(planCreateSchema.safeParse(input).success).toBe(true);
+  });
+
+  it("keeps a chosen parent id", () => {
+    expect(planInputFromForm({ ...formValues, parentId: "plan-1" }).parentId).toBe("plan-1");
   });
 });
 

@@ -6,6 +6,24 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 8H — Planning Cascade — 2026-08-31 — closes the Plan domain
+
+**Added**
+- `src/features/cascade/` — `buildCascade()` (pure, read-only) walks `plan.parentId`,
+  `goal.parentPlanId`, `project.goalId`, `milestone.parentType/parentId`,
+  `roadmap.linkedGoalId/linkedProjectId` into one tree with a "not yet linked" list and
+  per-kind counts; `useCascade()` (loads all plan-domain `listActive*` in parallel) and the
+  UI (`CascadeView`, recursive `CascadeNodeRow`).
+- `/plan/cascade` route + **Planning Cascade** nav item.
+- `PLAN_PARENT_HORIZON` map and `usePlanTierOptions()` in `src/features/plans/`.
+- Tests: `buildCascade` unit tests, `CascadeView` (mocked hook), and a cascade emulator
+  integration test.
+
+**Changed**
+- Plan form now has a **Parent {tier}** picker; `planFormSchema` gains `parentId` and
+  `planInputFromForm` reads it (2-arg signature removed).
+- `docs/DATA_MODEL.md` §4 linkage list.
+
 ### Layer 8G — Roadmaps — 2026-08-31
 
 **Added**
