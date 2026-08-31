@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { PomodoroView } from "@/features/pomodoro";
 
-export const metadata = { title: "Pomodoro" };
+export const metadata: Metadata = { title: "Pomodoro" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Pomodoro"
-      description="Configurable focus cycles with persistent session state."
-      plannedLayer={9}
-    />
-  );
+  return <PomodoroView />;
 }

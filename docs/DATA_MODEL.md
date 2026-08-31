@@ -30,7 +30,7 @@ users/{uid}/roadmaps/{roadmapId}             timeline plan, kind + embedded phas
 users/{uid}/events/{eventId}                   calendar events
 users/{uid}/timeBlocks/{timeBlockId}
 users/{uid}/focusSessions/{sessionId}          deep work
-users/{uid}/pomodoroSessions/{sessionId}
+users/{uid}/pomodoroSessions/{sessionId}       terminal focus sessions (completed|abandoned), goal/project link (Layer 9A)
 
 # Act
 users/{uid}/tasks/{taskId}

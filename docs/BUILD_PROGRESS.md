@@ -8,11 +8,11 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 8H — Planning Cascade (complete, committed + pushed) — **Plan domain (Layer 8) done** |
-| **Next approved layer** | Layer 9A — Pomodoro (Focus domain) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) complete (committed + pushed) |
+| **Current layer** | Layer 9A — Pomodoro (complete, committed + pushed) |
+| **Next approved layer** | Layer 9B — Deep Work |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9A (committed + pushed) |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 43 files, 210 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 10 files, 30 tests (auth-flow 5 + repository 7 + dashboard 2 + life-vision 2 + plans 4 + goals 2 + projects 2 + milestones 2 + roadmaps 2 + cascade 2). ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 47 files, 233 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 11 files, 32 tests (… + roadmaps 2 + cascade 2 + pomodoro 2). ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (45 routes, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
 | **Git status** | `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`). |
 | **Deployment status** | Not deployed. Firebase project **`mastery-personal-mgmt-system`** with a registered Web app; config in `.env.local`. Emulator Suite wired. Frontend target: Firebase App Hosting. |
@@ -1098,6 +1098,86 @@ scoping — emulators). Suite: 43 files / 210 tests.
   like a deleted one — the two cases aren't distinguished.
 - A single milestone/project/roadmap appears once, under its nearest resolved parent; it is
   not also shown under its grandparents as a flattened breadcrumb.
+
+### Layer 9A — Pomodoro — ✅ complete (2026-08-31) — committed + pushed — opens the Focus domain
+
+Configurable focus/short-break/long-break cycles with a **persistent** live timer that
+survives reload and navigation, plus a Firestore log of terminal sessions and headline
+focus statistics.
+
+**Live state (`src/features/pomodoro/pomodoro-store.ts`):** an external store for
+`useSyncExternalStore`. Remaining time is always derived from a wall-clock `phaseEndsAt`
+timestamp, so the countdown stays correct across tab-throttling, sleep, reload, and
+navigation. The serialisable slice is mirrored to `localStorage` (`mastery.pomodoro.v1`,
+validated on read via `pomodoroLiveStateSchema`) on every change and reacts to cross-tab
+`storage` events. `createPomodoroStore({ storage, now })` factory for tests; a
+`pomodoroStore` singleton for the app. A terminal session (target reached → `completed`, or
+`End` → `abandoned`) surfaces as `pendingCompletion` for the hook to persist; a work phase
+in progress is credited pro-rata.
+
+**Persisted model (`schema.ts`):** `pomodoroSessionSchema` = base record +
+`{ label, goalId, projectId, outcome (completed|abandoned), workMinutes, shortBreakMinutes,
+longBreakMinutes, plannedCycles, completedWorkIntervals, focusMinutes, startedAt, endedAt,
+notes }`. Transform-free `pomodoroSessionCreateSchema`. Only terminal sessions are written —
+never a per-tick document. `pomodoroConfigSchema` validates the setup form.
+
+**Created — `src/features/pomodoro/`:** `pomodoro-store.ts`, `schema.ts`,
+`pomodoro-stats.ts` (`summarizeSessions` — pure: sessions / completed / abandoned / focus
+minutes / intervals / average / today), `pomodoro-session-repository.ts`
+(`pomodoroSessionRepository` + bounded `listRecentSessions(limit=20)`, `createdAt desc`),
+`use-pomodoro.ts` (`useSyncExternalStore` + a single 1 s `tick` interval + a
+completion-persist effect gated on auth), `use-pomodoro-history.ts` (fetch-in-effect +
+`summarizeSessions`), `components/` (`PomodoroTimer` with an idle **setup form**
+— label + goal/project Selects + interval/break/cycle inputs via RHF + zod — and a running
+view with phase label, mm:ss, progress bar, cycle dots, Pause/Resume/Skip/End;
+`PomodoroStats` tiles; `PomodoroHistoryList`; `PomodoroView`), `index.ts`.
+
+**Modified:** `src/app/(app)/focus/pomodoro/page.tsx` renders `<PomodoroView />` (was a
+placeholder). `docs/DATA_MODEL.md` annotation. (Nav item `/focus/pomodoro` already existed.)
+
+**Tests added:** `pomodoro-store.test.ts` (start → work; work→short-break→work with full
+focus credit; completion after the planned intervals; long break every 4th; pause freezes /
+resume continues; skip credits a partial interval; End → abandoned with pro-rata focus;
+restore a running session in a second store instance; ignore a corrupt blob — fake storage +
+controllable clock), `schema.test.ts` (config bounds, live-state blob, session create),
+`pomodoro-stats.test.ts` (empty + aggregation incl. today), `components/PomodoroView.test.tsx`
+(idle setup + start / running timer + pause / history rows / history error + retry — hooks
+mocked), `tests/integration/pomodoro.test.ts` (create two sessions → `listRecentSessions`
+newest-first; user scoping — emulators). Suite: 47 files / 233 tests.
+
+**Verification (all green):** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (47/233) ·
+`build` ✅ (46 routes; `/focus/pomodoro` real) · `test:integration` ✅ (11 files / 32 tests)
+· `format:check` ✅ · `test:rules` not run (rules untouched) · functions suite unchanged ✅.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Focus → Pomodoro**. Set a label, optionally pick a goal /
+   project, adjust the minutes (e.g. Focus 1, Short 1, Intervals 2 for a fast check) →
+   **Start focus session**.
+2. Watch the countdown. **Reload the page** mid-interval → the timer is still running at the
+   right time. Navigate away and back → same.
+3. **Pause** → the clock freezes even as real time passes; **Resume** → it continues from
+   where it stopped. **Skip** jumps to the next phase.
+4. Let it run to the end of the planned intervals (or hit **End**) → a row appears under
+   **Recent sessions** and the stat tiles update. `End` mid-focus records "Ended early" with
+   partial focus minutes.
+5. Firestore console → `users/{uid}/pomodoroSessions/{id}` with `outcome`,
+   `completedWorkIntervals`, `focusMinutes`, `startedAt`/`endedAt`, audit fields. Confirm
+   there is **one** document per finished session, not one per tick.
+6. Open a second tab on the same page → starting/pausing in one reflects in the other.
+
+**Known limitations:**
+- The live timer lives only in this browser's `localStorage` — it does **not** sync across
+  devices, and clearing site data loses an in-progress session (no terminal record is
+  written for one that never ends).
+- No desktop notification / sound when a phase ends (Layer 17 territory); the phase only
+  changes when the tab runs its 1 s tick or is re-focused.
+- `task` linkage from the spec is deferred to Layer 10 (tasks do not exist yet); goal /
+  project linkage is wired now.
+- Stats are computed over the most recent 20 sessions only — "Focus today" undercounts if
+  you did more than 20 sessions since midnight.
+- Editing / deleting a past session is not offered; `notes` is stored but not yet editable.
+- Changing the interval lengths mid-session is not possible — end the session and start a
+  new one.
 
 ---
 

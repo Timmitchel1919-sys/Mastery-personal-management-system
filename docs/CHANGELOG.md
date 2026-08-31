@@ -6,6 +6,24 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 9A — Pomodoro — 2026-08-31 — opens the Focus domain
+
+**Added**
+- `src/features/pomodoro/` — a persistent pomodoro timer: `pomodoro-store.ts` (external
+  store for `useSyncExternalStore`, wall-clock countdown, `localStorage` mirror, cross-tab
+  sync, `createPomodoroStore` factory); `pomodoroSessionSchema` + create/update +
+  `pomodoroConfigSchema` + `pomodoroLiveStateSchema`; `pomodoroSessionRepository` +
+  `listRecentSessions`; `summarizeSessions` (pure stats); `usePomodoro`,
+  `usePomodoroHistory`; UI (`PomodoroView`, `PomodoroTimer` with a setup form,
+  `PomodoroStats`, `PomodoroHistoryList`).
+- `/focus/pomodoro` renders the real feature. Only a terminal session (completed / ended
+  early) is written to Firestore — never a per-tick document.
+- Tests: store state-machine unit tests, schema + stats unit tests, `PomodoroView`
+  (mocked hooks), and a pomodoro emulator integration test.
+
+**Changed**
+- `docs/DATA_MODEL.md` annotation for `pomodoroSessions`.
+
 ### Layer 8H — Planning Cascade — 2026-08-31 — closes the Plan domain
 
 **Added**
