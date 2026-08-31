@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { CalendarView } from "@/features/calendar";
 
-export const metadata = { title: "Calendar" };
+export const metadata: Metadata = { title: "Calendar" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Calendar"
-      description="Internal calendar with day, week, and month views."
-      plannedLayer={9}
-    />
-  );
+  return <CalendarView />;
 }

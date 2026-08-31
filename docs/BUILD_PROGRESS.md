@@ -8,11 +8,11 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 9B — Deep Work (complete, committed + pushed) |
-| **Next approved layer** | Layer 9C — Calendar |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9A · 9B (committed + pushed) |
+| **Current layer** | Layer 9C — Calendar (complete, committed + pushed) |
+| **Next approved layer** | Layer 9D — Time Blocking |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9A · 9B · 9C (committed + pushed) |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 51 files, 255 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 12 files, 34 tests (… + pomodoro 2 + deep-work 2). ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 56 files, 298 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 13 files, 36 tests (… + deep-work 2 + calendar 2). ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (45 routes, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
 | **Git status** | `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`). |
 | **Deployment status** | Not deployed. Firebase project **`mastery-personal-mgmt-system`** with a registered Web app; config in `.env.local`. Emulator Suite wired. Frontend target: Firebase App Hosting. |
@@ -1255,6 +1255,98 @@ unchanged ✅.
 - `listRecentDeepWork` fetches the 30 newest and filters archived client-side; stats are
   over that window only.
 - `task` linkage from the spec is deferred to Layer 10; goal / project linkage is wired.
+
+### Layer 9C — Calendar — ✅ complete (2026-08-31) — committed + pushed
+
+An internal functional calendar over `users/{uid}/events` with day / week / month views,
+recurring events, all-day events, reminders, goal / project links, and a proper timezone
+model — built behind a provider adapter so external sync can slot in later.
+
+**Timezone model (`zoned-time.ts`):** `Intl`-based, no dependency. Timed events store an ISO
+instant **with an explicit offset** (`2026-09-01T14:00:00+02:00`) plus the IANA `timeZone`
+they were entered in. `wallTimeToIso` / `isoToWall` / `wallTimeToInstant` / `instantToWall`
+/ `zoneOffsetMinutes` convert between a `YYYY-MM-DDTHH:mm` wall clock and instants,
+DST-aware (verified against `America/New_York`, `Asia/Tokyo`, `Europe/Amsterdam`). This is
+the layer that introduces the model — Deep Work's naked wall-clock strings (9B) can adopt
+it later.
+
+**Recurrence (`recurrence.ts`, pure):** `expandEvents(events, rangeStart, rangeEnd)` →
+`EventOccurrence[]`. Supports daily / weekly / monthly / yearly with an `interval`, weekly
+`weekdays`, and a `count` **or** `until` end. Stepping is done on the wall-clock date in the
+event's own zone (so "09:00 daily" stays 09:00 across DST); monthly / yearly skip dates that
+don't exist (Jan 31 → no Feb 31); occurrences are clipped to the requested window; bounded
+by `MAX_OCCURRENCES` / `MAX_STEPS`.
+
+**Grid helpers (`calendar-range.ts`, pure):** `monthMatrix` (6×7, Monday-start),
+`weekDates`, `viewRange`, `periodLabel`, `navigate`, `occurrencesByDay` (multi-day
+bucketing), `layoutDay` (greedy interval-graph colouring → side-by-side columns for
+overlapping events).
+
+**Adapter (`calendar-provider.ts`):** `CalendarProvider` interface
+(`listEvents` / `createEvent` / `updateEvent` / `deleteEvent`) with `internalCalendarProvider`
+wrapping `calendarEventRepository`; `getCalendarProvider()` is the single seam a future
+Google / Outlook / CalDAV source implements (spec §9C — "build behind an adapter
+interface"). No external sync.
+
+**Created — `src/features/calendar/`:** `schema.ts` (`eventSchema` + create/update/form +
+`eventInputFromForm`; timed-vs-all-day and end≥start refinements; `recurrenceSchema`,
+`remindersSchema`), `zoned-time.ts`, `recurrence.ts`, `calendar-range.ts`,
+`calendar-event-repository.ts` (`calendarEventRepository` on `events` + bounded
+`listActiveEvents(limit=300)`), `calendar-provider.ts`, `use-calendar.ts` (view + anchor
+state, provider load, memoized `occurrences` for the current range, nav + CRUD),
+`components/` (`CalendarView` toolbar + view switch, `MonthGrid`, `TimeGrid` (week & day,
+all-day row + 24-hour scroll body + positioned blocks), `EventForm` (title, all-day
+`Switch`, timed / all-day fields, time zone, repeat rule with weekday picker and count /
+until, reminder-preset chips, goal / project Selects, Delete), `EventDialog`), `index.ts`.
+
+**Modified:** `src/app/(app)/focus/calendar/page.tsx` renders `<CalendarView />` (was a
+placeholder). `docs/DATA_MODEL.md` annotation. (Nav item `/focus/calendar` already
+existed.) Reuses `useGoalOptions` / `useProjectOptions` and `useMounted`.
+
+**Tests added:** `zoned-time.test.ts` (offsets incl. DST, wall↔instant, iso round-trip),
+`recurrence.test.ts` (non-recurring in/out of range; daily count / interval / until; weekly
+weekdays; monthly skip-missing-day; window clipping; all-day recurrence; merge+sort),
+`calendar-range.test.ts` (Monday week start, 6×7 matrix, labels, navigation, multi-day
+bucketing, overlap columns), `schema.test.ts` (timed vs all-day refine, end≥start,
+recurrence + reminder bounds, form → input assembly with normalised recurrence / reminders),
+`components/CalendarView.test.tsx` (month grid + label + chip, view switch, toolbar nav, new
++ existing event dialog, week grid, error + retry — `useCalendar` mocked),
+`tests/integration/calendar.test.ts` (create a weekly-recurring event through the provider →
+list → expand to 5 occurrences → update → archive; user scoping — emulators). Suite: 56
+files / 298 tests.
+
+**Verification (all green):** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (56/298) ·
+`build` ✅ (46 routes; `/focus/calendar` real) · `test:integration` ✅ (13 files / 36 tests)
+· `format:check` ✅ · `test:rules` not run (rules untouched) · functions suite unchanged ✅.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Focus → Calendar**. It opens on the current month.
+2. **New event** (or click a day). Give it a title, a start/end time, and a time zone
+   (defaults to your browser's). Set **Repeat = Weekly**, pick a couple of weekdays, **Ends
+   = After N times**, add a **10 min before** reminder, optionally link a goal / project →
+   **Create event**. The recurring instances appear across the month.
+3. Switch to **Week** and **Day** — the event shows on the hour grid; overlapping events
+   split into side-by-side columns; all-day events sit in the top row.
+4. Click an instance → the dialog opens on the series; change the title → **Save changes**
+   (every instance updates). **Delete** removes the series.
+5. Use ◀ / **Today** / ▶ to navigate; the period label tracks the view.
+6. Firestore console → `users/{uid}/events/{id}` with `startDateTime` (ISO + offset),
+   `timeZone`, `recurrence`, `reminders`, audit fields.
+
+**Known limitations:**
+- **No drag-and-drop / resize** — the spec says "where stable"; events are moved by editing.
+- Recurrence edits are **series-wide only** — no "this occurrence" / "this and following",
+  and no per-occurrence exceptions (EXDATE) or moved instances.
+- `listActiveEvents` fetches the 300 newest active events and expansion happens client-side;
+  a date-range-indexed Firestore query (which needs a composite index) is a later
+  optimisation. A very old daily event could exceed the expansion step cap.
+- One global timezone model per event; there is no "show the whole calendar in zone X"
+  switch, and the grid places events by their own zone's wall clock.
+- `task` and `time-block` linkage from the spec are deferred (Layers 10 / 9D); goal /
+  project links are wired.
+- Reminders are stored only — actual notification delivery is Layer 17.
+- Week / day hour grid is a fixed 24-hour column with a scroll area; no working-hours
+  cropping or current-time indicator.
 
 ---
 

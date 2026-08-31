@@ -27,7 +27,7 @@ users/{uid}/milestones/{milestoneId}         checkpoint, polymorphic parent (goa
 users/{uid}/roadmaps/{roadmapId}             timeline plan, kind + embedded phases[], optional goal/project links (Layer 8G)
 
 # Focus
-users/{uid}/events/{eventId}                   calendar events
+users/{uid}/events/{eventId}                   calendar events: timed (ISO+offset & IANA tz) or all-day, recurrence, reminders, goal/project link (Layer 9C)
 users/{uid}/timeBlocks/{timeBlockId}
 users/{uid}/focusSessions/{sessionId}          deep work: outcome, distraction log, energy/focus ratings, goal/project link (Layer 9B)
 users/{uid}/pomodoroSessions/{sessionId}       terminal focus sessions (completed|abandoned), goal/project link (Layer 9A)

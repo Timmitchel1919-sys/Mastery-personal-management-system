@@ -6,6 +6,26 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 9C — Calendar — 2026-08-31
+
+**Added**
+- `src/features/calendar/` — an internal calendar over `users/{uid}/events`:
+  `eventSchema` + create/update/form + `eventInputFromForm` (timed / all-day, recurrence,
+  reminders, goal/project links, IANA `timeZone`); `zoned-time.ts` (`Intl`-based, DST-aware
+  wall-clock ↔ instant helpers); `recurrence.ts` (`expandEvents` — daily/weekly/monthly/
+  yearly with interval, weekdays, count/until; pure, bounded); `calendar-range.ts`
+  (`monthMatrix`, `weekDates`, `periodLabel`, `occurrencesByDay`, `layoutDay` overlap
+  columns); `calendarEventRepository` + `listActiveEvents`; `CalendarProvider` adapter
+  interface + `internalCalendarProvider` + `getCalendarProvider` (seam for future
+  Google/Outlook/CalDAV sync); `useCalendar`; UI (`CalendarView`, `MonthGrid`, `TimeGrid`,
+  `EventForm`, `EventDialog`) with day / week / month views.
+- `/focus/calendar` renders the real feature.
+- Tests: zoned-time, recurrence, calendar-range, schema unit tests; `CalendarView` (mocked
+  hook); calendar emulator integration test through the provider.
+
+**Changed**
+- `docs/DATA_MODEL.md` annotation for `events`.
+
 ### Layer 9B — Deep Work — 2026-08-31
 
 **Added**
