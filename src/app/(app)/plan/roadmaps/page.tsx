@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { RoadmapsView } from "@/features/roadmaps";
 
-export const metadata = { title: "Roadmaps" };
+export const metadata: Metadata = { title: "Roadmaps" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Roadmaps"
-      description="Timeline views for goals, projects, skills, and programs."
-      plannedLayer={8}
-    />
-  );
+  return <RoadmapsView />;
 }

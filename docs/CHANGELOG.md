@@ -6,6 +6,22 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 8G — Roadmaps — 2026-08-31
+
+**Added**
+- `src/features/roadmaps/` — `roadmapSchema` / `roadmapCreateSchema` /
+  `roadmapUpdateSchema` / `roadmapFormSchema` + `roadmapInputFromForm` (roadmap kind,
+  optional goal & project links, horizon, manual progress, an ordered list of embedded
+  `phases` each with name / date range / status, pillars); `roadmapRepository`,
+  `useRoadmaps()`, and the UI (`RoadmapsView`, `RoadmapForm` with a `useFieldArray` phases
+  editor, `RoadmapDialog`, `RoadmapCard`).
+- `/plan/roadmaps` renders the real feature.
+- Tests: roadmap schemas + phase date ordering + `roadmapInputFromForm`, `RoadmapsView`
+  (mocked hooks), and a roadmaps emulator integration test.
+
+**Changed**
+- `docs/DATA_MODEL.md` annotation for `roadmaps`.
+
 ### Layer 8F — Milestones — 2026-08-30
 
 **Added**

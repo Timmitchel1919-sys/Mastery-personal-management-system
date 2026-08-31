@@ -8,11 +8,11 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 8F — Milestones (complete, committed + pushed) |
-| **Next approved layer** | Layer 8G — Roadmaps |
-| **Completed layers** | Layers 0–7 · Layer 8A · 8B · 8C · 8D · 8E · 8F (committed + pushed) |
+| **Current layer** | Layer 8G — Roadmaps (complete, committed + pushed) |
+| **Next approved layer** | Layer 8H — Planning Cascade |
+| **Completed layers** | Layers 0–7 · Layer 8A · 8B · 8C · 8D · 8E · 8F · 8G (committed + pushed) |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 39 files, 188 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 8 files, 26 tests (auth-flow 5 + repository 7 + dashboard 2 + life-vision 2 + plans 4 + goals 2 + projects 2 + milestones 2). ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 41 files, 201 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 9 files, 28 tests (auth-flow 5 + repository 7 + dashboard 2 + life-vision 2 + plans 4 + goals 2 + projects 2 + milestones 2 + roadmaps 2). ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (45 routes, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
 | **Git status** | `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`). |
 | **Deployment status** | Not deployed. Firebase project **`mastery-personal-mgmt-system`** with a registered Web app; config in `.env.local`. Emulator Suite wired. Frontend target: Firebase App Hosting. |
@@ -950,6 +950,74 @@ goal; create → list → update progress/status → archive; user scoping — e
 - Goal → milestones / project → milestones are not surfaced from the parent side yet; that
   roll-up arrives with the planning cascade (8H) / dashboard work.
 - `dependencies` are free text, not links to other records.
+
+### Layer 8G — Roadmaps — ✅ complete (2026-08-31) — committed + pushed
+
+Roadmaps (`users/{uid}/roadmaps`) — timeline plans made of an ordered list of **phases**,
+each with its own name, date range, and status. A roadmap has a `roadmapKind`
+(goal / project / skill / learning / transformation / other), optional links to a goal
+**and / or** a project, a horizon, manual progress, and pillars.
+
+**Created — `src/features/roadmaps/`:**
+- `schema.ts` — `ROADMAP_KINDS`, `ROADMAP_STATUSES` (planning / active / on-hold /
+  complete), `PHASE_STATUSES` (upcoming / in-progress / done) + labels,
+  `MAX_ROADMAP_PHASES = 24`. `roadmapPhaseSchema` (`.refine` end≥start) nested inside
+  `roadmapFieldsSchema`. `roadmapSchema` (stored), `roadmapCreateSchema` (`.refine`
+  roadmap-level end≥start, transform-free), `roadmapUpdateSchema` (`.partial()`),
+  `roadmapPhaseFormSchema` + `roadmapFormSchema` (string dates, per-phase + roadmap-level
+  date-order refine) + `roadmapInputFromForm` (maps `""` → `null` for every date incl. each
+  phase's).
+- `roadmap-repository.ts` — `roadmapRepository` via `createFirestoreRepository` +
+  `listActiveRoadmaps()`.
+- `use-roadmaps.ts` — `useRoadmaps()`: load + create / update / archive + reload.
+- `components/` — `RoadmapForm` (RHF + zod; title, description, kind, status, linked goal /
+  project Selects, pillars, start / end / progress, and a **`useFieldArray` phases editor**
+  — add / remove rows, each name + start + end + status), `RoadmapDialog`, `RoadmapCard`
+  (status + kind badges, progress bar, phase list with status dots, "N/M phases done",
+  horizon, linked-goal / -project chips, pillar badges, archive-confirm), `RoadmapsView`
+  (sorted by status → start date).
+- `index.ts` barrel.
+
+**Modified:** `src/app/(app)/plan/roadmaps/page.tsx` renders `<RoadmapsView />` (was a
+placeholder). `docs/DATA_MODEL.md` annotation. Reuses `useGoalOptions` (8E) and
+`useProjectOptions` (8F) for the link pickers — no new options code this layer.
+
+**Tests added:** `src/features/roadmaps/schema.test.ts` (create requires fields, empty
+phases + null dates ok, roadmap- and phase-level date ordering, progress / phase-count /
+enum bounds, `roadmapFormSchema` + `roadmapInputFromForm` phase mapping),
+`components/RoadmapsView.test.tsx` (empty / card with status·kind·progress·phase-list·
+"1/2 phases done"·link / new-roadmap dialog / error + retry — `useRoadmaps` +
+`useGoalOptions` + `useProjectOptions` mocked), `tests/integration/roadmaps.test.ts`
+(roadmap linked to a goal with two phases; create → list → update progress/status →
+archive; user scoping — emulators). Suite: 41 files / 201 tests.
+
+**Verification (all green):** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (41/201) ·
+`build` ✅ (45 routes; `/plan/roadmaps` real) · `test:integration` ✅ (9 files / 28 tests) ·
+`format:check` ✅ · `test:rules` not run (rules untouched) · functions suite unchanged ✅.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Plan → Roadmaps**. Empty state → "Add your first roadmap".
+2. Create a roadmap: title, pick a **Kind**, optionally link a goal (8D) and / or project
+   (8E), pillars, start / end / progress. Under **Phases**, click **Add phase** a few
+   times; give each a name, dates, and status → **Create roadmap**. The card shows both
+   badges, a progress bar, the phase list with coloured status dots, "N/M phases done", the
+   horizon, and the linked-goal / -project chips.
+3. Edit → reorder is not supported, but you can rename phases, change their status, add or
+   remove rows, and change progress → **Save changes**.
+4. Archive (trash → confirm) → gone; reload persists.
+5. Firestore console → `users/{uid}/roadmaps/{id}` with `roadmapKind`, `phases` (array of
+   `{ name, startDate, endDate, phaseStatus }`), `linkedGoalId` / `linkedProjectId`, audit
+   fields.
+
+**Known limitations:**
+- Phases are an **embedded array** on the roadmap document, not their own collection — no
+  per-phase ids, no drag-to-reorder (order = insertion order), and the whole array is
+  rewritten on every save.
+- `progress` is manual — not derived from phase statuses.
+- Linked goal / project are bare id strings with no referential integrity; pickers list
+  only *active* goals / projects, so a link to an archived one shows no chip.
+- `listActiveRoadmaps` filters archived client-side (same trade-off as 8A–8F).
+- No Gantt / calendar visualisation yet — the card shows a simple vertical phase list.
 
 ---
 
