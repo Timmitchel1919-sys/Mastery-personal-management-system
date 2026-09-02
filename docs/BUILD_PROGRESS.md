@@ -14,8 +14,8 @@ Living build tracker. Updated at the end of every layer.
 | **In-progress work** | none |
 | **Test status** | ✅ app: `vitest run` — 60 files, 322 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D; rules untouched). ⚠️ integration: `npm run test:integration` — 14 files, 38 tests **written**; not executed in the 9D session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`). ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (46 routes, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
-| **Git status** | `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`); §10.1 added — mandatory end-of-session commit + push + deploy to `mastery-personal-mgmt-system.web.app`. |
-| **Deployment status** | Firebase project **`mastery-personal-mgmt-system`** (live web app `mastery-personal-mgmt-system.web.app`) with a registered Web app; config in `.env.local`. Emulator Suite wired. Frontend target: Firebase App Hosting. **Hosting block not yet in `firebase.json`** — the per-session deploy pipeline (CLAUDE.md §10.1 / DEPLOYMENT.md §2a) still needs wiring before the first `firebase deploy`. |
+| **Git status** | `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`); §10.1 added — mandatory end-of-session commit + push + deploy. Layer 9D built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree). |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (first deploy 2026-09-02). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015 (deviates from App Hosting / ADR-0003; revisit when a layer needs SSR). `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage`. Cloud Functions not deployed (needs Blaze; none shipped). `NEXT_PUBLIC_APP_ENV` still `development` in the release build — fix at Layer 22. |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
 | **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · (no new deps in Layer 6) |
 
@@ -1348,7 +1348,7 @@ files / 298 tests.
 - Week / day hour grid is a fixed 24-hour column with a scroll area; no working-hours
   cropping or current-time indicator.
 
-### Layer 9D — Time Blocking — ✅ complete (2026-09-02) — committed + pushed
+### Layer 9D — Time Blocking — ✅ complete (2026-09-02) — committed + pushed + deployed live
 
 Allocate time to an activity over `users/{uid}/timeBlocks` — a titled time range interpreted
 in an explicit IANA time zone (the Layer 9C `zoned-time` model, reused), a category, optional
@@ -1408,6 +1408,15 @@ pattern as the 12 passing integration tests, but **could not be executed in this
 the Firestore emulator fails to start in this environment (`java.net.SocketException: Invalid
 argument: connect` opening a loopback selector pipe — `firestore-debug.log`). It should run
 in CI / a normal dev machine.
+
+**Deploy pipeline wired this session (ADR-0015):** `next.config.ts` → `output: "export"`
+(+ `images.unoptimized`); `src/app/api/health/route.ts` → `force-static`; `firebase.json`
+gains a `hosting` block (`public: "out"`, `cleanUrls`, immutable cache on `/_next/static`);
+`.gitignore` / `.prettierignore` add `.claude/`. `npm run build` then `firebase deploy
+--only hosting,firestore:rules,firestore:indexes,storage --project
+mastery-personal-mgmt-system` — **first live deploy** (266 files) to
+https://mastery-personal-mgmt-system.web.app/ . Smoke-checked: `/`, `/dashboard`,
+`/focus/time-blocking` → 200; `/api/health` serves the static JSON.
 
 **Manual test instructions:**
 1. `npm run dev`, sign in → **Focus → Time Blocking**. Empty state → "Add your first block".

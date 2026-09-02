@@ -29,6 +29,11 @@ layers; each entry maps to a layer.
 - `docs/DATA_MODEL.md` annotation for `timeBlocks`.
 - `CLAUDE.md` §10.1 + §11.17 and `docs/DEPLOYMENT.md` §2a — mandatory end-of-session
   commit + push + deploy to `https://mastery-personal-mgmt-system.web.app/`.
+- **Deploy pipeline wired (ADR-0015):** `next.config.ts` `output: "export"` +
+  `images.unoptimized`; `/api/health` route `force-static`; `firebase.json` `hosting`
+  block (`public: "out"`, `cleanUrls`); `.claude/` added to `.gitignore` / `.prettierignore`.
+  ADR-0003 (App Hosting) marked superseded-for-now. **First live deploy** — static export
+  → Firebase Hosting on the Spark plan.
 
 ### Layer 9C — Calendar — 2026-08-31
 

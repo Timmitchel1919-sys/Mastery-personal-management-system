@@ -217,20 +217,22 @@ At the end of each session, once §9 verification is green and §11 is met:
 3. **Deploy** the result so it is live at
    **`https://mastery-personal-mgmt-system.web.app/`**:
    ```bash
-   npm run build
-   npm --prefix functions run build
-   firebase deploy --only hosting,firestore:rules,firestore:indexes,storage,functions
+   npm run build   # next build → static export to out/ (ADR-0015)
+   firebase deploy --only hosting,firestore:rules,firestore:indexes,storage \
+     --project mastery-personal-mgmt-system --non-interactive
    ```
    Deploy targets the production Firebase project **`mastery-personal-mgmt-system`**
-   (`.firebaserc` `default`) — the same project that backs that web app. Never deploy to
-   the emulator-only `demo-*` ids.
+   (`.firebaserc` `default`) on the **Spark (free) plan** — hosting + Firestore/Storage
+   rules + indexes only. **Do not add `functions`** to this command: Cloud Functions
+   deploy needs the Blaze plan and no function is shipped yet (revisit at the AI /
+   Recovery layers). Never deploy to the emulator-only `demo-*` ids.
 4. **Report** the commit SHA, the `git push` result, and the deployed Hosting URL +
    release id. If any step fails, say so explicitly — do not report the session as done.
 
-If the hosting / deploy pipeline is not yet wired (no `hosting` block in `firebase.json`,
-no App Hosting backend, or credentials unavailable), that wiring is the **first task** of
-the current session — it is a prerequisite for this rule, not a reason to skip it. Record
-the deploy configuration in `docs/DEPLOYMENT.md` and any deviation in `docs/DECISIONS.md`.
+The pipeline is wired (ADR-0015): `output: "export"` in `next.config.ts`, `hosting` block
+in `firebase.json` (`public: "out"`, `cleanUrls`). If a future layer needs SSR, middleware,
+or server route handlers, that forces a move to Firebase App Hosting (needs Blaze) —
+record it as a new ADR and update this section. Runbook: `docs/DEPLOYMENT.md` §2a.
 
 ## 11. Definition of done (every layer)
 

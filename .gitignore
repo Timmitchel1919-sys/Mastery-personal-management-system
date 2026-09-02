@@ -9,6 +9,9 @@ out/
 build/
 dist/
 
+# Local editor / tooling state
+.claude/
+
 # Production
 /coverage
 /.nyc_output

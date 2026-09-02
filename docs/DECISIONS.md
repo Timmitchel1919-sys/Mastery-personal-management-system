@@ -38,7 +38,7 @@ CI runs on `main`. Loss of PR-based review gates is accepted for this project.
 ---
 
 ## ADR-0003 — Firebase App Hosting for the frontend (not Vercel)
-**Date:** 2026-08-27 · **Status:** accepted · **Deviates from:** Final Master Prompt §3 and §27
+**Date:** 2026-08-27 · **Status:** superseded for now by ADR-0015 (static export → Firebase Hosting); remains the fallback once SSR is needed · **Deviates from:** Final Master Prompt §3 and §27
 
 **Context.** The prompt names Vercel for the Next.js frontend. The owner wants everything
 hosted and deployed on Firebase.
@@ -291,3 +291,44 @@ not type-check against it.
 **Consequences.** 8C is ~5 lines (3 repo entries + 3 route files reusing `PlansView`).
 Feature schemas across the app should keep `createSchema` transform-free and do any
 string→typed mapping in an explicit helper (pattern for later domains).
+
+---
+
+## ADR-0015 — Static export to Firebase Hosting (defer App Hosting)
+**Date:** 2026-09-02 · **Status:** accepted · **Layer:** 9D session (deploy pipeline) · **Supersedes for now:** ADR-0003
+
+**Context.** The owner requires the app to be committed, pushed, and **deployed live after
+every session** (`CLAUDE.md` §10.1), at `https://mastery-personal-mgmt-system.web.app/`.
+Firebase App Hosting (ADR-0003) requires the **Blaze (pay-as-you-go)** plan; the project
+`mastery-personal-mgmt-system` is on the **Spark (free)** plan and upgrading billing is the
+owner's call, not the agent's. Meanwhile the app through Layer 9D is entirely client-side:
+client auth (ADR-0009), the Firebase JS SDK for all data, no middleware, no server route
+handlers (the one `/api/health` handler is a static liveness marker), no `next/image`
+usage, no `rewrites`/`redirects`/`headers` in `next.config`.
+
+**Decision.**
+- `next.config.ts` → `output: "export"` + `images: { unoptimized: true }`. `next build`
+  emits a fully static site to `out/`.
+- `src/app/api/health/route.ts` → `export const dynamic = "force-static"` (emitted as a
+  static JSON asset; `timestamp` = build time).
+- `firebase.json` gains a `hosting` block: `public: "out"`, `cleanUrls: true`,
+  `trailingSlash: false`, long-lived immutable cache for `/_next/static/**`.
+- Per-session deploy: `npm run build` then
+  `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage
+  --project mastery-personal-mgmt-system --non-interactive`. **No `functions`** — Cloud
+  Functions deploy needs Blaze and none is shipped.
+- Firebase web SDK config is read from `.env.local` at build time and baked into the
+  static bundle.
+
+**Consequences.**
+- Free hosting, deployable today, no billing decision blocking the §10.1 rule. First live
+  deploy done 2026-09-02 (266 files).
+- **No SSR / middleware / server route handlers / ISR / on-demand revalidation** until this
+  is revisited. The first layer that needs any of them (candidates: Layer 13 General AI if
+  it proxies through Next routes rather than `functions/`, Layer 16 Reports/PDF, Layer 17
+  server-driven notifications) must either keep that logic in `functions/` (Cloud Functions,
+  already the plan for AI/Recovery) or move the frontend to App Hosting — a new ADR + a
+  Blaze upgrade.
+- `NEXT_PUBLIC_APP_ENV` is still `development` in the release build; a prod env file / CI
+  secret store (Layer 22) fixes that.
+- ADR-0003 stays on record as the intended end state for a server-rendered frontend.

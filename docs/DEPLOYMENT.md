@@ -23,32 +23,44 @@ in **Layer 22**; this document is the target and is filled in as infrastructure 
 
 ## 2. Hosting model
 
-- **Frontend (Next.js App Router):** Firebase App Hosting. (The Final Master Prompt names
-  Vercel; this project uses Firebase App Hosting instead — ADR-0003.)
+- **Frontend (Next.js App Router):** **static export (`output: "export"`) → Firebase
+  Hosting** on the Spark (free) plan (ADR-0015). The app is a client-side SPA against the
+  Firebase JS SDK — no server runtime is used. ADR-0003 (Firebase App Hosting) is the
+  fallback target for when a layer needs SSR / middleware / server route handlers; App
+  Hosting requires the Blaze plan.
 - **Backend:** Firebase Authentication, Cloud Firestore, Firebase Storage, Cloud Functions,
-  Cloud Messaging, App Check — same Firebase project per environment.
+  Cloud Messaging, App Check — same Firebase project per environment. Cloud Functions
+  deploy needs Blaze and is not part of the per-session release yet.
 - **Source control:** GitHub — `https://github.com/Timmitchel1919-sys/Mastery-personal-management-system.git`,
   single `main` branch (ADR-0002).
 
 ## 2a. Mandatory per-session release (CLAUDE.md §10.1)
 
-Every session ends with: **commit → push `origin/main` → deploy live.**
+Every session ends with: **commit → push `origin/main` → deploy live.** ✅ **Pipeline wired
+2026-09-02** — first live deploy done (Layer 9D session).
 
 - Live URL: **https://mastery-personal-mgmt-system.web.app/**
-- Firebase project: `mastery-personal-mgmt-system` (`.firebaserc` `default`)
+- Firebase project: `mastery-personal-mgmt-system` (`.firebaserc` `default`, Spark plan)
 - GitHub: https://github.com/Timmitchel1919-sys/Mastery-personal-management-system
+- Config: `next.config.ts` → `output: "export"` + `images.unoptimized`; `firebase.json` →
+  `hosting` block (`public: "out"`, `cleanUrls: true`, `_next/static` immutable cache).
+  `src/app/api/health/route.ts` is `force-static` (emitted as a static JSON asset).
 
 ```bash
-npm run typecheck && npm run lint && npm test && npm run build   # §9 gate
-npm --prefix functions run build
-firebase deploy --only hosting,firestore:rules,firestore:indexes,storage,functions
+npm run typecheck && npm run lint && npm test && npm run build   # §9 gate; build → out/
+firebase deploy --only hosting,firestore:rules,firestore:indexes,storage \
+  --project mastery-personal-mgmt-system --non-interactive
 ```
 
-Prerequisites still to wire (do this before the first deploy):
+Notes / follow-ups:
 
-- [ ] Add a `hosting` block (or App Hosting backend) to `firebase.json` — the Next.js App
-      Router app needs App Hosting or an adapter; plain static Hosting is not enough.
-- [ ] Confirm `firebase` CLI auth / CI service account is available in the session.
+- **Do not add `functions`** to the deploy — needs Blaze; no function shipped yet.
+- The production build currently bakes in `NEXT_PUBLIC_APP_ENV=development` (from
+  `.env.local`). Set `NEXT_PUBLIC_APP_ENV=production` for the release build once a
+  prod env file / CI secret store exists (Layer 22).
+- Firebase web SDK config is read from `.env.local` at build time and baked into the
+  static bundle — keep `.env.local` populated on any machine that runs the release build.
+- `firebase` CLI must be authenticated (`firebase login`) or a CI service account set.
 
 ## 3. CI/CD (Layer 22)
 
@@ -62,9 +74,11 @@ On every push to `main` and every pull request, CI runs:
 6. `npm run build` (production)
 7. Security checks where supported (dependency audit, secret scan)
 
-On `main`, after green CI: deploy Firestore rules + indexes, deploy Functions, deploy the
-App Hosting build. Preview builds for pull requests where supported. **No production
-secrets in preview environments.**
+On `main`, after green CI: `npm run build` then `firebase deploy --only
+hosting,firestore:rules,firestore:indexes,storage` (static export → Firebase Hosting,
+ADR-0015). Functions deploy is added when a Cloud Function ships and the project is on
+Blaze. Preview builds for pull requests where supported. **No production secrets in
+preview environments.**
 
 ## 4. Configuration
 
@@ -79,15 +93,15 @@ secrets in preview environments.**
 
 | Task | Command / process |
 |---|---|
-| Deploy everything | _Layer 22_ |
+| Per-session release | §2a — `npm run build` then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project mastery-personal-mgmt-system --non-interactive` |
+| Deploy frontend only | `npm run build && firebase deploy --only hosting` (static export in `out/`) |
 | Deploy rules only | `firebase deploy --only firestore:rules,storage` |
 | Deploy indexes | `firebase deploy --only firestore:indexes` |
-| Deploy functions | `firebase deploy --only functions` |
-| Deploy frontend | App Hosting build from `main` |
-| Rollback frontend | redeploy previous App Hosting release |
+| Deploy functions | `firebase deploy --only functions` (needs Blaze; not shipped yet) |
+| Rollback frontend | `firebase hosting:rollback`, or re-release a prior version from the Hosting console |
 | Rollback functions | redeploy previous function version / `firebase functions:rollback` where available |
 | Enable App Check | console + enforce per service (Layer 20) |
-| Domain configuration | App Hosting custom domain (Layer 22) |
+| Domain configuration | Hosting custom domain in the Firebase console (Layer 22) |
 
 ## 6. Pre-launch checklist (Layer 22)
 
