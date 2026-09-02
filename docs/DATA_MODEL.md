@@ -31,6 +31,7 @@ users/{uid}/events/{eventId}                   calendar events: timed (ISO+offse
 users/{uid}/timeBlocks/{timeBlockId}          time allocation: category, zoned start/end instants, goal/project link, pillars, status; overlap detection is client-side (Layer 9D)
 users/{uid}/focusSessions/{sessionId}          deep work: outcome, distraction log, energy/focus ratings, goal/project link (Layer 9B)
 users/{uid}/pomodoroSessions/{sessionId}       terminal focus sessions (completed|abandoned), goal/project link (Layer 9A)
+users/{uid}/priorityMatrixItems/{itemId}       Eisenhower matrix: one of 4 quadrants (do|schedule|delegate|eliminate), movable, goal/project link, pillars, completed flag (Layer 9E)
 
 # Act
 users/{uid}/tasks/{taskId}

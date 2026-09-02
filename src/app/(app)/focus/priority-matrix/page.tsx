@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { PriorityMatrixView } from "@/features/priority-matrix";
 
-export const metadata = { title: "Priority Matrix" };
+export const metadata: Metadata = { title: "Priority Matrix" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Priority Matrix"
-      description="Sort tasks across the urgent and important quadrants."
-      plannedLayer={9}
-    />
-  );
+  return <PriorityMatrixView />;
 }

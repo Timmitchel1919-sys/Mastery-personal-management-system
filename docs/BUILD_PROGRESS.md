@@ -8,14 +8,14 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 9D — Time Blocking (complete, committed + pushed) |
-| **Next approved layer** | Layer 9E — Priority Matrix |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9A · 9B · 9C · 9D (committed + pushed) |
+| **Current layer** | Layer 9E — Priority Matrix (complete) — **closes the Focus domain (9A–9E)** |
+| **Next approved layer** | Layer 10A — Tasks (opens the Act domain) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · **Layer 9 (9A–9E)** |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 60 files, 322 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D; rules untouched). ⚠️ integration: `npm run test:integration` — 14 files, 38 tests **written**; not executed in the 9D session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`). ✅ functions: 1 file, 5 tests. |
-| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (46 routes, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
-| **Git status** | `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`); §10.1 added — mandatory end-of-session commit + push + deploy. Layer 9D built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree). |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (first deploy 2026-09-02). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015 (deviates from App Hosting / ADR-0003; revisit when a layer needs SSR). `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage`. Cloud Functions not deployed (needs Blaze; none shipped). `NEXT_PUBLIC_APP_ENV` still `development` in the release build — fix at Layer 22. |
+| **Test status** | ✅ app: `vitest run` — 63 files, 337 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D/9E; rules untouched). ⚠️ integration: `npm run test:integration` — 15 files, 40 tests **written**; the 9D + 9E tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`). ✅ functions: 1 file, 5 tests. |
+| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D + 9E built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (redeployed for 9E). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015 (deviates from App Hosting / ADR-0003; revisit when a layer needs SSR). `npm run build` then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project mastery-personal-mgmt-system`. Cloud Functions not deployed (needs Blaze; none shipped). `NEXT_PUBLIC_APP_ENV` still `development` in the release build — fix at Layer 22. |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
 | **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · (no new deps in Layer 6) |
 
@@ -1450,6 +1450,83 @@ https://mastery-personal-mgmt-system.web.app/ . Smoke-checked: `/`, `/dashboard`
 - `blockStatus` is manual — a block whose end time has passed is not auto-marked `done`.
 - Cross-feature import: `time-blocking` imports the zone helpers from `@/features/calendar`
   (same pattern as features importing `@/features/goals` / `projects` option hooks).
+
+### Layer 9E — Priority Matrix — ✅ complete (2026-09-02) — committed + pushed + deployed live — **closes the Focus domain**
+
+An Eisenhower matrix over `users/{uid}/priorityMatrixItems` — every item sits in exactly
+one of four quadrants (`do` / `schedule` / `delegate` / `eliminate`) and can be moved
+between them, marked complete, linked to a goal / project, and tagged with life pillars
+(spec §9E). `task` linkage is deferred to the Act domain (Layer 10).
+
+**Created — `src/features/priority-matrix/`:**
+- `schema.ts` — `MATRIX_QUADRANTS` + `MATRIX_QUADRANT_META` (label, `urgent`/`important`
+  booleans, one-line summary, advice). `matrixItemFieldsSchema` (title, quadrant, note,
+  `goalId`, `projectId`, `pillarIds` 0–3, `completed`). `matrixItemSchema` (stored),
+  transform-free `matrixItemCreateSchema`, `matrixItemUpdateSchema` (`.partial()`),
+  `matrixItemFormSchema` + `matrixItemInputFromForm` (`"" → null` for links).
+- `priority-matrix-repository.ts` — `priorityMatrixRepository` (`createFirestoreRepository`,
+  collection `priorityMatrixItems`) + `listActiveMatrixItems(limit=200)` (active only,
+  `createdAt asc`).
+- `priority-matrix-stats.ts` — **pure** `summarizeMatrix` (total / completed / open /
+  open-count per quadrant).
+- `use-priority-matrix.ts` — `usePriorityMatrix()`: load + create / update / archive +
+  `move(id, quadrant)` + `toggleComplete(id, completed)` (thin `update` wrappers) + reload;
+  memoized `byQuadrant` grouping and `stats`.
+- `components/` — `MatrixItemForm` (RHF + zod; title, quadrant Select, goal / project
+  Selects, `PillarSelect`, note, completed `Switch`), `MatrixItemDialog` (create with the
+  clicked quadrant preselected / edit), `MatrixItemCard` (completion `Checkbox` with
+  strike-through, note, pillar badges, linked title, a **move-to-quadrant `Select`**, edit +
+  archive-confirm), `PriorityMatrixView` (2×2 grid of quadrant cards with coloured left
+  accent, per-quadrant "Add", open/completed counts, loading / error).
+- `index.ts` barrel.
+
+**Modified:** `src/app/(app)/focus/priority-matrix/page.tsx` renders `<PriorityMatrixView />`
+(was a `ModulePlaceholder`). `docs/DATA_MODEL.md` adds `priorityMatrixItems`. Reuses
+`useGoalOptions` / `useProjectOptions` and `PillarSelect` / `PillarBadges`. Nav item
+`/focus/priority-matrix` already existed.
+
+**Tests added:** `schema.test.ts` (create requires title, quadrant enum, pillar cap / empty
+ok, update partial, form refine + `matrixItemInputFromForm` mapping, quadrant-meta
+coverage, stored record), `priority-matrix-stats.test.ts` (empty; open-per-quadrant vs
+completed), `components/PriorityMatrixView.test.tsx` (four quadrants each empty; item placed
+in its quadrant with a move control + completion toggle calls the hook; new-item dialog;
+error + retry — hooks mocked), `tests/integration/priority-matrix.test.ts` (create in `do`
+→ move to `schedule` → complete → `listActiveMatrixItems` → archive; user scoping —
+emulators; **written, not executed in-session** — same emulator restriction as 9D). App
+suite: 63 files / 337 tests.
+
+**Verification:** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (63/337) · `build` ✅ (47
+routes, static export, no warnings) · `format:check` ✅ · functions suite unchanged ✅ (5).
+`test:rules` not run — rules untouched. `test:integration` — see above.
+
+**Deploy:** `npm run build` then `firebase deploy --only
+hosting,firestore:rules,firestore:indexes,storage --project mastery-personal-mgmt-system`.
+Redeployed to https://mastery-personal-mgmt-system.web.app/ ; `/focus/priority-matrix` → 200.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Focus → Priority Matrix**. Four quadrant cards: Do (urgent &
+   important), Schedule (important, not urgent), Delegate (urgent, not important), Eliminate
+   (neither).
+2. Click **Add** on the Schedule card → give it a title, optionally link a goal / project
+   and pick pillars → **Add item**. It appears in the Schedule quadrant.
+3. On the card, use the quadrant dropdown to **move** it to Do → it jumps to the Do card.
+   Tick the checkbox → the title gets a strike-through and the open/completed counts update.
+4. Edit (pencil) → change the title or quadrant → **Save changes**. Archive (trash →
+   confirm) → gone; reload → persists.
+5. Firestore console → `users/{uid}/priorityMatrixItems/{id}` with `quadrant`, `completed`,
+   `goalId` / `projectId`, `pillarIds`, audit fields.
+
+**Known limitations:**
+- **No drag-and-drop** — items move via the per-card quadrant dropdown or the edit dialog
+  (consistent with 9C/9D deferring DnD).
+- `task` linkage from the spec is deferred to Layer 10 (tasks don't exist yet); `goal` /
+  `project` links are real ids (pickers list active records only).
+- No ordering within a quadrant (items sort by creation time); no per-quadrant WIP limits,
+  no auto-sorting by pillar or link.
+- `completed` is a plain flag with no completion timestamp or history, and completed items
+  stay in their quadrant (greyed) rather than moving to a "done" area.
+- `listActiveMatrixItems` reads the 200 oldest active items and groups client-side; no
+  realtime, no pagination UI.
 
 ---
 

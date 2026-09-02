@@ -6,6 +6,25 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 9E — Priority Matrix — 2026-09-02 — closes the Focus domain
+
+**Added**
+- `src/features/priority-matrix/` — an Eisenhower matrix over
+  `users/{uid}/priorityMatrixItems`: `matrixItemSchema` + create/update/form +
+  `matrixItemInputFromForm` (title, one of four quadrants [do / schedule / delegate /
+  eliminate], goal/project link, 0–3 life pillars, completed flag); `summarizeMatrix`
+  (pure — total / completed / open-per-quadrant); `priorityMatrixRepository` +
+  `listActiveMatrixItems`; `usePriorityMatrix` (memoized `byQuadrant` + `stats`, `move`
+  and `toggleComplete` helpers); UI (`PriorityMatrixView` — 2×2 quadrant grid with
+  per-quadrant add, open/completed counts; `MatrixItemForm`, `MatrixItemDialog`,
+  `MatrixItemCard` with a move-to-quadrant dropdown + completion checkbox).
+- `/focus/priority-matrix` renders the real feature (was a placeholder).
+- Tests: schema, stats unit tests; `PriorityMatrixView` (mocked hooks); a priority-matrix
+  emulator integration test (written; not executed in-session — Firestore emulator).
+
+**Changed**
+- `docs/DATA_MODEL.md` annotation for `priorityMatrixItems`.
+
 ### Layer 9D — Time Blocking — 2026-09-02
 
 **Added**
