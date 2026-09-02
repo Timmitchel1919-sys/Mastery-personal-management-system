@@ -217,7 +217,13 @@ At the end of each session, once §9 verification is green and §11 is met:
 3. **Deploy** the result so it is live at
    **`https://mastery-personal-mgmt-system.web.app/`**:
    ```bash
-   npm run build   # next build → static export to out/ (ADR-0015)
+   # `.env.local` MUST exist here first — a worktree does not inherit the main checkout's.
+   # `cp <main-checkout>/.env.local .env.local` if missing. With output:"export" the
+   # NEXT_PUBLIC_FIREBASE_* values are inlined at build time; a build without them ships a
+   # bundle that throws "Missing Firebase configuration" in the browser.
+   NEXT_PUBLIC_APP_ENV=production \
+   NEXT_PUBLIC_APP_URL=https://mastery-personal-mgmt-system.web.app \
+     npm run build   # next build → static export to out/ (ADR-0015)
    firebase deploy --only hosting,firestore:rules,firestore:indexes,storage \
      --project mastery-personal-mgmt-system --non-interactive
    ```
@@ -225,7 +231,9 @@ At the end of each session, once §9 verification is green and §11 is met:
    (`.firebaserc` `default`) on the **Spark (free) plan** — hosting + Firestore/Storage
    rules + indexes only. **Do not add `functions`** to this command: Cloud Functions
    deploy needs the Blaze plan and no function is shipped yet (revisit at the AI /
-   Recovery layers). Never deploy to the emulator-only `demo-*` ids.
+   Recovery layers). Never deploy to the emulator-only `demo-*` ids. After deploying,
+   sanity-check the live site in a **fresh** browser context (its `_next/static` cache is
+   `max-age=3600`, so a stale tab can lag a redeploy by up to an hour).
 4. **Report** the commit SHA, the `git push` result, and the deployed Hosting URL +
    release id. If any step fails, say so explicitly — do not report the session as done.
 

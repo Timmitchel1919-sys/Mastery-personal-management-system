@@ -43,23 +43,40 @@ Every session ends with: **commit → push `origin/main` → deploy live.** ✅ 
 - Firebase project: `mastery-personal-mgmt-system` (`.firebaserc` `default`, Spark plan)
 - GitHub: https://github.com/Timmitchel1919-sys/Mastery-personal-management-system
 - Config: `next.config.ts` → `output: "export"` + `images.unoptimized`; `firebase.json` →
-  `hosting` block (`public: "out"`, `cleanUrls: true`, `_next/static` immutable cache).
-  `src/app/api/health/route.ts` is `force-static` (emitted as a static JSON asset).
+  `hosting` block (`public: "out"`, `cleanUrls: true`, `_next/static` → `max-age=3600,
+  must-revalidate`). `src/app/api/health/route.ts` is `force-static` (emitted as a static
+  JSON asset).
 
 ```bash
-npm run typecheck && npm run lint && npm test && npm run build   # §9 gate; build → out/
+# .env.local MUST exist in the build dir (see below), then:
+npm run typecheck && npm run lint && npm test
+NEXT_PUBLIC_APP_ENV=production NEXT_PUBLIC_APP_URL=https://mastery-personal-mgmt-system.web.app \
+  npm run build   # § 9 gate; build → out/
 firebase deploy --only hosting,firestore:rules,firestore:indexes,storage \
   --project mastery-personal-mgmt-system --non-interactive
 ```
 
 Notes / follow-ups:
 
+- **`.env.local` must be present in the build directory.** With `output: "export"` the
+  `NEXT_PUBLIC_FIREBASE_*` values are inlined into the JS **at build time** — a build
+  without them ships a bundle that throws `Missing Firebase configuration` in the browser.
+  Git worktrees do **not** inherit the main checkout's `.env.local`; copy it in first
+  (`cp <main-checkout>/.env.local .env.local`). `.env.local` stays git-ignored.
+- **Set `NEXT_PUBLIC_APP_ENV=production`** on the release build (shell env wins over
+  `.env.local`, which holds `development`). Fold this into a prod env file / CI secret
+  store at Layer 22.
 - **Do not add `functions`** to the deploy — needs Blaze; no function shipped yet.
-- The production build currently bakes in `NEXT_PUBLIC_APP_ENV=development` (from
-  `.env.local`). Set `NEXT_PUBLIC_APP_ENV=production` for the release build once a
-  prod env file / CI secret store exists (Layer 22).
-- Firebase web SDK config is read from `.env.local` at build time and baked into the
-  static bundle — keep `.env.local` populated on any machine that runs the release build.
+- **`_next/static` caching:** Turbopack's static-export chunk filenames are **not**
+  guaranteed content-addressed across builds — a redeploy can reuse a filename for changed
+  content. So the cache header is `max-age=3600, must-revalidate` (not `immutable`).
+  A returning visitor who loaded a *previously broken* build still holds it until that
+  hour expires or they hard-reload (Ctrl/Cmd+Shift+R). Revisit with a real build-id
+  strategy at Layer 22.
+- **Known cosmetic 404:** `<Link>` prefetch for pages inside a route group (`(auth)` /
+  `(app)`) requests an RSC `…__PAGE__.txt` payload whose exported filename doesn't match —
+  it 404s in the console. Navigation itself works (the `.html` pages serve fine). Fix
+  candidates: `trailingSlash: true`, or move off static export.
 - `firebase` CLI must be authenticated (`firebase login`) or a CI service account set.
 
 ## 3. CI/CD (Layer 22)
