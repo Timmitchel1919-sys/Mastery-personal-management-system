@@ -8,14 +8,14 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 9C — Calendar (complete, committed + pushed) |
-| **Next approved layer** | Layer 9D — Time Blocking |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9A · 9B · 9C (committed + pushed) |
+| **Current layer** | Layer 9D — Time Blocking (complete, committed + pushed) |
+| **Next approved layer** | Layer 9E — Priority Matrix |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9A · 9B · 9C · 9D (committed + pushed) |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 56 files, 298 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests. ✅ integration: `npm run test:integration` — 13 files, 36 tests (… + deep-work 2 + calendar 2). ✅ functions: 1 file, 5 tests. |
-| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (45 routes, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
-| **Git status** | `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`). |
-| **Deployment status** | Not deployed. Firebase project **`mastery-personal-mgmt-system`** with a registered Web app; config in `.env.local`. Emulator Suite wired. Frontend target: Firebase App Hosting. |
+| **Test status** | ✅ app: `vitest run` — 60 files, 322 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D; rules untouched). ⚠️ integration: `npm run test:integration` — 14 files, 38 tests **written**; not executed in the 9D session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`). ✅ functions: 1 file, 5 tests. |
+| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (46 routes, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
+| **Git status** | `CLAUDE.md` §10 restored to commit-and-push per layer (`2b5b5ac`); §10.1 added — mandatory end-of-session commit + push + deploy to `mastery-personal-mgmt-system.web.app`. |
+| **Deployment status** | Firebase project **`mastery-personal-mgmt-system`** (live web app `mastery-personal-mgmt-system.web.app`) with a registered Web app; config in `.env.local`. Emulator Suite wired. Frontend target: Firebase App Hosting. **Hosting block not yet in `firebase.json`** — the per-session deploy pipeline (CLAUDE.md §10.1 / DEPLOYMENT.md §2a) still needs wiring before the first `firebase deploy`. |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
 | **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · (no new deps in Layer 6) |
 
@@ -1347,6 +1347,100 @@ files / 298 tests.
 - Reminders are stored only — actual notification delivery is Layer 17.
 - Week / day hour grid is a fixed 24-hour column with a scroll area; no working-hours
   cropping or current-time indicator.
+
+### Layer 9D — Time Blocking — ✅ complete (2026-09-02) — committed + pushed
+
+Allocate time to an activity over `users/{uid}/timeBlocks` — a titled time range interpreted
+in an explicit IANA time zone (the Layer 9C `zoned-time` model, reused), a category, optional
+goal / project link and life pillars, a status, and notes. The view groups blocks by day and
+**warns on overlapping blocks** (spec §9D "detect and warn on obvious scheduling conflicts").
+
+**Created — `src/features/time-blocking/`:**
+- `schema.ts` — `TIME_BLOCK_CATEGORIES` (deep-work / task / habit / goal / project / learning
+  / spiritual / recovery / personal / admin / break / other) + labels; `TIME_BLOCK_STATUSES`
+  (planned / done / skipped) + labels. `timeBlockFieldsSchema` (title, category, timeZone,
+  `startDateTime` / `endDateTime` as ISO instants, `pillarIds` 0–3, `goalId`, `projectId`,
+  notes, `blockStatus`). `timeBlockSchema` (stored), `timeBlockCreateSchema` (`.refine`
+  end > start, transform-free), `timeBlockUpdateSchema` (`.partial()`), `timeBlockFormSchema`
+  (wall-clock `startWall` / `endWall` strings + refine) + `timeBlockInputFromForm` (wall →
+  zoned ISO via `wallTimeToIso`). `blockDurationMinutes` helper (pure).
+- `detect-conflicts.ts` — **pure** `detectConflicts(blocks)` → `Map<blockId, blockId[]>`;
+  two blocks conflict when their absolute instant ranges overlap (`a.start < b.end &&
+  b.start < a.end`), compared on the stored offset-carrying ISO strings so cross-timezone
+  blocks compare correctly; `skipped` blocks are excluded. `conflictedBlockCount`.
+- `time-block-stats.ts` — **pure** `summarizeTimeBlocks` (blocks / planned / done / skipped /
+  scheduled minutes / completed minutes / conflicted-block count).
+- `time-block-repository.ts` — `timeBlockRepository` (`createFirestoreRepository`, collection
+  `timeBlocks`) + `listActiveTimeBlocks(limit=200)` (active only, sorted by start instant
+  client-side).
+- `use-time-blocking.ts` — `useTimeBlocking()`: load + create / update / archive + reload,
+  memoized `conflicts` map and `stats`; the local list is kept in start order.
+- `components/` — `TimeBlockForm` (RHF + zod; title, category & status Selects, start / end
+  `datetime-local`, time-zone Input defaulting to `resolveBrowserZone()`, goal / project
+  Selects, `PillarSelect`, notes), `TimeBlockDialog` (create / edit; ISO → wall via
+  `isoToWall`), `TimeBlockCard` (category + status + **Overlap** badges, formatted range,
+  duration, zone, linked title, pillar badges, notes, archive-confirm), `TimeBlockStats`
+  tiles, `TimeBlockView` (stats + a warning `Alert` when any conflicts exist + blocks
+  grouped by day, each conflicting card flagged; loading / empty / error).
+- `index.ts` barrel.
+
+**Modified:** `src/app/(app)/focus/time-blocking/page.tsx` renders `<TimeBlockView />` (was a
+`ModulePlaceholder`). `docs/DATA_MODEL.md` annotates `timeBlocks`. Reuses `resolveBrowserZone`
+/ `wallTimeToIso` / `isoToWall` from `@/features/calendar` and `useGoalOptions` /
+`useProjectOptions`. Nav item `/focus/time-blocking` already existed.
+
+**Tests added:** `schema.test.ts` (create requires core fields, category / status enums,
+end > start, pillar cap, empty pillars ok; form refine + `timeBlockInputFromForm` wall → zoned
+ISO mapping; stored record; `blockDurationMinutes`), `detect-conflicts.test.ts` (back-to-back
+clear, overlap flags both, three-way, skipped excluded, cross-timezone instant comparison),
+`time-block-stats.test.ts` (empty, scheduled vs completed minutes with skipped excluded,
+conflicted-block count), `components/TimeBlockView.test.tsx` (empty / card with category ·
+status · duration · link / conflict banner + both cards flagged / new-block dialog / error +
+retry — hooks mocked), `tests/integration/time-blocking.test.ts` (block linked to a goal;
+create out of order → `listActiveTimeBlocks` returns start order → update status → archive;
+user scoping — emulators). App suite: 60 files / 322 tests.
+
+**Verification:** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (60/322) · `build` ✅ (46
+routes; `/focus/time-blocking` real, no warnings) · `format:check` ✅ · functions
+`typecheck` / `lint` / `build` / `test` ✅ (5). `test:rules` not run — `firestore.rules` /
+`storage.rules` untouched this layer. `test:integration` — the 9D test is written to the same
+pattern as the 12 passing integration tests, but **could not be executed in this session**:
+the Firestore emulator fails to start in this environment (`java.net.SocketException: Invalid
+argument: connect` opening a loopback selector pipe — `firestore-debug.log`). It should run
+in CI / a normal dev machine.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Focus → Time Blocking**. Empty state → "Add your first block".
+2. **New block**: title, pick a category (e.g. Deep work), set a start and end time, adjust
+   the time zone if needed, optionally link a goal / project and pick pillars → **Add block**.
+   The card shows the category + status badges, the time range in that zone, the duration,
+   the zone, and any linked title.
+3. Add a second block whose time **overlaps** the first → a yellow "Scheduling conflict"
+   banner appears and both cards get a red **Overlap** badge. The stat tiles show the
+   scheduled minutes and the conflict count.
+4. Edit a block (pencil) → change its time so it no longer overlaps → **Save changes**; the
+   warning clears. Set a block to **Skipped** → it stops counting as a conflict.
+5. Archive a block (trash → confirm) → gone; reload → persists, blocks are grouped by day in
+   start order.
+6. Firestore console → `users/{uid}/timeBlocks/{id}` with `category`, `startDateTime` /
+   `endDateTime` (ISO + offset), `timeZone`, `blockStatus`, `pillarIds`, audit fields.
+
+**Known limitations:**
+- **No calendar-grid rendering** — time blocks are a day-grouped card list, not drawn on the
+  Layer 9C hour grid, and there is no drag-to-create / resize. The two features share the
+  time-zone model but not a view; a combined schedule view is later work.
+- **No block ↔ calendar-event sync** — a block is its own record; it does not create or
+  mirror a `calendar` event (spec `event.timeBlockId` linkage is deferred).
+- `task` / `habit` / `recovery` allocations are only a **category label** — real links wait
+  for the Act domain (Layer 10) and Recovery Center (Layer 15). `goal` / `project` links are
+  real ids (pickers list active records only; a link to an archived one shows no chip).
+- Conflict detection is **pairwise overlap only** — it does not consider working hours,
+  buffers/travel time, all-day context, or calendar events; `skipped` blocks are ignored.
+- `listActiveTimeBlocks` fetches the 200 newest active blocks and sorts / detects conflicts
+  client-side; no date-range Firestore query (would need a composite index), no realtime.
+- `blockStatus` is manual — a block whose end time has passed is not auto-marked `done`.
+- Cross-feature import: `time-blocking` imports the zone helpers from `@/features/calendar`
+  (same pattern as features importing `@/features/goals` / `projects` option hooks).
 
 ---
 

@@ -28,7 +28,7 @@ users/{uid}/roadmaps/{roadmapId}             timeline plan, kind + embedded phas
 
 # Focus
 users/{uid}/events/{eventId}                   calendar events: timed (ISO+offset & IANA tz) or all-day, recurrence, reminders, goal/project link (Layer 9C)
-users/{uid}/timeBlocks/{timeBlockId}
+users/{uid}/timeBlocks/{timeBlockId}          time allocation: category, zoned start/end instants, goal/project link, pillars, status; overlap detection is client-side (Layer 9D)
 users/{uid}/focusSessions/{sessionId}          deep work: outcome, distraction log, energy/focus ratings, goal/project link (Layer 9B)
 users/{uid}/pomodoroSessions/{sessionId}       terminal focus sessions (completed|abandoned), goal/project link (Layer 9A)
 

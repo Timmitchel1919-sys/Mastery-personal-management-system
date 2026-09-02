@@ -6,6 +6,30 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 9D — Time Blocking — 2026-09-02
+
+**Added**
+- `src/features/time-blocking/` — allocate time to an activity over `users/{uid}/timeBlocks`:
+  `timeBlockSchema` + create/update/form + `timeBlockInputFromForm` (title, category
+  [deep-work / task / habit / goal / project / learning / spiritual / recovery / personal /
+  admin / break / other], zoned `startDateTime` / `endDateTime`, goal/project link, 0–3 life
+  pillars, status [planned / done / skipped], notes) reusing the Layer 9C `zoned-time` model;
+  `detect-conflicts.ts` (`detectConflicts` — pure pairwise instant-overlap detection,
+  timezone-correct, `skipped` excluded); `time-block-stats.ts` (`summarizeTimeBlocks` — pure);
+  `timeBlockRepository` + `listActiveTimeBlocks`; `useTimeBlocking` (memoized conflicts +
+  stats); UI (`TimeBlockView` with a day-grouped list + a conflict warning banner and
+  per-card **Overlap** flags, `TimeBlockForm`, `TimeBlockDialog`, `TimeBlockCard`,
+  `TimeBlockStats`).
+- `/focus/time-blocking` renders the real feature (was a placeholder).
+- Tests: schema, conflict-detection, stats unit tests; `TimeBlockView` (mocked hooks); a
+  time-blocking emulator integration test (written; not executed in-session — the Firestore
+  emulator does not start in this environment).
+
+**Changed**
+- `docs/DATA_MODEL.md` annotation for `timeBlocks`.
+- `CLAUDE.md` §10.1 + §11.17 and `docs/DEPLOYMENT.md` §2a — mandatory end-of-session
+  commit + push + deploy to `https://mastery-personal-mgmt-system.web.app/`.
+
 ### Layer 9C — Calendar — 2026-08-31
 
 **Added**

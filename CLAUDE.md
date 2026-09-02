@@ -185,7 +185,7 @@ npm run test:e2e       # end-to-end (from the layer that adds e2e; runs in CI th
 If a command does not yet exist for the current layer, say so explicitly in
 `docs/BUILD_PROGRESS.md` rather than skipping silently.
 
-## 10. Git workflow
+## 10. Git & release workflow
 
 - **Single branch: `main`.** When a layer's verification passes (§9) and its definition of
   done is met (§11), commit it and push straight to `origin/main`. No `develop`, no
@@ -202,6 +202,36 @@ If a command does not yet exist for the current layer, say so explicitly in
 - (History: ADR-0002 policy → manual-approval policy on 2026-08-28 (`75a202f`) → restored
   to commit-and-push-per-layer on the owner's instruction.)
 
+### 10.1 Mandatory end-of-session commit + push + deploy
+
+**Every working session ends with the code committed, pushed, and deployed — no
+exceptions.** A session is not finished while local work is uncommitted, `origin/main` is
+behind, or the live site does not reflect `main`.
+
+At the end of each session, once §9 verification is green and §11 is met:
+
+1. **Commit** all layer changes to `main` with a Conventional Commit message (§10 rules,
+   plus the `Co-Authored-By` trailer).
+2. **Push** to `origin/main`
+   (`https://github.com/Timmitchel1919-sys/Mastery-personal-management-system`).
+3. **Deploy** the result so it is live at
+   **`https://mastery-personal-mgmt-system.web.app/`**:
+   ```bash
+   npm run build
+   npm --prefix functions run build
+   firebase deploy --only hosting,firestore:rules,firestore:indexes,storage,functions
+   ```
+   Deploy targets the production Firebase project **`mastery-personal-mgmt-system`**
+   (`.firebaserc` `default`) — the same project that backs that web app. Never deploy to
+   the emulator-only `demo-*` ids.
+4. **Report** the commit SHA, the `git push` result, and the deployed Hosting URL +
+   release id. If any step fails, say so explicitly — do not report the session as done.
+
+If the hosting / deploy pipeline is not yet wired (no `hosting` block in `firebase.json`,
+no App Hosting backend, or credentials unavailable), that wiring is the **first task** of
+the current session — it is a prerequisite for this rule, not a reason to skip it. Record
+the deploy configuration in `docs/DEPLOYMENT.md` and any deviation in `docs/DECISIONS.md`.
+
 ## 11. Definition of done (every layer)
 
 A layer is complete only when **all** hold:
@@ -214,5 +244,8 @@ A layer is complete only when **all** hold:
 12. No unrelated future features introduced.
 13. `docs/BUILD_PROGRESS.md` updated. 14. Changed files listed. 15. Manual test instructions supplied.
 16. Known limitations documented honestly.
+17. The layer is committed and pushed to `origin/main`, **and** deployed live to
+    `https://mastery-personal-mgmt-system.web.app/` per §10.1, with the commit SHA and
+    deployed release id reported.
 
 Never declare completion while failures remain.

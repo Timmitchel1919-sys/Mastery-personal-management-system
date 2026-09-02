@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { TimeBlockView } from "@/features/time-blocking";
 
-export const metadata = { title: "Time Blocking" };
+export const metadata: Metadata = { title: "Time Blocking" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Time Blocking"
-      description="Allocate time to tasks, habits, goals, and projects."
-      plannedLayer={9}
-    />
-  );
+  return <TimeBlockView />;
 }

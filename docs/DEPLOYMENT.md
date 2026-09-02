@@ -30,6 +30,26 @@ in **Layer 22**; this document is the target and is filled in as infrastructure 
 - **Source control:** GitHub — `https://github.com/Timmitchel1919-sys/Mastery-personal-management-system.git`,
   single `main` branch (ADR-0002).
 
+## 2a. Mandatory per-session release (CLAUDE.md §10.1)
+
+Every session ends with: **commit → push `origin/main` → deploy live.**
+
+- Live URL: **https://mastery-personal-mgmt-system.web.app/**
+- Firebase project: `mastery-personal-mgmt-system` (`.firebaserc` `default`)
+- GitHub: https://github.com/Timmitchel1919-sys/Mastery-personal-management-system
+
+```bash
+npm run typecheck && npm run lint && npm test && npm run build   # §9 gate
+npm --prefix functions run build
+firebase deploy --only hosting,firestore:rules,firestore:indexes,storage,functions
+```
+
+Prerequisites still to wire (do this before the first deploy):
+
+- [ ] Add a `hosting` block (or App Hosting backend) to `firebase.json` — the Next.js App
+      Router app needs App Hosting or an adapter; plain static Hosting is not enough.
+- [ ] Confirm `firebase` CLI auth / CI service account is available in the session.
+
 ## 3. CI/CD (Layer 22)
 
 On every push to `main` and every pull request, CI runs:
