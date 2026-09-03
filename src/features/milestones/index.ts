@@ -17,6 +17,12 @@ export {
   type MilestoneStatus,
   type MilestoneParentType,
 } from "./schema";
-export { milestoneRepository, listActiveMilestones } from "./milestone-repository";
+export {
+  milestoneRepository,
+  listActiveMilestones,
+  listMilestoneOptions,
+  type MilestoneOption,
+} from "./milestone-repository";
 export { useMilestones } from "./use-milestones";
+export { useMilestoneOptions } from "./use-milestone-options";
 export { MilestonesView } from "./components/MilestonesView";

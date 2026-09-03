@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { TasksView } from "@/features/tasks";
 
-export const metadata = { title: "Tasks" };
+export const metadata: Metadata = { title: "Tasks" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Tasks"
-      description="Task management with subtasks, recurrence, and effort tracking."
-      plannedLayer={10}
-    />
-  );
+  return <TasksView />;
 }

@@ -34,7 +34,7 @@ users/{uid}/pomodoroSessions/{sessionId}       terminal focus sessions (complete
 users/{uid}/priorityMatrixItems/{itemId}       Eisenhower matrix: one of 4 quadrants (do|schedule|delegate|eliminate), movable, goal/project link, pillars, completed flag (Layer 9E)
 
 # Act
-users/{uid}/tasks/{taskId}
+users/{uid}/tasks/{taskId}                     status, priority, start/due dates, pillars, goal/project/milestone/parent-task links, light recurrence rule, estimate/actual minutes, energy, context, tags, completedAt, resolution reason (Layer 10A)
 users/{uid}/habits/{habitId}
 users/{uid}/habitLogs/{logId}
 users/{uid}/routines/{routineId}

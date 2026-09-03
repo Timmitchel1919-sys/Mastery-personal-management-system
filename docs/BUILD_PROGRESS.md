@@ -8,13 +8,13 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 9E — Priority Matrix (complete) — **closes the Focus domain (9A–9E)** |
-| **Next approved layer** | Layer 10A — Tasks (opens the Act domain) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · **Layer 9 (9A–9E)** |
+| **Current layer** | Layer 10A — Tasks (complete) — **opens the Act domain** |
+| **Next approved layer** | Layer 10B — Habits |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · **Layer 10A** |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 63 files, 337 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D/9E; rules untouched). ⚠️ integration: `npm run test:integration` — 15 files, 40 tests **written**; the 9D + 9E tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`). ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 66 files, 358 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D/9E/10A; rules untouched). ⚠️ integration: `npm run test:integration` — 16 files, 42 tests **written**; the 9D/9E/10A tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`). ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D + 9E built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 10A built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
 | **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (9E + a config hotfix). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix:** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions not deployed (needs Blaze). |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
 | **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · (no new deps in Layer 6) |
@@ -1527,6 +1527,98 @@ Redeployed to https://mastery-personal-mgmt-system.web.app/ ; `/focus/priority-m
   stay in their quadrant (greyed) rather than moving to a "done" area.
 - `listActiveMatrixItems` reads the 200 oldest active items and groups client-side; no
   realtime, no pagination UI.
+
+### Layer 10A — Tasks — ✅ complete (2026-09-02) — committed + pushed + deployed live — **opens the Act domain**
+
+The unit of daily execution over `users/{uid}/tasks`. Rich record: status, priority, start /
+due dates, life pillars, links up the planning cascade (goal / project / milestone) plus a
+parent task, a light recurrence rule, effort (estimate / actual minutes) and energy, a
+GTD-style context + tags, a completion timestamp, and a resolution reason for blocked /
+cancelled work.
+
+**Created — `src/features/tasks/`:**
+- `schema.ts` — `TASK_STATUSES` (todo / in-progress / blocked / done / cancelled),
+  `TASK_ENERGY_LEVELS`, `taskRecurrenceSchema` (`{ frequency, interval }`). `taskFieldsSchema`
+  → `taskSchema` (stored), transform-free `taskCreateSchema` (`.refine` due ≥ start),
+  `taskUpdateSchema` (`.partial()`). `taskFormSchema` (string dates, `recurrence` +
+  `recurrenceInterval` fields) + `taskInputFromForm(values, previousCompletedAt?, now?)` —
+  sets / preserves / clears `completedAt` by status, dedupes + caps tags. `isClosed`,
+  `daysOverdue` helpers (pure).
+- `task-repository.ts` — `taskRepository` (collection `tasks`) + `listActiveTasks(limit=300)`
+  (active only; work-list sort: open before closed → status → priority → due date → title,
+  client-side) + `listTaskOptions()` (open tasks, for the parent-task picker).
+- `task-stats.ts` — **pure** `summarizeTasks` (open / done / blocked / overdue / due-today /
+  logged minutes) and `subtaskProgressByParent` (per-parent total + closed count).
+- `use-tasks.ts` — `useTasks()`: load + create / update / archive + `setStatusFor`
+  (moves `completedAt` with the status) + reload; memoized `stats` and `subtaskProgress`.
+- `components/` — `TaskForm` (RHF + zod; every field, with a `useWatch`-driven resolution
+  textarea for blocked / cancelled and a conditional recurrence interval; goal / project /
+  milestone / parent-task `LinkSelect`s), `TaskDialog`, `TaskCard` (done checkbox with
+  strike-through, status + priority + overdue + recurrence badges, due date, effort, energy,
+  context, subtask count, parent + link chips, tags, pillar badges, resolution note,
+  archive-confirm), `TaskStats` tiles, `TasksView` (stats + flat sorted list; `useMounted`
+  gates the "today"-relative overdue styling; loading / empty / error).
+- `index.ts` barrel.
+
+**Modified:**
+- `src/app/(app)/act/tasks/page.tsx` renders `<TasksView />` (was a `ModulePlaceholder`).
+- `src/features/milestones/` — added `listMilestoneOptions` / `MilestoneOption` and a
+  `useMilestoneOptions` hook (same pattern as goals / projects), exported from the barrel,
+  for the task form's milestone picker.
+- `docs/DATA_MODEL.md` annotates `tasks`.
+
+**Tests added:** `schema.test.ts` (create requires title, enums, date order, null dates /
+recurrence, tag cap; `taskFormSchema` refine; `taskInputFromForm` completedAt set / preserve
+/ clear + tag dedupe; `daysOverdue` / `isClosed`; stored record), `task-stats.test.ts`
+(empty; open / overdue / due-today / done / blocked classification + logged minutes;
+`subtaskProgressByParent`), `components/TasksView.test.tsx` (empty; card with status ·
+priority · overdue · link · subtask count; toggle → `setStatusFor(task, "done")`; new-task
+dialog; error + retry — hooks + `useMounted` mocked), `tests/integration/tasks.test.ts`
+(task linked to a goal + parent; `listTaskOptions` excludes closed; complete sets
+`completedAt` + bumps version; closed sorts last; archive; user scoping — emulators;
+**written, not executed in-session**). App suite: 66 files / 358 tests.
+
+**Verification:** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (66/358) · `build` ✅ (47
+routes, static export, no warnings) · `format:check` ✅ · functions suite unchanged ✅ (5).
+`test:rules` not run — rules untouched. `test:integration` — see above.
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production npm run build` then `firebase deploy --only
+hosting,firestore:rules,firestore:indexes,storage --project mastery-personal-mgmt-system`.
+Redeployed to https://mastery-personal-mgmt-system.web.app/ ; `/act/tasks` → 200.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Act → Tasks**. Empty state → "Add your first task".
+2. **New task**: title, set a priority and a due date, optionally link a goal / project /
+   milestone and pick a parent task, add tags (comma separated), a context (e.g. `@calls`),
+   an estimate, an energy level → **Add task**. The card shows the status + priority badges,
+   the due date, the effort/energy/context row, and any link chips.
+3. Give a task a past due date → it shows an "Nd overdue" badge and the due date turns red;
+   the **Overdue** stat tile increments.
+4. Create a second task and pick the first as its **Parent task** → the parent card shows
+   "0/1 subtasks". Tick the subtask's checkbox → it reads "1/1" and the subtask greys out.
+5. Set a task's status to **Blocked** in the dialog → a "Reason" field appears; the reason
+   shows on the card in amber. Set it to **Done** → `completedAt` is stamped and the task
+   sorts to the bottom.
+6. Archive (trash → confirm) → gone; reload → persists.
+7. Firestore console → `users/{uid}/tasks/{id}` with `taskStatus`, `priority`, `dueDate`,
+   `goalId` / `projectId` / `milestoneId` / `parentTaskId`, `recurrence`, `tags`,
+   `completedAt`, audit fields.
+
+**Known limitations:**
+- **Recurrence is stored, not expanded** — a recurring task does not spawn the next
+  instance on completion; `recurrence` is a `{ frequency, interval }` marker for a later
+  pass (10D Execution Tracker or a dedicated recurrence engine).
+- **Subtasks are a flat parent link**, surfaced only as a count on the parent card — no
+  nested tree view, no cascade on archive/complete, and the parent picker lists only open
+  tasks (a task can't be its own parent; deeper cycles aren't blocked).
+- `daysOverdue` / "due today" use the browser's local date; there is no per-task timezone.
+- `listActiveTasks` reads the 300 newest active tasks and sorts client-side (no composite
+  index, no realtime, no pagination / filter UI — a status/priority filter bar is later).
+- Status is manual — completing all subtasks does not auto-complete the parent, and
+  `estimatedMinutes` / `actualMinutes` are free numbers with no timer integration
+  (Pomodoro / Deep Work links are not wired to tasks yet).
+- Links are bare id strings with no referential integrity; a link to an archived
+  goal/project/milestone simply shows no chip (pickers list active records only).
 
 ---
 

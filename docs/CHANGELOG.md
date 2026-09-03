@@ -6,6 +6,27 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 10A — Tasks — 2026-09-02 — opens the Act domain
+
+**Added**
+- `src/features/tasks/` — the unit of daily execution over `users/{uid}/tasks`:
+  `taskSchema` + create/update/form + `taskInputFromForm` (status, priority, start/due
+  dates, pillars, goal/project/milestone/parent-task links, `{ frequency, interval }`
+  recurrence marker, estimate/actual minutes, energy, context, tags, `completedAt`,
+  resolution reason); `isClosed` / `daysOverdue` helpers; `summarizeTasks` +
+  `subtaskProgressByParent` (pure); `taskRepository` + `listActiveTasks` (work-list sort)
+  + `listTaskOptions`; `useTasks` (`setStatusFor` moves `completedAt` with status);
+  UI (`TasksView` stats + sorted list, `TaskForm`, `TaskDialog`, `TaskCard` with a done
+  checkbox, overdue badge, subtask count and link chips).
+- `src/features/milestones/` — `listMilestoneOptions` / `MilestoneOption` +
+  `useMilestoneOptions`, for the task form's milestone picker.
+- `/act/tasks` renders the real feature (was a placeholder).
+- Tests: schema, stats unit tests; `TasksView` (mocked hooks); a tasks emulator
+  integration test (written; not executed in-session — Firestore emulator).
+
+**Changed**
+- `docs/DATA_MODEL.md` annotation for `tasks`.
+
 ### Layer 9E — Priority Matrix — 2026-09-02 — closes the Focus domain
 
 **Added**
