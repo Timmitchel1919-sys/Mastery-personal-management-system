@@ -8,13 +8,13 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 10C — Daily Routine (complete) |
-| **Next approved layer** | Layer 10D — Execution Tracker — **closes the Act domain** |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · **Layer 10 (10A–10C)** |
+| **Current layer** | Layer 10D — Execution Tracker (complete) — **closes the Act domain (10A–10D)** |
+| **Next approved layer** | Layer 11A — Journal (opens the Grow domain) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · **Layer 10 (10A–10D)** |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 75 files, 407 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D/9E/10A–10C; rules untouched). ⚠️ integration: `npm run test:integration` — 18 files, 46 tests **written**; the 9D/9E/10A–10C tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`). ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 77 files, 424 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D/9E/10A–10D; rules untouched). ⚠️ integration: `npm run test:integration` — 18 files, 46 tests **written**; the 9D/9E/10A–10C tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`); 10D adds no new integration test — see its layer log entry. ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 10C built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 10D built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
 | **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (9E + a config hotfix). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix:** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions not deployed (needs Blaze). |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
 | **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · (no new deps in Layer 6) |
@@ -1818,6 +1818,95 @@ Redeployed to https://mastery-personal-mgmt-system.web.app/ ; `/act/routine` →
   harmless orphaned ids — no cleanup pass.
 - `listActiveRoutines` / `listRecentRoutineLogs` are bounded, client-grouped reads (same
   trade-off as habits) — no realtime, no pagination UI.
+
+### Layer 10D — Execution Tracker — ✅ complete (2026-09-02) — committed + pushed + deployed live — **closes the Act domain**
+
+A **read-only aggregation** view — no new collection (ADR-0016) — comparing planned vs
+completed vs delayed vs cancelled work, estimated vs spent time, focus quality, energy, and
+recorded reasons for non-completion, over a `Today` / `This week` period. Copy is kept
+neutral and non-shaming throughout per spec: states are reported factually ("overdue",
+"not completed", "cancelled"), and the reasons list is framed as context, not a scorecard.
+
+**Created — `src/features/execution-tracker/`:**
+- `execution-tracker.ts` — all **pure**: `periodRange(period, today)` (today = single day;
+  week = trailing 7 days inclusive); `classifyTasks(tasks, range, today)` — a task with a
+  `completedAt` in range counts as completed (on time vs. later than its due date);
+  otherwise a task counts if its due date falls in range (overdue vs. upcoming) or it was
+  cancelled in range (approximated by `updatedAt` — tasks keep no cancellation timestamp);
+  sums estimated/actual minutes and collects a `notes` list from any `resolutionReason` on
+  a completed-late / overdue / cancelled task. `summarizeHabitsForPeriod` — sums
+  `expectedDatesInRange` (10B) against completed-log dates across all non-paused habits.
+  `summarizeRoutinesForPeriod` — walks every day in range and sums `computeRoutineProgress`
+  (10C) across all non-template routines. `averageEnergyLevel` — mean `energyLevel` across
+  completed Deep Work sessions (9B), reusing focus-quality/energy signals that already
+  exist there rather than re-collecting them.
+- `use-execution-tracker.ts` — `useExecutionTracker()`: holds the period toggle and
+  composes the **existing** `useTasks` / `useHabits` / `useRoutines` / `useDeepWork` hooks
+  (no new repository calls); combines their loading/error states; memoizes the period
+  summary and a `focusEnergy` snapshot (avg focus quality, avg energy, last-7-days focus
+  minutes — from `useDeepWork`'s own stats).
+- `components/ExecutionTrackerView.tsx` — a period `Select`, then four sections (Tasks,
+  Habits, Routines, Focus & energy) of stat tiles, plus the non-completion notes list under
+  Tasks; loading / empty-safe / error states.
+- `index.ts` barrel.
+
+**Modified:**
+- `src/app/(app)/act/execution/page.tsx` renders `<ExecutionTrackerView />` (was a
+  `ModulePlaceholder`).
+- `src/features/routines/use-routines.ts` — now also returns the raw `logs` array (already
+  fetched internally) so the tracker can compute routine progress over a multi-day range,
+  not just today.
+- `docs/DATA_MODEL.md` retires the placeholder `executionLogs` line with a pointer to
+  ADR-0016 (no such collection is created).
+
+**Tests added:** `execution-tracker.test.ts` (period ranges; task classification — on-time
+vs later completion with a note, cancelled-with-reason, overdue-vs-upcoming split,
+out-of-range tasks ignored; habit expected/completed summation + paused habits excluded;
+routine step/minute summation across a range + templates excluded; average energy over
+completed sessions only), `components/ExecutionTrackerView.test.tsx` (all four sections
+render; task counts + a non-completion note; focus/energy averages; error + retry — hook
+mocked). App suite: 77 files / 424 tests. **No new integration test** — this layer writes
+no collection; its pure functions are unit-tested here, and the underlying Task / Habit /
+Routine / Deep Work repositories are already covered by their own layers' integration
+tests (ADR-0016).
+
+**Verification:** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (77/424) · `build` ✅ (47
+routes, static export, no warnings) · `format:check` ✅ · functions suite unchanged ✅ (5).
+`test:rules` not run — rules untouched.
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production npm run build` then `firebase deploy --only
+hosting,firestore:rules,firestore:indexes,storage --project mastery-personal-mgmt-system`.
+Redeployed to https://mastery-personal-mgmt-system.web.app/ ; `/act/execution` → 200.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Act → Execution Tracker**. Default period is **This week**.
+2. With some tasks (10A) completed, overdue, or cancelled with a reason recorded, habits
+   (10B) logged for a few days, and a routine (10C) with steps checked off — the Tasks
+   section shows counts across Completed on time / Completed later / Past due, still open /
+   Upcoming / Cancelled, plus estimated-vs-logged minutes.
+3. Any completed-late, overdue, or cancelled task that has a **reason** recorded (blocked /
+   cancelled resolution reason) shows under "Context recorded for these" with its title and
+   reason — framed as context, not a scorecard.
+4. Habits section shows expected-vs-completed occurrences for the period; Routines shows
+   steps and minutes completed vs. planned; Focus & energy shows your recent Deep Work
+   averages.
+5. Switch the period to **Today** → all four sections recompute for just today.
+6. This is a read-only view — there's nothing to create, edit, or archive here.
+
+**Known limitations:**
+- **"Rescheduled" is not reported** — tasks don't keep a due-date-change history, so it
+  can't be derived honestly from existing data; only completed / cancelled / overdue /
+  upcoming are shown (documented rather than faked — ADR-0016).
+- **Cancellation timing is approximated** by a task's `updatedAt` (no dedicated
+  cancellation timestamp) — editing any other field on an already-cancelled task after the
+  fact would shift which period it's attributed to.
+- **Focus & energy is not period-filtered** to match the Today/This week toggle — it always
+  shows Deep Work's own "recent sessions" / "last 7 days" figures (inherits that layer's
+  known limitation).
+- Habit/Routine sums iterate day-by-day over the range client-side (bounded to a week) —
+  fine at this scale, but not a general-purpose historical reporting engine.
+- No export, no custom date range, no per-goal/per-pillar breakdown — this is a single
+  whole-account snapshot for the two built-in periods.
 
 ---
 

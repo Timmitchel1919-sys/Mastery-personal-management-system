@@ -6,6 +6,26 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 10D — Execution Tracker — 2026-09-02 — closes the Act domain
+
+**Added**
+- `src/features/execution-tracker/` — a read-only aggregation view (no new collection,
+  ADR-0016) comparing planned vs completed vs delayed vs cancelled work over `Today` /
+  `This week`: `periodRange`, `classifyTasks` (on-time/later completion, cancelled,
+  overdue/upcoming, estimated vs actual minutes, non-completion notes from
+  `resolutionReason`), `summarizeHabitsForPeriod`, `summarizeRoutinesForPeriod`,
+  `averageEnergyLevel` (all pure); `useExecutionTracker` (composes the existing
+  `useTasks` / `useHabits` / `useRoutines` / `useDeepWork` hooks); `ExecutionTrackerView`
+  (period selector + Tasks / Habits / Routines / Focus & energy sections). Copy is
+  neutral and non-shaming per spec.
+- `/act/execution` renders the real feature (was a placeholder).
+- Tests: pure-function unit tests; `ExecutionTrackerView` (mocked hook). No new
+  integration test — this layer introduces no collection (ADR-0016).
+
+**Changed**
+- `src/features/routines/use-routines.ts` now also returns the raw `logs` array.
+- `docs/DATA_MODEL.md` retires the placeholder `executionLogs` line (see ADR-0016).
+
 ### Layer 10C — Daily Routine — 2026-09-02
 
 **Added**

@@ -332,3 +332,35 @@ usage, no `rewrites`/`redirects`/`headers` in `next.config`.
 - `NEXT_PUBLIC_APP_ENV` is still `development` in the release build; a prod env file / CI
   secret store (Layer 22) fixes that.
 - ADR-0003 stays on record as the intended end state for a server-rendered frontend.
+
+---
+
+## ADR-0016 — Execution Tracker is a read-only aggregation; no `executionLogs` collection
+**Date:** 2026-09-02 · **Status:** accepted · **Layer:** 10D — closes the Act domain
+
+**Context.** `docs/DATA_MODEL.md` reserved `users/{uid}/executionLogs/{logId}` since Layer 0
+for the Execution Tracker (spec: compare planned vs completed vs delayed vs cancelled vs
+rescheduled work; estimated vs spent time; focus quality; energy; reasons for
+non-completion). By Layer 10D, every one of those facts already lives somewhere: task
+status/dates/estimate/actual/`resolutionReason` (10A), habit schedule + logs (10B), routine
+steps + logs (10C), and focus quality / energy on Deep Work sessions (9B). Writing a
+parallel `executionLogs` record would duplicate state that's already the source of truth
+elsewhere, with the same drift risk the codebase has already ruled out twice — the Deep
+Work session score (9B) and habit streaks (10B) are both computed on read for exactly this
+reason.
+
+**Decision.** `src/features/execution-tracker/` adds **no new Firestore collection**. It
+is pure aggregation: `execution-tracker.ts` classifies/sums existing Task, Habit(+log),
+Routine(+log), and Deep Work data for a period (`today` / `week`); `use-execution-tracker.ts`
+composes the existing `useTasks` / `useHabits` / `useRoutines` / `useDeepWork` hooks and
+memoizes the summary; `ExecutionTrackerView` renders it. "Rescheduled" is **not** reported
+as its own category — tasks don't keep a due-date-change history, so it can't be derived
+honestly; "cancelled" timing is approximated from `updatedAt` (tasks have no dedicated
+cancellation timestamp). Both are recorded as known limitations rather than faked.
+`docs/DATA_MODEL.md`'s `executionLogs` line is retired in favor of a note pointing here.
+
+**Consequences.** No composite indexes, no new write path, no risk of the tracker
+disagreeing with the records it's summarizing. If a future layer needs durable historical
+snapshots (e.g. "what did the tracker say last month" after source records changed), that
+would justify a real `executionLogs` collection — revisit with a new ADR rather than
+retrofitting this one.

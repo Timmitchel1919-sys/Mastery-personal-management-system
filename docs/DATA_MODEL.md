@@ -39,7 +39,8 @@ users/{uid}/habits/{habitId}                   pillars (required), goal link, fr
 users/{uid}/habitLogs/{logId}                  one completed|missed log per habit per day (Layer 10B)
 users/{uid}/routines/{routineId}               routineType (morning|work-study|evening|custom), embedded ordered steps[] (title, estimatedMinutes, optional habit link), isTemplate flag (Layer 10C)
 users/{uid}/routineLogs/{logId}                one log per routine per day: completedStepIds[] (Layer 10C)
-users/{uid}/executionLogs/{logId}
+(no `executionLogs` collection — the Execution Tracker (Layer 10D) is a read-only aggregation
+over tasks/habits/routines/focusSessions; nothing new is written. See ADR-0016.)
 
 # Grow
 users/{uid}/journalEntries/{entryId}

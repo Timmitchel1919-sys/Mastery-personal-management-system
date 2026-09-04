@@ -122,6 +122,7 @@ export function useRoutines() {
   return {
     status,
     routines,
+    logs,
     todayLogByRoutine,
     stats,
     error,
