@@ -8,13 +8,13 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 11A — Journal (complete) — **opens the Grow domain** |
-| **Next approved layer** | Layer 11B — Learning |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · **Layer 11A** |
+| **Current layer** | Layer 11B — Learning (complete) |
+| **Next approved layer** | Layer 11C — Reading |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · **Layer 11 (11A–11B)** |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 81 files, 447 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D–11A; rules untouched). ⚠️ integration: `npm run test:integration` — 19 files, 48 tests **written**; the 9D/9E/10A–10C/11A tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`); 10D adds no new integration test — see its layer log entry. ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 84 files, 468 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D–11B; rules untouched). ⚠️ integration: `npm run test:integration` — 20 files, 50 tests **written**; the 9D/9E/10A–10C/11A–11B tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`); 10D adds no new integration test — see its layer log entry. ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 11A built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 11B built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
 | **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (9E + a config hotfix). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix:** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions not deployed (needs Blaze). |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
 | **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · (no new deps in Layer 6) |
@@ -2006,6 +2006,105 @@ Redeployed to https://mastery-personal-mgmt-system.web.app/ ; `/grow/journal` �
   no export.
 - `listRecentJournalEntries` is bounded and filtered client-side — no realtime, no
   pagination UI once an account has more than 200 active entries.
+
+### Layer 11B — Learning — ✅ complete (2026-09-02) — committed + pushed + deployed live
+
+Courses, study plans, book studies, and certification tracks over `users/{uid}/learningItems`
+with an embedded, ordered **lesson checklist** (one-time, toggled directly on the item —
+unlike the daily-recurring routine steps from 10C), resources, assessment notes, and
+goal / life-pillar / skill linkage (skill is a bare id for now — Skills ships in 11D). Time
+spent is tracked separately as `users/{uid}/studySessions`, an append-only log analogous to
+Deep Work sessions (9B), so a learning item's total study time is **derived**, never
+duplicated onto the item.
+
+**Created — `src/features/learning/`:**
+- `schema.ts` — `LEARNING_ITEM_TYPES` (course / book-study / skill-practice /
+  certification / other), `LEARNING_STATUSES` (not-started / in-progress / completed /
+  paused). `learningItemSchema` (stored: title, description, type, status, provider,
+  target completion date, `resources: string[]`, `lessons: {id,title,completed}[]` ≤50,
+  assessment notes, notes, 0–3 pillars, goal/skill links). Transform-free
+  `learningItemCreateSchema`, `learningItemUpdateSchema` (`.partial()`).
+  `learningItemFormSchema` (`resourcesText` newline list) + `learningItemInputFromForm`
+  (always nulls `skillId` — no picker until 11D). `emptyLesson()` / `lessonProgress()`
+  (pure) mirror the roadmap-phase / routine-step id + progress pattern. Separate
+  `studySessionSchema` family (`learningItemId` nullable, `date`, 1–600 `minutes`, notes).
+- `learning-item-repository.ts` / `study-session-repository.ts` — `learningItemRepository`
+  + `listActiveLearningItems`; `studySessionRepository` (collection `studySessions`,
+  `date desc`) + `listRecentStudySessions(limit=200)`.
+- `learning-stats.ts` — **pure** `summarizeLearning` (item counts by status, total +
+  last-7-days study minutes) and `studyMinutesForItem` (sum of sessions for one item).
+- `use-learning.ts` — `useLearning()`: loads items + sessions together; create / update /
+  archive for items; `toggleLesson(item, lessonId)` flips one lesson's `completed` via a
+  normal `update` (no separate log — lessons are a one-time checklist, not recurring);
+  `logSession` / `removeSession` for study sessions; memoized `studyMinutesByItem` and
+  `stats`.
+- `components/` — `LearningItemForm` (RHF + zod; type/status Selects, provider, target
+  date, goal Select, pillars, a `useFieldArray` lesson checklist editor, resources
+  textarea, assessment/notes textareas), `LearningItemDialog`, `LearningItemCard` (type +
+  status + "N/M lessons" badges, a `Progress` bar, provider/target/study-minutes/goal-link
+  row, a live lesson checklist, resource links — rendered as `<a>` when URL-shaped, plain
+  text otherwise, assessment notes, pillar badges, archive-confirm), `LearningStats`
+  tiles, `LogSessionDialog` (learning-item Select defaulting to "General study", date,
+  minutes, notes), `RecentSessionsList` (title/date/minutes + remove), `LearningView`
+  ("New item" + "Log session" actions, stats, item grid, a "Recent study sessions"
+  section; loading / empty / error).
+- `index.ts` barrel.
+
+**Modified:** `src/app/(app)/grow/learning/page.tsx` renders `<LearningView />` (was a
+`ModulePlaceholder`). `docs/DATA_MODEL.md` annotates `learningItems` + `studySessions`.
+Reuses `useGoalOptions`, `PillarSelect` / `PillarBadges`.
+
+**Tests added:** `schema.test.ts` (create requires title + every lesson to have a title,
+enum bounds, zero lessons/resources ok, `emptyLesson`/`lessonProgress`, form → input
+resource-line-splitting + `skillId` always null, study-session form/create incl. rejecting
+zero minutes, stored record), `learning-stats.test.ts` (empty; status counts + 7-day vs
+total study minutes; `studyMinutesForItem` scoped to one item),
+`components/LearningView.test.tsx` (empty; item card with type · status · lesson checklist
+· goal link, ticking a lesson calls `toggleLesson`; recent sessions list + remove; log-session
+and new-item dialogs open; error + retry — hook mocked), `tests/integration/learning.test.ts`
+(item linked to a goal; toggling a lesson persists; a study session logs and survives the
+item's archival; user scoping — emulators; **written, not executed in-session** — same
+emulator restriction as prior layers this session). App suite: 84 files / 468 tests.
+
+**Verification:** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (84/468) · `build` ✅ (47
+routes, static export, no warnings) · `format:check` ✅ · functions suite unchanged ✅ (5).
+`test:rules` not run — rules untouched. `test:integration` — see above.
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production npm run build` then `firebase deploy --only
+hosting,firestore:rules,firestore:indexes,storage --project mastery-personal-mgmt-system`.
+Redeployed to https://mastery-personal-mgmt-system.web.app/ ; `/grow/learning` → 200.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Grow → Learning**. Empty state → "Add your first item".
+2. **New item**: title "Advanced TypeScript", type **Course**, status **In progress**, a
+   provider, a target date, a couple of lessons, a resource URL per line → **Add item**.
+   The card shows the type/status badges, a progress bar, the lesson checklist, and the
+   resource as a clickable link.
+3. Tick a lesson's checkbox on the card → the "N/M lessons" badge and progress bar update
+   immediately.
+4. Click **Log session** → pick the item (or leave "General study"), a date, minutes, a
+   note → **Log session**. It appears under "Recent study sessions", and the card's "N min
+   studied" figure and the stat tiles update.
+5. Remove a session from the recent list → the study-minutes figures drop accordingly; the
+   learning item itself is unaffected.
+6. Edit an item → change status to **Completed** → **Save changes**; archive an item
+   (trash → confirm) → gone from the list; its study sessions remain in Firestore and keep
+   counting toward the "total" stat.
+7. Firestore console → `users/{uid}/learningItems/{id}` (`lessons[]` with stable `id`s,
+   `resources[]`, `skillId: null`) and `users/{uid}/studySessions/{id}`.
+
+**Known limitations:**
+- **`skillId` has no picker yet** — it's always `null`; Skills ships in Layer 11D, at
+  which point a picker can be wired the same way milestones/habits gained one.
+- **Assessments are a single free-text field** (`assessmentNotes`), not a structured,
+  scorable list — kept simple rather than adding a third embedded array alongside lessons
+  and resources.
+- **No per-lesson notes or per-lesson time tracking** — notes are one field for the whole
+  item; study sessions link to the item as a whole, not to an individual lesson.
+- `resources` are plain strings rendered as links when URL-shaped — no favicon/preview
+  fetching, no validation that a link resolves.
+- `listActiveLearningItems` / `listRecentStudySessions` are bounded, client-filtered reads
+  (same trade-off as habits/routines) — no realtime, no pagination UI.
 
 ---
 

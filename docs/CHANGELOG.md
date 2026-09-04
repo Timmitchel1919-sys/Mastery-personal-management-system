@@ -6,6 +6,29 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 11B — Learning — 2026-09-02
+
+**Added**
+- `src/features/learning/` — courses / study plans / book studies / certification tracks
+  over `users/{uid}/learningItems`: `learningItemSchema` + create/update/form +
+  `learningItemInputFromForm` (type, status, provider, target date, embedded ordered
+  `lessons` checklist, `resources`, assessment notes, goal/pillar links, `skillId` reserved
+  for Layer 11D); `emptyLesson` / `lessonProgress` (pure); separate `studySessionSchema`
+  family (append-only time log, analogous to Deep Work sessions); `summarizeLearning` +
+  `studyMinutesForItem` (pure — study time is derived, never duplicated onto the item);
+  `learningItemRepository` + `listActiveLearningItems`, `studySessionRepository` +
+  `listRecentStudySessions`; `useLearning` (`toggleLesson`, `logSession`,
+  `removeSession`); UI (`LearningView` with item grid + a recent-sessions section,
+  `LearningItemForm` with a `useFieldArray` lesson editor, `LearningItemDialog`,
+  `LearningItemCard` with a live lesson checklist and linked resources, `LogSessionDialog`,
+  `RecentSessionsList`).
+- `/grow/learning` renders the real feature (was a placeholder).
+- Tests: schema, stats unit tests; `LearningView` (mocked hook); a learning emulator
+  integration test (written; not executed in-session — Firestore emulator).
+
+**Changed**
+- `docs/DATA_MODEL.md` annotation for `learningItems` + `studySessions`.
+
 ### Layer 11A — Journal — 2026-09-02 — opens the Grow domain
 
 **Added**

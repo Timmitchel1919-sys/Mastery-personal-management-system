@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { LearningView } from "@/features/learning";
 
-export const metadata = { title: "Learning" };
+export const metadata: Metadata = { title: "Learning" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Learning"
-      description="Courses, study plans, lessons, and assessments."
-      plannedLayer={11}
-    />
-  );
+  return <LearningView />;
 }
