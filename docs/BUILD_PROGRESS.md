@@ -8,13 +8,13 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 10A — Tasks (complete) — **opens the Act domain** |
-| **Next approved layer** | Layer 10B — Habits |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · **Layer 10A** |
+| **Current layer** | Layer 10B — Habits (complete) |
+| **Next approved layer** | Layer 10C — Daily Routine |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · **Layer 10 (10A–10B)** |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 66 files, 358 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D/9E/10A; rules untouched). ⚠️ integration: `npm run test:integration` — 16 files, 42 tests **written**; the 9D/9E/10A tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`). ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 71 files, 387 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D/9E/10A/10B; rules untouched). ⚠️ integration: `npm run test:integration` — 17 files, 44 tests **written**; the 9D/9E/10A/10B tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`). ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 10A built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 10B built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
 | **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (9E + a config hotfix). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix:** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions not deployed (needs Blaze). |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
 | **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · (no new deps in Layer 6) |
@@ -1619,6 +1619,107 @@ Redeployed to https://mastery-personal-mgmt-system.web.app/ ; `/act/tasks` → 2
   (Pomodoro / Deep Work links are not wired to tasks yet).
 - Links are bare id strings with no referential integrity; a link to an archived
   goal/project/milestone simply shows no chip (pickers list active records only).
+
+### Layer 10B — Habits — ✅ complete (2026-09-02) — committed + pushed + deployed live
+
+A streak tracker over `users/{uid}/habits` + `users/{uid}/habitLogs`, suited to spiritual
+disciplines, health habits, learning, and routines. A habit carries a life-pillar link
+(required), an optional goal link, a schedule (daily every-N-days / weekly weekdays /
+monthly days-of-month), a target + unit, a reminder time, and a pause state. **Streaks are
+computed, not stored** — the same "derived, never persisted" pattern already used for the
+Deep Work session score (Layer 9B) — so they can never drift out of sync with the logs.
+
+**Created — `src/features/habits/`:**
+- `schema.ts` — `HABIT_FREQUENCIES` (daily/weekly/monthly), `HABIT_STATUSES`
+  (active/paused). `habitSchema` (stored; `pillarIds` required via `lifePillarsSchema`),
+  transform-free `habitCreateSchema`, `habitUpdateSchema` (`.partial()`). `habitFormSchema`
+  (`daysOfMonthText` free-text field) + `habitInputFromForm` (keeps only the
+  interval/weekdays/daysOfMonth relevant to the chosen frequency; parses, dedupes, sorts,
+  and clamps the days-of-month text to 1–31). Separate `habitLogSchema` family — one log
+  per habit per day, `completed` or `missed`.
+- `habit-schedule.ts` — **pure** `isExpectedOn(habit, anchor, date)` and
+  `expectedDatesInRange` (bounded iteration, mirrors the calendar recurrence module's
+  approach) — the schedule math shared by streaks and the recent-days strip.
+- `habit-streak.ts` — **pure** `computeHabitStreaks` (current + longest streak: a run is
+  *consecutive expected occurrences* logged `completed` — gaps on non-expected days don't
+  break it) and `recentDayStates` (last N days as completed/missed/not-expected, for a dot
+  strip). `anchorFor` bounds the lookback to 365 days so a long-lived habit stays cheap.
+- `habit-stats.ts` — **pure** `summarizeHabits` (active/paused habit counts, due-today,
+  completed-today, best current streak across all habits).
+- `habit-repository.ts` / `habit-log-repository.ts` — `habitRepository` +
+  `listActiveHabits`; `habitLogRepository` + `listRecentHabitLogs(limit=500)` (bounded,
+  grouped by `habitId` client-side to avoid a composite `where+orderBy` index).
+- `use-habits.ts` — `useHabits()`: loads habits + logs together; create/update/archive for
+  habits; `setDayStatus(habitId, date, status)` **upserts** the one log for that day (finds
+  an existing log in state, updates it, else creates); memoized `logsByHabit`,
+  `streaksByHabit`, `recentDaysByHabit`, `stats`.
+- `components/` — `HabitForm` (RHF + zod; pillars, goal link, frequency Select with a
+  conditional every-N-days input / weekday toggle row / days-of-month text field, target +
+  unit, `type="time"` reminder, status), `HabitDialog`, `HabitCard` (status + schedule +
+  streak badges, a 7-day dot strip, best-streak/target/reminder/link row, pillar badges,
+  **"Done today" / "Missed" quick-log buttons**, edit + archive-confirm), `HabitStats`
+  tiles, `HabitsView` (stats + card grid; `useMounted`-gated "today" for hydration safety;
+  loading / empty / error).
+- `index.ts` barrel.
+
+**Modified:** `src/app/(app)/act/habits/page.tsx` renders `<HabitsView />` (was a
+`ModulePlaceholder`). `docs/DATA_MODEL.md` annotates `habits` + `habitLogs`. Reuses
+`useGoalOptions`, `PillarSelect` / `PillarBadges`, `useMounted`.
+
+**Tests added:** `habit-schedule.test.ts` (daily interval math, weekly weekday matching +
+"no weekdays = every day", monthly days-of-month + empty-defaults-to-day-1, range
+expansion), `habit-streak.test.ts` (perfect run, a missed day resets current but keeps the
+earlier longest, empty logs, weekly-only-expected-days, recent-day states),
+`schema.test.ts` (create requires title + ≥1 pillar, enum/reminder-format checks, form →
+input frequency-scoped mapping + days-of-month dedupe, habit-log schema), `habit-stats.test.ts`
+(zero state, active/paused split + due/done-today + best streak, a habit not due today is
+excluded), `components/HabitsView.test.tsx` (empty; card with schedule · streak · link ·
+today's log state; "Done today" calls `setDayStatus`; new-habit dialog; error + retry —
+hooks mocked), `tests/integration/habits.test.ts` (habit linked to a goal; three days
+logged → streak of 3; correcting a day to `missed` drops the current streak but keeps the
+earlier longest; archive; user scoping — emulators; **written, not executed in-session**).
+App suite: 71 files / 387 tests.
+
+**Verification:** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (71/387) · `build` ✅ (47
+routes, static export, no warnings) · `format:check` ✅ · functions suite unchanged ✅ (5).
+`test:rules` not run — rules untouched. `test:integration` — see above.
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production npm run build` then `firebase deploy --only
+hosting,firestore:rules,firestore:indexes,storage --project mastery-personal-mgmt-system`.
+Redeployed to https://mastery-personal-mgmt-system.web.app/ ; `/act/habits` → 200.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Act → Habits**. Empty state → "Add your first habit".
+2. **New habit**: title, pick at least one life pillar (required), choose **Daily** →
+   leave "Every N days" at 1, set a target + unit, a reminder time → **Add habit**. The
+   card shows Active + Daily badges, a 7-day dot strip, and Done today / Missed buttons.
+3. Click **Done today** → the button highlights, a green dot appears for today in the
+   strip, and the "Done today" stat tile increments. Click **Missed** instead → it flips to
+   a red dot and no streak credit.
+4. Log a few consecutive days (edit the habit isn't needed — the quick buttons write
+   today's log) — watch the **N streak** badge and "best streak N" text update. Break the
+   chain (click Missed) → the streak badge disappears but "best streak" keeps the earlier
+   number.
+5. Create a **Weekly** habit and toggle specific weekdays → the dot strip only expects
+   those days; other days show as grey (not-expected) rather than red.
+6. Set a habit to **Paused** in the edit dialog → its status badge changes; archiving hides
+   it entirely (its logs remain).
+7. Firestore console → `users/{uid}/habits/{id}` (frequency/schedule fields, no streak
+   field — it's computed) and `users/{uid}/habitLogs/{id}` (one per habit per day).
+
+**Known limitations:**
+- **Streaks recompute on every render** from the full log set rather than being cached —
+  fine at this scale (bounded to 500 logs / 365-day lookback), but revisit if a user
+  accumulates years of daily logs across many habits.
+- **No historical status timeline** — pausing/resuming doesn't retroactively adjust past
+  expected days; a long unpaused gap with no logs will show as a broken streak, computed
+  honestly against the schedule rather than "frozen" while away.
+- Monthly scheduling only understands specific days-of-month (not "last day" / "first
+  Monday" style rules); weekly with no weekdays selected behaves like daily.
+- The quick-log buttons only ever write **today's** log — correcting a past day, or the
+  `value` (vs. `target`) and `notes` fields on a log, isn't exposed in the UI yet.
+- Reminder times are stored only — delivery is Layer 17. `goal` linkage is a real id
+  (archived goals show no chip); `task`/routine linkage from the spec waits for 10C/10D.
 
 ---
 

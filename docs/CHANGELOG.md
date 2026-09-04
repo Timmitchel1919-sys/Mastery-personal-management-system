@@ -6,6 +6,27 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 10B — Habits — 2026-09-02
+
+**Added**
+- `src/features/habits/` — a streak tracker over `users/{uid}/habits` +
+  `users/{uid}/habitLogs`: `habitSchema` + create/update/form + `habitInputFromForm`
+  (required pillars, goal link, daily/weekly/monthly schedule, target/unit, reminder time,
+  active/paused status); `habitLogSchema` family (one completed/missed log per habit per
+  day); `isExpectedOn` / `expectedDatesInRange` (pure schedule math); `computeHabitStreaks`
+  / `recentDayStates` (pure — streaks are **computed from logs, never stored**, like the
+  Deep Work session score in Layer 9B); `summarizeHabits` (pure); `habitRepository` +
+  `listActiveHabits`, `habitLogRepository` + `listRecentHabitLogs`; `useHabits`
+  (`setDayStatus` upserts the day's log); UI (`HabitsView` stats + grid, `HabitForm` with a
+  frequency-conditional schedule editor, `HabitDialog`, `HabitCard` with a 7-day dot strip
+  and Done-today/Missed quick-log buttons).
+- `/act/habits` renders the real feature (was a placeholder).
+- Tests: schedule, streak, stats, schema unit tests; `HabitsView` (mocked hooks); a habits
+  emulator integration test (written; not executed in-session — Firestore emulator).
+
+**Changed**
+- `docs/DATA_MODEL.md` annotation for `habits` + `habitLogs`.
+
 ### Layer 10A — Tasks — 2026-09-02 — opens the Act domain
 
 **Added**

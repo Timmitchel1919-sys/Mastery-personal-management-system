@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { HabitsView } from "@/features/habits";
 
-export const metadata = { title: "Habits" };
+export const metadata: Metadata = { title: "Habits" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Habits"
-      description="Habit tracking with streaks, schedules, and progress history."
-      plannedLayer={10}
-    />
-  );
+  return <HabitsView />;
 }
