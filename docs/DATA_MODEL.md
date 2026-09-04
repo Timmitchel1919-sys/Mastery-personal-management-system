@@ -43,7 +43,7 @@ users/{uid}/routineLogs/{logId}                one log per routine per day: comp
 over tasks/habits/routines/focusSessions; nothing new is written. See ADR-0016.)
 
 # Grow
-users/{uid}/journalEntries/{entryId}
+users/{uid}/journalEntries/{entryId}           entryType (free-form|guided-reflection|daily/weekly-reflection|gratitude|lessons-learned|decision), mood/energy (1-5), goal/pillar links, tags, isPrivate (display-only collapse flag) (Layer 11A)
 users/{uid}/learningItems/{itemId}
 users/{uid}/books/{bookId}
 users/{uid}/skills/{skillId}

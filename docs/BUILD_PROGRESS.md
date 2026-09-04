@@ -8,13 +8,13 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 10D — Execution Tracker (complete) — **closes the Act domain (10A–10D)** |
-| **Next approved layer** | Layer 11A — Journal (opens the Grow domain) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · **Layer 10 (10A–10D)** |
+| **Current layer** | Layer 11A — Journal (complete) — **opens the Grow domain** |
+| **Next approved layer** | Layer 11B — Learning |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · **Layer 11A** |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 77 files, 424 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D/9E/10A–10D; rules untouched). ⚠️ integration: `npm run test:integration` — 18 files, 46 tests **written**; the 9D/9E/10A–10C tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`); 10D adds no new integration test — see its layer log entry. ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 81 files, 447 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D–11A; rules untouched). ⚠️ integration: `npm run test:integration` — 19 files, 48 tests **written**; the 9D/9E/10A–10C/11A tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`); 10D adds no new integration test — see its layer log entry. ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 10D built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 11A built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
 | **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (9E + a config hotfix). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix:** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions not deployed (needs Blaze). |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
 | **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · (no new deps in Layer 6) |
@@ -1907,6 +1907,105 @@ Redeployed to https://mastery-personal-mgmt-system.web.app/ ; `/act/execution` �
   fine at this scale, but not a general-purpose historical reporting engine.
 - No export, no custom date range, no per-goal/per-pillar breakdown — this is a single
   whole-account snapshot for the two built-in periods.
+
+### Layer 11A — Journal — ✅ complete (2026-09-02) — committed + pushed + deployed live — **opens the Grow domain**
+
+One entry shape over `users/{uid}/journalEntries` covering free-form writing, guided
+reflection, daily/weekly reflection, gratitude, lessons learned, and decision journaling —
+`entryType` mainly drives which prompt the content field shows, plus a gratitude entry gets
+a short list field. Mood/energy metadata, goal/pillar linkage, tags, client-side search, and
+a lightweight per-entry privacy (collapse) flag round out the spec.
+
+**Created — `src/features/journal/`:**
+- `schema.ts` — `JOURNAL_ENTRY_TYPES` (free-form / guided-reflection / daily-reflection /
+  weekly-reflection / gratitude / lessons-learned / decision) +
+  `JOURNAL_ENTRY_TYPE_PROMPT` (a starting prompt per type, shown as the content field's
+  placeholder — not stored). `journalEntrySchema` (stored: title, `entryType`,
+  `entryDate`, `content`, `gratitudeItems` 0–10, 1–5 `moodRating`/`energyLevel`, 0–3
+  `pillarIds`, `goalId`, `tags`, `isPrivate`). Transform-free `journalEntryCreateSchema`
+  (`.refine`: needs either `content` or a gratitude item), `journalEntryUpdateSchema`
+  (`.partial()`). `journalEntryFormSchema` (`gratitudeItemsText` / `tagsText` free-text) +
+  `journalEntryInputFromForm` — keeps gratitude items only for a gratitude entry, dedupes
+  tags.
+- `journal-repository.ts` — `journalRepository` (collection `journalEntries`,
+  `createdAt desc` — a feed, unlike the Plan/Act domains' `asc` lists) +
+  `listRecentJournalEntries(limit=200)`.
+- `journal-search.ts` — **pure** `filterJournalEntries(entries, {query, entryType})` — a
+  client-side substring match (title/content/tags/gratitude items) plus an optional type
+  filter, over the already-loaded bounded list (no search infrastructure).
+- `journal-stats.ts` — **pure** `summarizeJournal` (total, entries in the last 7 days by
+  `entryDate`, average mood/energy, distinct tag count).
+- `use-journal.ts` — `useJournal()`: load + create/update/archive + reload; local
+  `filter` state; memoized `filteredItems` and `stats`.
+- `components/` — `JournalEntryForm` (RHF + zod; type Select swaps the content
+  placeholder and reveals a gratitude-items textarea; date, mood/energy 1–5 Selects, goal
+  Select, `PillarSelect`, tags, a `Switch` for "Private — collapse this entry by
+  default"), `JournalEntryDialog`, `JournalEntryCard` (type + Private badges, entry date,
+  an eye/eye-off toggle that collapses/reveals a private entry's body, gratitude list,
+  mood/energy/goal-link row, tags, pillar badges, archive-confirm), `JournalStats` tiles,
+  `JournalView` (stats + a search box + type filter + card feed; loading / empty /
+  no-matches / error).
+- `index.ts` barrel.
+
+**Modified:** `src/app/(app)/grow/journal/page.tsx` renders `<JournalView />` (was a
+`ModulePlaceholder`). `docs/DATA_MODEL.md` annotates `journalEntries`. Reuses
+`useGoalOptions`, `PillarSelect` / `PillarBadges`.
+
+**Tests added:** `schema.test.ts` (create needs content or a gratitude item, enum/rating
+bounds, blank title + empty pillars ok, form refine + `journalEntryInputFromForm`
+type-scoped gratitude mapping + tag dedupe, stored record), `journal-search.test.ts`
+(no-filter passthrough, substring match across title/content/tags/gratitude items,
+entry-type filter, combined filter+type), `journal-stats.test.ts` (empty state, averages +
+last-7-days count + distinct tags), `components/JournalView.test.tsx` (empty state; card
+with type · mood/energy · goal link · tags; "no entries match" when a filter excludes
+everything; typing updates the search filter; new-entry dialog; error + retry — hook
+mocked), `tests/integration/journal.test.ts` (entry linked to a goal; newest-first listing;
+update mood + privacy; archive; user scoping — emulators; **written, not executed
+in-session** — same emulator restriction as prior layers this session). App suite: 81
+files / 447 tests.
+
+**Verification:** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (81/447) · `build` ✅ (47
+routes, static export, no warnings) · `format:check` ✅ · functions suite unchanged ✅ (5).
+`test:rules` not run — rules untouched. `test:integration` — see above.
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production npm run build` then `firebase deploy --only
+hosting,firestore:rules,firestore:indexes,storage --project mastery-personal-mgmt-system`.
+Redeployed to https://mastery-personal-mgmt-system.web.app/ ; `/grow/journal` → 200.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Grow → Journal**. Empty state → "Write your first entry".
+2. **New entry**: leave type at **Free-form**, write something, pick a mood/energy, add a
+   tag → **Add entry**. The card shows the type badge, date, mood/energy, and the tag.
+3. Create a **Gratitude** entry → a "Grateful for" textarea appears (one item per line)
+   above the main content field; the card renders the items as a bulleted list.
+4. Switch type to **Daily reflection** / **Decision journal** etc. → the content field's
+   placeholder changes to a prompt for that type, guiding what to write without forcing a
+   rigid structure.
+5. Toggle **Private** on an entry → its card shows a "Private" badge and its body is
+   collapsed behind an eye icon by default; click the icon to reveal/hide it in that
+   session.
+6. Use the search box and the type filter above the feed → the list narrows to matches;
+   clearing both shows everything again.
+7. Edit → change mood/tags → **Save changes**. Archive (trash → confirm) → gone; reload →
+   persists, feed stays newest-first.
+8. Firestore console → `users/{uid}/journalEntries/{id}` with `entryType`, `entryDate`,
+   `moodRating`/`energyLevel`, `tags`, `isPrivate`, audit fields.
+
+**Known limitations:**
+- **`isPrivate` is display-only** — it collapses the entry in this UI; it does not encrypt
+  the record or restrict Firestore access beyond the standard owner-only rule already
+  enforced for every record, and it is unrelated to the Recovery Center's privacy gate
+  (Layer 15), which is a separate, more isolated system.
+- **No per-prompt structure** — "guided reflection" and "decision journal" only change the
+  placeholder prompt over one free-text field; there's no multi-question Q&A form or
+  structured situation/decision/outcome breakdown (kept out of scope to avoid a much
+  larger editor).
+- Search is a client-side substring match over the bounded 200-entry list — no full-text
+  search service, no ranking, no matching across archived entries.
+- No entry-to-entry linking (e.g. a decision entry referencing an earlier reflection), and
+  no export.
+- `listRecentJournalEntries` is bounded and filtered client-side — no realtime, no
+  pagination UI once an account has more than 200 active entries.
 
 ---
 

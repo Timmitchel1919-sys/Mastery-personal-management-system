@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { JournalView } from "@/features/journal";
 
-export const metadata = { title: "Journal" };
+export const metadata: Metadata = { title: "Journal" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Journal"
-      description="Free-form and guided reflection with mood and energy metadata."
-      plannedLayer={11}
-    />
-  );
+  return <JournalView />;
 }

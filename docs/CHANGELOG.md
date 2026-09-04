@@ -6,6 +6,25 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 11A — Journal — 2026-09-02 — opens the Grow domain
+
+**Added**
+- `src/features/journal/` — one entry shape over `users/{uid}/journalEntries` covering
+  free-form / guided-reflection / daily-reflection / weekly-reflection / gratitude /
+  lessons-learned / decision entries: `journalEntrySchema` + create/update/form +
+  `journalEntryInputFromForm` (entry type drives a content placeholder + a gratitude-items
+  field; mood/energy 1–5, goal/pillar links, tags, a display-only `isPrivate` flag);
+  `filterJournalEntries` (pure client-side search + type filter); `summarizeJournal`
+  (pure); `journalRepository` + `listRecentJournalEntries`; `useJournal`; UI (`JournalView`
+  with a search box + type filter, `JournalEntryForm`, `JournalEntryDialog`,
+  `JournalEntryCard` with a private-entry collapse/reveal toggle).
+- `/grow/journal` renders the real feature (was a placeholder).
+- Tests: schema, search, stats unit tests; `JournalView` (mocked hook); a journal emulator
+  integration test (written; not executed in-session — Firestore emulator).
+
+**Changed**
+- `docs/DATA_MODEL.md` annotation for `journalEntries`.
+
 ### Layer 10D — Execution Tracker — 2026-09-02 — closes the Act domain
 
 **Added**
