@@ -26,3 +26,13 @@ export async function listActiveHabits(limit = 100): Promise<Habit[]> {
   });
   return page.items.filter((habit) => habit.status === "active");
 }
+
+export interface HabitOption {
+  id: string;
+  title: string;
+}
+
+/** Active habits as `{ id, title }` — for pickers that link something to a habit. */
+export async function listHabitOptions(): Promise<HabitOption[]> {
+  return (await listActiveHabits()).map((habit) => ({ id: habit.id, title: habit.title }));
+}

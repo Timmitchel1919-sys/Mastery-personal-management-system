@@ -37,7 +37,8 @@ users/{uid}/priorityMatrixItems/{itemId}       Eisenhower matrix: one of 4 quadr
 users/{uid}/tasks/{taskId}                     status, priority, start/due dates, pillars, goal/project/milestone/parent-task links, light recurrence rule, estimate/actual minutes, energy, context, tags, completedAt, resolution reason (Layer 10A)
 users/{uid}/habits/{habitId}                   pillars (required), goal link, frequency/schedule (daily interval | weekly weekdays | monthly days-of-month), target/unit, reminder time, pause state; streak is computed from logs, not stored (Layer 10B)
 users/{uid}/habitLogs/{logId}                  one completed|missed log per habit per day (Layer 10B)
-users/{uid}/routines/{routineId}
+users/{uid}/routines/{routineId}               routineType (morning|work-study|evening|custom), embedded ordered steps[] (title, estimatedMinutes, optional habit link), isTemplate flag (Layer 10C)
+users/{uid}/routineLogs/{logId}                one log per routine per day: completedStepIds[] (Layer 10C)
 users/{uid}/executionLogs/{logId}
 
 # Grow

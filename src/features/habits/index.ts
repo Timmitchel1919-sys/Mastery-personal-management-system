@@ -35,7 +35,13 @@ export {
   type DayState,
 } from "./habit-streak";
 export { summarizeHabits, type HabitsStats } from "./habit-stats";
-export { habitRepository, listActiveHabits } from "./habit-repository";
+export {
+  habitRepository,
+  listActiveHabits,
+  listHabitOptions,
+  type HabitOption,
+} from "./habit-repository";
 export { habitLogRepository, listRecentHabitLogs } from "./habit-log-repository";
 export { useHabits } from "./use-habits";
+export { useHabitOptions } from "./use-habit-options";
 export { HabitsView } from "./components/HabitsView";

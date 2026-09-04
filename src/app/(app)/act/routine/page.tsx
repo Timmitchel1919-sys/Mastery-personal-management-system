@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { RoutinesView } from "@/features/routines";
 
-export const metadata = { title: "Daily Routine" };
+export const metadata: Metadata = { title: "Daily Routine" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Daily Routine"
-      description="Morning, work, and evening routines from reusable templates."
-      plannedLayer={10}
-    />
-  );
+  return <RoutinesView />;
 }

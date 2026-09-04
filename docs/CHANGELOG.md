@@ -6,6 +6,28 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 10C — Daily Routine — 2026-09-02
+
+**Added**
+- `src/features/routines/` — ordered checklists over `users/{uid}/routines` +
+  `users/{uid}/routineLogs`: `routineSchema` + create/update/form + `routineInputFromForm`
+  (routine type, embedded ordered steps with a stable id / title / minutes / optional habit
+  link, `isTemplate` flag); `routineLogSchema` family (one `completedStepIds[]` log per
+  routine per day); `computeRoutineProgress` (pure); `summarizeRoutines` (pure);
+  `routineRepository` + `listActiveRoutines`, `routineLogRepository` +
+  `listRecentRoutineLogs`; `useRoutines` (`toggleStep` upserts today's log,
+  `duplicateTemplate` clones a template with fresh step ids); UI (`RoutinesView` split
+  into "Your routines" / "Templates" sections, `RoutineForm` with a `useFieldArray` step
+  editor, `RoutineDialog`, `RoutineCard` with a progress bar and a live checklist).
+- `src/features/habits/` — `listHabitOptions` / `HabitOption` + `useHabitOptions`, for the
+  routine step editor's habit picker.
+- `/act/routine` renders the real feature (was a placeholder).
+- Tests: schema, progress, stats unit tests; `RoutinesView` (mocked hooks); a routines
+  emulator integration test (written; not executed in-session — Firestore emulator).
+
+**Changed**
+- `docs/DATA_MODEL.md` annotation for `routines` + `routineLogs`.
+
 ### Layer 10B — Habits — 2026-09-02
 
 **Added**
