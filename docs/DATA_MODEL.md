@@ -47,7 +47,8 @@ users/{uid}/journalEntries/{entryId}           entryType (free-form|guided-refle
 users/{uid}/learningItems/{itemId}             itemType (course|book-study|skill-practice|certification|other), embedded lessons[] checklist, resources[], assessment notes, goal/pillar/skill links (Layer 11B)
 users/{uid}/studySessions/{sessionId}          date + minutes logged, optional learning-item link (Layer 11B)
 users/{uid}/books/{bookId}                     readingStatus (want-to-read|currently-reading|completed|abandoned), page-based progress, user-entered highlights[]/lessons[]/actionItems[], goal/pillar links — no fetched book content (Layer 11C)
-users/{uid}/skills/{skillId}
+users/{uid}/skills/{skillId}                   category, startingProficiency/targetProficiency (1-5), practice plan, evidence[]/resources[], goal/pillar links, nextReviewDate — current proficiency is derived from skillReviews, not stored here (Layer 11D)
+users/{uid}/skillReviews/{reviewId}            skillId link, date + proficiency (1-5) + notes — append-only progress-history log (Layer 11D)
 
 # Analytics
 users/{uid}/kpis/{kpiId}

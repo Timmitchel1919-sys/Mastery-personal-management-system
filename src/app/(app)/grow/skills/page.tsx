@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { SkillsView } from "@/features/skills";
 
-export const metadata = { title: "Skills" };
+export const metadata: Metadata = { title: "Skills" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Skills"
-      description="Skill inventory, proficiency targets, and practice plans."
-      plannedLayer={11}
-    />
-  );
+  return <SkillsView />;
 }

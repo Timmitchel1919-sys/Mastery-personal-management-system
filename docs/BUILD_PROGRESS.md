@@ -8,14 +8,14 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 11C — Reading (complete) |
-| **Next approved layer** | Layer 11D — Skills — **closes the Grow domain** |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · **Layer 11 (11A–11C)** |
+| **Current layer** | Layer 11D — Skills (complete) — **closes the Grow domain** |
+| **Next approved layer** | Layer 12 — KPI, Analytics & Life Score (not started — awaiting explicit go-ahead) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · **Layer 11 (11A–11D) — Grow domain complete** |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 87 files, 487 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D–11C; rules untouched). ⚠️ integration: `npm run test:integration` — 21 files, 52 tests **written**; the 9D/9E/10A–10C/11A–11C tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`); 10D adds no new integration test — see its layer log entry. ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 90 files, 507 tests (2 files timed out once mid-run on unrelated pre-existing tests — `PomodoroView.test.tsx`, `sidebar-nav.test.tsx` — confirmed flaky by re-running in isolation, both pass; not caused by this layer). ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D–11D; rules untouched). ⚠️ integration: `npm run test:integration` — 22 files, 54 tests **written**; the 9D/9E/10A–10C/11A–11D tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`); 10D adds no new integration test — see its layer log entry. ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 11C built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (9E + a config hotfix). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix:** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions not deployed (needs Blaze). |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 11D built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 11D). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions not deployed (needs Blaze). |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
 | **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · (no new deps in Layer 6) |
 
@@ -2192,6 +2192,123 @@ Redeployed to https://mastery-personal-mgmt-system.web.app/ ; `/grow/reading` �
   separate study-session log).
 - `listActiveBooks` is a bounded, client-grouped read (same trade-off as habits/routines/
   learning items) — no realtime, no pagination UI.
+
+---
+
+### Layer 11D — Skills — ✅ complete (2026-09-04) — committed + pushed + deployed live — **closes the Grow domain (11A–11D)**
+
+A skill inventory over `users/{uid}/skills`, each with a category, a starting/target
+proficiency, a practice plan, user-entered evidence and learning resources, and goal/pillar
+links. **Current proficiency and progress-to-target are derived from a `skillReviews` log**,
+not stored on the skill — the skill only holds `startingProficiency` (baseline) and
+`targetProficiency` (goal); the same "computed, never duplicated" pattern already used for
+habit streaks (10B) and Deep Work scores (9B). Also wires up the `skillId` link on Learning
+items (Layer 11B), deferred at the time because Skills didn't exist yet.
+
+**Created — `src/features/skills/`:**
+- `schema.ts` — `SKILL_CATEGORIES` (technical / creative / physical / interpersonal /
+  leadership / language / other), `PROFICIENCY_MIN`/`MAX` (1–5). `skillSchema` (stored:
+  title, description, category, `startingProficiency`, `targetProficiency`, practice plan,
+  `evidence: string[]` ≤20, `resources: string[]` ≤20, 0–3 pillars, goal link,
+  `nextReviewDate`). `skillCreateSchema`, `skillUpdateSchema` (`.partial()`). `skillFormSchema`
+  (`evidenceText`/`resourcesText` newline lists) + `skillInputFromForm`. Separate
+  `skillReviewSchema` (stored: `skillId`, `date`, `proficiency`, notes) +
+  `skillReviewCreateSchema`/`skillReviewFormSchema`/`skillReviewInputFromForm`. **Pure**
+  `currentProficiency(skill, reviews)` (latest review by date, else the skill's starting
+  proficiency) and `progressToTarget(skill, reviews)` (0–100, clamped).
+- `skill-repository.ts` — `skillRepository` (collection `skills`) + `listActiveSkills` +
+  `SkillOption`/`listSkillOptions` (for the Learning skill picker).
+- `skill-review-repository.ts` — `skillReviewRepository` (collection `skillReviews`,
+  ordered by date desc) + `listRecentSkillReviews` (bounded 300, client-grouped by
+  `skillId` — same trade-off as habit/routine logs, avoids a composite index).
+- `skill-stats.ts` — **pure** `summarizeSkills` (total, due-for-review count, average
+  progress-to-target).
+- `use-skills.ts` — `useSkills()`: loads skills + reviews in parallel; create / update /
+  archive for skills; `logReview` / `removeReview` for reviews; memoized
+  `reviewsBySkill: Map<string, SkillReview[]>` and `stats`.
+- `use-skill-options.ts` — `useSkillOptions()` (mirrors `useGoalOptions`).
+- `components/` — `SkillForm` (RHF + zod; category Select, starting/target proficiency
+  Selects — starting proficiency's field notes it updates automatically once a review is
+  logged — next-review date, goal Select, `PillarSelect`, practice-plan/evidence/resources
+  textareas), `SkillDialog`, `LogReviewDialog` (date, proficiency Select defaulting to the
+  skill's current proficiency, notes — keyed by `skill?.id` so it resets per skill rather
+  than resetting on every keystroke), `SkillCard` (category + current→target badges, an
+  overdue "Review due" badge, a progress bar, practice plan/evidence/resources, a compact
+  recent-reviews list, goal link, pillar badges, a "Log review" button, edit + archive with
+  confirm), `SkillsStats` tiles, `SkillsView` (stats + grid + loading/empty/error).
+- `index.ts` barrel.
+
+**Modified:**
+- `src/app/(app)/grow/skills/page.tsx` renders `<SkillsView />` (was a `ModulePlaceholder`).
+- `src/features/learning/schema.ts` — `learningItemFormSchema` gained `skillId: z.string()`;
+  `learningItemInputFromForm` now maps a blank form value to `null` instead of hardcoding
+  `null` for every item.
+- `src/features/learning/components/LearningItemForm.tsx` — added a Skill `Select`
+  (`skillOptions` prop) next to the existing Goal picker.
+- `src/features/learning/components/LearningItemDialog.tsx` — threads `skillOptions` and
+  the item's `skillId` default through to the form.
+- `src/features/learning/components/LearningItemCard.tsx` — added a `skillTitleById` prop
+  and a linked-skill chip alongside the existing goal-link chip.
+- `src/features/learning/components/LearningView.tsx` — loads `useSkillOptions()` and
+  wires it into the card grid and the item dialog.
+- `docs/DATA_MODEL.md` annotates `skills` and adds `skillReviews`.
+
+**Tests added:** `schema.test.ts` (create requires a title, rejects an unknown category and
+out-of-1–5 proficiency, partial update, stored record, form + `skillInputFromForm`
+evidence/resource-splitting and blank-goal/date-to-null mapping, review form +
+`skillReviewInputFromForm`, `currentProficiency` falls back / picks the latest by date
+regardless of array order, `progressToTarget` scales and clamps at 100), `skill-stats.test.ts`
+(zeros/null average with no skills; due-for-review count + averaged progress with mixed
+reviewed/unreviewed skills), `components/SkillsView.test.tsx` (empty state; a skill card with
+category/proficiency/progress/practice-plan/evidence/goal-link/recent-review-note; opening
+the log-review dialog for a specific skill; opening the new-skill dialog; error + retry — hook
+mocked), `tests/integration/skills.test.ts` (skill linked to a goal; two reviews logged and
+`currentProficiency` picks the latest; archive; user scoping — emulators; **written, not
+executed in-session** — same emulator restriction as prior layers this session). Also updated
+`src/features/learning/schema.test.ts` and `components/LearningView.test.tsx` for the new
+`skillId` wiring. App suite: 90 files / 507 tests.
+
+**Verification:** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (90/507 — two unrelated
+pre-existing tests timed out once mid-run and passed on isolated re-run, see Test status
+above) · `build` ✅ (47 routes, static export, no warnings) · `format:check` ✅ · functions
+suite unchanged ✅ (5). `test:rules` not run — rules untouched. `test:integration` — see
+above.
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production NEXT_PUBLIC_APP_URL=https://mastery-personal-mgmt-system.web.app npm run build`
+then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project
+mastery-personal-mgmt-system --non-interactive`. Redeployed to
+https://mastery-personal-mgmt-system.web.app/ ; smoke-tested `/grow/skills` in a fresh
+browser tab — redirects to sign-in (auth guard working), no console errors.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Grow → Skills**. Empty state → "Add your first skill".
+2. **New skill**: title "Public speaking", category **Interpersonal**, starting proficiency
+   **2**, target **4**, a practice plan, evidence/resources lines, next review date →
+   **Add skill**. The card shows `2 → 4`, a progress bar, and (if the review date is in the
+   past) a "Review due" badge.
+3. Click **Log review** → set proficiency to **3**, add a note → **Log review**. The card's
+   badge updates to `3 → 4`, the progress bar advances, and the note appears in the recent
+   reviews list.
+4. Edit the skill and confirm "Current proficiency" shows a hint that it updates from
+   reviews, not from the edit form.
+5. Go to **Grow → Learning**, create or edit an item, pick the skill from the new **Skill**
+   dropdown → save. The learning item card shows a linked-skill chip.
+6. Archive the skill (trash → confirm) → gone from the list; reload → persists. Logged
+   reviews are not deleted (per the archive-confirm copy).
+7. Firestore console → `users/{uid}/skills/{id}` and `users/{uid}/skillReviews/{id}` with
+   audit fields.
+
+**Known limitations:**
+- **No skill decay / reminder notifications** — `nextReviewDate` is a plain field shown as
+  overdue on the card; nothing proactively reminds the user (push notifications ship in
+  Layer 17).
+- **No review editing or history charting** — reviews can be logged but not edited from the
+  UI (only archived via the repository), and there's no trend chart, just a compact recent
+  list capped at 3.
+- `listActiveSkills`/`listRecentSkillReviews` are bounded, client-grouped reads (same
+  trade-off as habits/routines/learning) — no realtime, no pagination UI.
+- This closes the Grow domain (11A–11D); Layer 12 (KPI, Analytics & Life Score) has not been
+  started and awaits the owner's explicit go-ahead per `CLAUDE.md` §7.
 
 ---
 

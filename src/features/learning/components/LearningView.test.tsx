@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type * as GoalsModule from "@/features/goals";
+import type * as SkillsModule from "@/features/skills";
 import type { LearningItem, StudySession } from "../schema";
 
 const reload = vi.fn();
@@ -18,6 +19,13 @@ vi.mock("../use-learning", () => ({ useLearning: () => hookValue }));
 vi.mock("@/features/goals", async (importOriginal) => ({
   ...(await importOriginal<typeof GoalsModule>()),
   useGoalOptions: () => ({ options: [{ id: "goal-1", title: "Grow in faith" }], loading: false }),
+}));
+vi.mock("@/features/skills", async (importOriginal) => ({
+  ...(await importOriginal<typeof SkillsModule>()),
+  useSkillOptions: () => ({
+    options: [{ id: "skill-1", title: "Public speaking" }],
+    loading: false,
+  }),
 }));
 
 import { LearningView } from "./LearningView";

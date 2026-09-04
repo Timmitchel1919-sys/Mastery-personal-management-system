@@ -108,18 +108,23 @@ describe("learningItemFormSchema + learningItemInputFromForm", () => {
     notes: "",
     pillarIds: [],
     goalId: "goal-1",
+    skillId: "skill-1",
   };
 
   it("validates the form shape", () => {
     expect(learningItemFormSchema.safeParse(form).success).toBe(true);
   });
 
-  it("splits resources into a list, drops blank lines, maps blank goal to null, always nulls skillId", () => {
+  it("splits resources into a list, drops blank lines, maps blank goal/skill to null", () => {
     const input = learningItemInputFromForm(form);
     expect(input.resources).toEqual(["https://example.com/book", "https://example.com/notes"]);
     expect(input.goalId).toBe("goal-1");
-    expect(input.skillId).toBeNull();
+    expect(input.skillId).toBe("skill-1");
     expect(learningItemCreateSchema.safeParse(input).success).toBe(true);
+
+    const blank = learningItemInputFromForm({ ...form, goalId: "", skillId: "" });
+    expect(blank.goalId).toBeNull();
+    expect(blank.skillId).toBeNull();
   });
 });
 

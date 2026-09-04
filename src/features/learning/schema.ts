@@ -8,8 +8,8 @@ import { lifePillarSchema } from "@/lib/validation/domain";
  * learning item is the container for a course, study plan, book-based study, or
  * certification track: an embedded, ordered **lesson checklist** (one-time, toggled
  * directly on the item — unlike the daily-recurring routine steps from Layer 10C),
- * resources, assessment notes, and links up to a goal / life pillar / skill (the last is a
- * bare id for now — Skills ships in Layer 11D). Time spent is tracked separately as
+ * resources, assessment notes, and links up to a goal / life pillar / skill (a `skillId`
+ * pointing at Layer 11D's `skills` collection). Time spent is tracked separately as
  * **study sessions**, an append-only log analogous to Deep Work sessions (9B), so a
  * learning item's total study time is derived, not duplicated onto the item.
  */
@@ -123,6 +123,7 @@ export const learningItemFormSchema = z.object({
   notes: z.string().trim().max(4000),
   pillarIds: learningPillarsSchema,
   goalId: z.string(),
+  skillId: z.string(),
 });
 export type LearningItemFormValues = z.infer<typeof learningItemFormSchema>;
 
@@ -148,7 +149,7 @@ export function learningItemInputFromForm(values: LearningItemFormValues): Learn
     notes: values.notes,
     pillarIds: values.pillarIds,
     goalId: values.goalId || null,
-    skillId: null,
+    skillId: values.skillId || null,
   };
 }
 

@@ -21,6 +21,7 @@ import {
   Textarea,
 } from "@/components/ui";
 import type { GoalOption } from "@/features/goals";
+import type { SkillOption } from "@/features/skills";
 import { normalizeError } from "@/lib/errors";
 import {
   LEARNING_ITEM_TYPES,
@@ -37,6 +38,7 @@ const NONE = "__none__";
 
 export interface LearningItemFormProps {
   goalOptions: GoalOption[];
+  skillOptions: SkillOption[];
   defaultValues?: Partial<LearningItemFormValues>;
   submitLabel: string;
   onSubmit: (values: LearningItemFormValues) => Promise<void>;
@@ -45,6 +47,7 @@ export interface LearningItemFormProps {
 
 export function LearningItemForm({
   goalOptions,
+  skillOptions,
   defaultValues,
   submitLabel,
   onSubmit,
@@ -71,6 +74,7 @@ export function LearningItemForm({
       notes: defaultValues?.notes ?? "",
       pillarIds: defaultValues?.pillarIds ?? [],
       goalId: defaultValues?.goalId ?? "",
+      skillId: defaultValues?.skillId ?? "",
     },
   });
 
@@ -172,6 +176,31 @@ export function LearningItemForm({
               <SelectContent>
                 <SelectItem value={NONE}>None</SelectItem>
                 {goalOptions.map((option) => (
+                  <SelectItem key={option.id} value={option.id}>
+                    {option.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="skillId"
+        render={({ field }) => (
+          <FormField label="Skill" htmlFor="learning-skill" error={errors.skillId?.message}>
+            <Select
+              value={field.value || NONE}
+              onValueChange={(next) => field.onChange(next === NONE ? "" : next)}
+            >
+              <SelectTrigger id="learning-skill">
+                <SelectValue placeholder="None" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>None</SelectItem>
+                {skillOptions.map((option) => (
                   <SelectItem key={option.id} value={option.id}>
                     {option.title}
                   </SelectItem>

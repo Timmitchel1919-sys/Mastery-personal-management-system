@@ -6,6 +6,30 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 11D — Skills — 2026-09-04 — closes the Grow domain (11A–11D)
+
+**Added**
+- `src/features/skills/` — a skill inventory over `users/{uid}/skills`: `skillSchema` +
+  create/update/form + `skillInputFromForm` (category, starting/target proficiency 1-5,
+  practice plan, `evidence`/`resources`, goal/pillar links, next review date); separate
+  `skillReviewSchema` family (append-only progress-history log); pure `currentProficiency`
+  (latest review, else starting proficiency) and `progressToTarget` (0-100, clamped) —
+  proficiency is derived, never duplicated onto the skill; `skillRepository` +
+  `listActiveSkills`/`listSkillOptions`, `skillReviewRepository` +
+  `listRecentSkillReviews`; `useSkills` (`logReview`/`removeReview`), `useSkillOptions`; UI
+  (`SkillsView`, `SkillForm`, `SkillDialog`, `LogReviewDialog`, `SkillCard` with a
+  current→target badge, overdue review indicator, and recent-reviews list).
+- `/grow/skills` renders the real feature (was a placeholder).
+- Tests: schema, stats unit tests; `SkillsView` (mocked hook); a skills emulator
+  integration test (written; not executed in-session — Firestore emulator).
+
+**Changed**
+- `src/features/learning/` — wired up the `skillId` link deferred in Layer 11B: a Skill
+  picker on the learning item form, a linked-skill chip on the card, and
+  `learningItemInputFromForm` now maps the form's skill selection instead of hardcoding
+  `null`.
+- `docs/DATA_MODEL.md` annotation for `skills` + `skillReviews`.
+
 ### Layer 11C — Reading — 2026-09-02
 
 **Added**

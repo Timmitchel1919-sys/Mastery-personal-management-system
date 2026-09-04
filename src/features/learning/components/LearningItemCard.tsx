@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Clock, Link2, Pencil, Trash2 } from "lucide-react";
+import { Clock, Link2, Pencil, Sparkles, Trash2 } from "lucide-react";
 import { PillarBadges } from "@/components/shared";
 import {
   Badge,
@@ -43,6 +43,7 @@ interface LearningItemCardProps {
   item: LearningItem;
   studyMinutes: number;
   goalTitleById: Map<string, string>;
+  skillTitleById: Map<string, string>;
   onEdit: (item: LearningItem) => void;
   onArchive: (id: string) => Promise<void>;
   onToggleLesson: (item: LearningItem, lessonId: string) => Promise<unknown>;
@@ -52,6 +53,7 @@ export function LearningItemCard({
   item,
   studyMinutes,
   goalTitleById,
+  skillTitleById,
   onEdit,
   onArchive,
   onToggleLesson,
@@ -61,6 +63,7 @@ export function LearningItemCard({
   const progress = lessonProgress(item);
   const percent = progress.total === 0 ? 0 : (progress.completed / progress.total) * 100;
   const link = item.goalId ? goalTitleById.get(item.goalId) : undefined;
+  const skillLink = item.skillId ? skillTitleById.get(item.skillId) : undefined;
 
   return (
     <Card>
@@ -115,6 +118,12 @@ export function LearningItemCard({
             <span className="inline-flex items-center gap-1">
               <Link2 className="size-3.5" aria-hidden="true" />
               {link}
+            </span>
+          ) : null}
+          {skillLink ? (
+            <span className="inline-flex items-center gap-1">
+              <Sparkles className="size-3.5" aria-hidden="true" />
+              {skillLink}
             </span>
           ) : null}
         </div>

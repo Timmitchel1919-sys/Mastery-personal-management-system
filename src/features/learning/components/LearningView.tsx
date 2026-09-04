@@ -6,6 +6,7 @@ import { BreadcrumbTrail, PageContainer, PageHeader } from "@/components/layout"
 import { EmptyState, ErrorState } from "@/components/shared";
 import { Button, Card, CardContent, Skeleton } from "@/components/ui";
 import { useGoalOptions } from "@/features/goals";
+import { useSkillOptions } from "@/features/skills";
 import { useLearning } from "../use-learning";
 import { learningItemInputFromForm, studySessionInputFromForm, type LearningItem } from "../schema";
 import { LearningItemCard } from "./LearningItemCard";
@@ -31,6 +32,7 @@ export function LearningView() {
     removeSession,
   } = useLearning();
   const { options: goalOptions } = useGoalOptions();
+  const { options: skillOptions } = useSkillOptions();
 
   const [itemDialogOpen, setItemDialogOpen] = useState(false);
   const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
@@ -39,6 +41,10 @@ export function LearningView() {
   const goalTitleById = useMemo(
     () => new Map(goalOptions.map((option) => [option.id, option.title])),
     [goalOptions],
+  );
+  const skillTitleById = useMemo(
+    () => new Map(skillOptions.map((option) => [option.id, option.title])),
+    [skillOptions],
   );
   const itemTitleById = useMemo(() => new Map(items.map((item) => [item.id, item.title])), [items]);
 
@@ -114,6 +120,7 @@ export function LearningView() {
                   item={item}
                   studyMinutes={studyMinutesByItem.get(item.id) ?? 0}
                   goalTitleById={goalTitleById}
+                  skillTitleById={skillTitleById}
                   onEdit={openEdit}
                   onArchive={archive}
                   onToggleLesson={toggleLesson}
@@ -144,6 +151,7 @@ export function LearningView() {
         onOpenChange={setItemDialogOpen}
         item={editing}
         goalOptions={goalOptions}
+        skillOptions={skillOptions}
         onSubmit={async (values) => {
           const input = learningItemInputFromForm(values);
           if (editing) await update(editing.id, input);

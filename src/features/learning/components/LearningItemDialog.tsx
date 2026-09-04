@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui";
 import type { GoalOption } from "@/features/goals";
+import type { SkillOption } from "@/features/skills";
 import { LearningItemForm } from "./LearningItemForm";
 import type { LearningItem, LearningItemFormValues } from "../schema";
 
@@ -16,6 +17,7 @@ interface LearningItemDialogProps {
   onOpenChange: (open: boolean) => void;
   item?: LearningItem | null;
   goalOptions: GoalOption[];
+  skillOptions: SkillOption[];
   onSubmit: (values: LearningItemFormValues) => Promise<void>;
 }
 
@@ -24,6 +26,7 @@ export function LearningItemDialog({
   onOpenChange,
   item,
   goalOptions,
+  skillOptions,
   onSubmit,
 }: LearningItemDialogProps) {
   const editing = Boolean(item);
@@ -40,6 +43,7 @@ export function LearningItemDialog({
         <LearningItemForm
           key={item?.id ?? "new"}
           goalOptions={goalOptions}
+          skillOptions={skillOptions}
           submitLabel={editing ? "Save changes" : "Add item"}
           defaultValues={
             item
@@ -56,6 +60,7 @@ export function LearningItemDialog({
                   notes: item.notes,
                   pillarIds: item.pillarIds,
                   goalId: item.goalId ?? "",
+                  skillId: item.skillId ?? "",
                 }
               : undefined
           }
