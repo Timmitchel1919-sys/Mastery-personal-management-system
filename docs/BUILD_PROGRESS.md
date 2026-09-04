@@ -8,13 +8,13 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 11B — Learning (complete) |
-| **Next approved layer** | Layer 11C — Reading |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · **Layer 11 (11A–11B)** |
+| **Current layer** | Layer 11C — Reading (complete) |
+| **Next approved layer** | Layer 11D — Skills — **closes the Grow domain** |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · **Layer 11 (11A–11C)** |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 84 files, 468 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D–11B; rules untouched). ⚠️ integration: `npm run test:integration` — 20 files, 50 tests **written**; the 9D/9E/10A–10C/11A–11B tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`); 10D adds no new integration test — see its layer log entry. ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 87 files, 487 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D–11C; rules untouched). ⚠️ integration: `npm run test:integration` — 21 files, 52 tests **written**; the 9D/9E/10A–10C/11A–11C tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`); 10D adds no new integration test — see its layer log entry. ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 11B built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 11C built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
 | **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (9E + a config hotfix). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix:** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions not deployed (needs Blaze). |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
 | **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · (no new deps in Layer 6) |
@@ -2105,6 +2105,93 @@ Redeployed to https://mastery-personal-mgmt-system.web.app/ ; `/grow/learning` �
   fetching, no validation that a link resolves.
 - `listActiveLearningItems` / `listRecentStudySessions` are bounded, client-filtered reads
   (same trade-off as habits/routines) — no realtime, no pagination UI.
+
+### Layer 11C — Reading — ✅ complete (2026-09-02) — committed + pushed + deployed live
+
+A reading list over `users/{uid}/books`, grouped into Currently reading / Want to read /
+Completed / Abandoned, with page-based progress, user-entered highlights, lessons, action
+items, and goal/pillar linkage. **Every text field is user-entered** — per spec, there is
+no ISBN/metadata lookup, no auto-fetched synopsis or cover art, and no AI summarization;
+highlights are verbatim quotes the user chooses to type in, exactly like their own notes.
+
+**Created — `src/features/reading/`:**
+- `schema.ts` — `READING_STATUSES` (want-to-read / currently-reading / completed /
+  abandoned). `bookSchema` (stored: title, author, status, `currentPage`/`totalPages`,
+  started/completed dates, `highlights: {id,quote,pageNumber}[]` ≤100, `lessons: string[]`
+  ≤20, `actionItems: {id,title,completed}[]` ≤30, notes, 0–3 pillars, goal link).
+  `bookCreateSchema` (`.refine`: current page can't exceed the total when a total is set),
+  `bookUpdateSchema` (`.partial()`). `bookFormSchema` (`lessonsText` newline list, mirrors
+  the same refine) + `bookInputFromForm`. `emptyHighlight()` / `emptyActionItem()` (stable
+  ids, same pattern as Learning's `emptyLesson`) and **pure** `readingProgressPercent`
+  (`null` with no total page count, else a clamped 0–100).
+- `book-repository.ts` — `bookRepository` (collection `books`) + `listActiveBooks`.
+- `reading-stats.ts` — **pure** `summarizeReading` (counts per status, completions in the
+  last 30 days).
+- `use-reading.ts` — `useReading()`: load + create / update / archive + reload;
+  `toggleActionItem(book, itemId)` flips one action item via a normal `update` (same
+  one-time-checklist pattern as Learning's lessons — no separate log needed); memoized
+  `stats`.
+- `components/` — `BookForm` (RHF + zod; status, current/total pages, started/completed
+  dates, goal Select, pillars, two `useFieldArray` editors — highlights with a quote +
+  page-number pair, action items with a title + completed checkbox — plus a lessons
+  textarea), `BookDialog`, `BookCard` (status + `%` badges, a `Progress` bar, pages/
+  dates/goal-link row, highlights rendered as styled `<blockquote>`s with their page
+  number, a lessons bullet list, a live action-item checklist, pillar badges,
+  archive-confirm), `ReadingStats` tiles, `ReadingView` (stats + four status sections,
+  each hidden when empty; loading / empty / error).
+- `index.ts` barrel.
+
+**Modified:** `src/app/(app)/grow/reading/page.tsx` renders `<ReadingView />` (was a
+`ModulePlaceholder`). `docs/DATA_MODEL.md` annotates `books`. Reuses `useGoalOptions`,
+`PillarSelect` / `PillarBadges`.
+
+**Tests added:** `schema.test.ts` (create requires title + every highlight/action item to
+have content, enum bounds, current-page-vs-total refine both directions, null total bypasses
+the page check, `emptyHighlight`/`emptyActionItem` distinct ids, `readingProgressPercent`
+null/clamped, form refine + `bookInputFromForm` lesson-splitting + zero-total-to-null
+mapping, stored record), `reading-stats.test.ts` (empty; per-status counts + 30-day
+completion window), `components/ReadingView.test.tsx` (empty; a book grouped under its
+status section with progress/highlights/lessons/action-item checklist/goal link, ticking an
+action item calls `toggleActionItem`; new-book dialog; error + retry — hook mocked),
+`tests/integration/reading.test.ts` (book linked to a goal; completing an action item
+persists; marking it finished; archive; user scoping — emulators; **written, not executed
+in-session** — same emulator restriction as prior layers this session). App suite: 87
+files / 487 tests.
+
+**Verification:** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (87/487) · `build` ✅ (47
+routes, static export, no warnings) · `format:check` ✅ · functions suite unchanged ✅ (5).
+`test:rules` not run — rules untouched. `test:integration` — see above.
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production npm run build` then `firebase deploy --only
+hosting,firestore:rules,firestore:indexes,storage --project mastery-personal-mgmt-system`.
+Redeployed to https://mastery-personal-mgmt-system.web.app/ ; `/grow/reading` → 200.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Grow → Reading**. Empty state → "Add your first book".
+2. **New book**: title "Deep Work", author, status **Currently reading**, current/total
+   pages, add a highlight (quote + page number) and an action item → **Add book**. It
+   appears under **Currently reading** with a progress bar and `%` badge, the highlight as
+   a styled quote block, and the action item as a checkbox.
+3. Tick the action item's checkbox on the card → it strikes through immediately.
+4. Edit → change status to **Completed**, set current page to the total, pick a completed
+   date → **Save changes**. The book moves from "Currently reading" to the **Completed**
+   section.
+5. Add a second book with status **Want to read** → it appears in its own section; sections
+   with no books are hidden entirely.
+6. Archive a book (trash → confirm) → gone; reload → persists, grouping is preserved.
+7. Firestore console → `users/{uid}/books/{id}` with `readingStatus`, `highlights[]`
+   (`quote`, `pageNumber`), `lessons[]`, `actionItems[]`, audit fields.
+
+**Known limitations:**
+- **No book metadata lookup by design** — title/author/cover are entered by hand; this is
+  intentional per the spec's copyright constraint, not a missing integration to add later.
+- **No per-highlight tags or export** — highlights are a flat list on the book, not
+  independently searchable or exportable as quotes.
+- Page-based progress assumes a single linear read-through — no support for re-reads or
+  multiple reading sessions with separate progress histories (contrast with Learning's
+  separate study-session log).
+- `listActiveBooks` is a bounded, client-grouped read (same trade-off as habits/routines/
+  learning items) — no realtime, no pagination UI.
 
 ---
 

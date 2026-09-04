@@ -46,7 +46,7 @@ over tasks/habits/routines/focusSessions; nothing new is written. See ADR-0016.)
 users/{uid}/journalEntries/{entryId}           entryType (free-form|guided-reflection|daily/weekly-reflection|gratitude|lessons-learned|decision), mood/energy (1-5), goal/pillar links, tags, isPrivate (display-only collapse flag) (Layer 11A)
 users/{uid}/learningItems/{itemId}             itemType (course|book-study|skill-practice|certification|other), embedded lessons[] checklist, resources[], assessment notes, goal/pillar/skill links (Layer 11B)
 users/{uid}/studySessions/{sessionId}          date + minutes logged, optional learning-item link (Layer 11B)
-users/{uid}/books/{bookId}
+users/{uid}/books/{bookId}                     readingStatus (want-to-read|currently-reading|completed|abandoned), page-based progress, user-entered highlights[]/lessons[]/actionItems[], goal/pillar links — no fetched book content (Layer 11C)
 users/{uid}/skills/{skillId}
 
 # Analytics

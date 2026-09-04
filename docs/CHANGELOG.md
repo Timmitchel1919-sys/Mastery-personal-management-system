@@ -6,6 +6,26 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 11C — Reading — 2026-09-02
+
+**Added**
+- `src/features/reading/` — a reading list over `users/{uid}/books`, grouped into
+  Currently reading / Want to read / Completed / Abandoned: `bookSchema` + create/update/
+  form + `bookInputFromForm` (page-based progress, user-entered `highlights`/`lessons`/
+  `actionItems`, goal/pillar links); `emptyHighlight` / `emptyActionItem` /
+  `readingProgressPercent` (pure); `summarizeReading` (pure); `bookRepository` +
+  `listActiveBooks`; `useReading` (`toggleActionItem`); UI (`ReadingView` split into
+  status sections, `BookForm` with two `useFieldArray` editors, `BookDialog`, `BookCard`
+  with a progress bar, styled highlight quotes, and a live action-item checklist).
+  **No book metadata lookup** — every field is user-entered, per the spec's constraint
+  against reproducing copyrighted book content.
+- `/grow/reading` renders the real feature (was a placeholder).
+- Tests: schema, stats unit tests; `ReadingView` (mocked hook); a reading emulator
+  integration test (written; not executed in-session — Firestore emulator).
+
+**Changed**
+- `docs/DATA_MODEL.md` annotation for `books`.
+
 ### Layer 11B — Learning — 2026-09-02
 
 **Added**

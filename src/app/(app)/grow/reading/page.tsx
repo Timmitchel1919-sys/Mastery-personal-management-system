@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { ReadingView } from "@/features/reading";
 
-export const metadata = { title: "Reading" };
+export const metadata: Metadata = { title: "Reading" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Reading"
-      description="Reading list, progress, notes, and action items."
-      plannedLayer={11}
-    />
-  );
+  return <ReadingView />;
 }
