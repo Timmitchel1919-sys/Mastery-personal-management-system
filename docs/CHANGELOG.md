@@ -6,6 +6,44 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 15F — Accountability Partner — 2026-09-05
+
+The final Recovery Center sublayer — **Layer 15 (15A–15F) is complete.**
+
+**Added**
+- `functions/src/recovery/configure-accountability-partner.ts` —
+  `configureAccountabilityPartner` (`op: "create" | "update" | "revoke"`), the only writer
+  of `users/{uid}/recoveryAccountabilityPartners/{id}` (rules reject a direct client write).
+- `functions/src/recovery/get-accountability-projection.ts` + `accountability-projection.ts`
+  — `getAccountabilityProjection`: the only way a partner sees anything. Requires the
+  caller's verified email to match an active, unexpired, unrevoked grant; returns nothing
+  but the scope's projection (streak / status / checked-in-today / a short summary / a
+  custom field subset, optionally a bare setback count). Never reflections, HALT, triggers,
+  setback narratives, coping actions, or coach sessions. Both written and unit-tested;
+  **not deployed** (Spark plan).
+- `src/features/recovery/recovery-accountability-schema.ts` / `-client.ts` /
+  `use-recovery-accountability.ts` / `use-accountability-projection.ts`.
+- `AccountabilitySection` (in the goal detail view) with `AccountabilityPartnerDialog` —
+  the owner shares a narrow slice of one goal under a permission scope, with an optional
+  expiry and revoke; `PartnerProjectionView` + `/recovery/partner` route — the
+  partner-facing card, outside the PIN gate.
+
+**Changed**
+- `firestore.rules` — `isServerMediatedRecoveryWrite` now also refuses a direct client
+  write to the top-level `recoveryAccountabilityPartners` collection.
+- `RecoveryHomeView`'s "Coming next" block is removed (Layer 15 is done).
+- `functions/tests/ai/fakes.ts` — the fake Firestore doc ref gained `update()`.
+- `docs/DATA_MODEL.md`, `docs/RECOVERY_PRIVACY.md` §6; `docs/DECISIONS.md` — ADR-0024.
+
+**Tests:** `configure-accountability-partner` (7), `get-accountability-projection` (9),
+`accountability-projection` (3), recovery-accountability schema, `AccountabilitySection`
+(5), `PartnerProjectionView` (2), a Layer 15F rules block, and a grant integration test —
+the last two written, not executed in-session (emulator restriction).
+
+**Known limitation:** neither Cloud Function is deployed, so configuring a partner or
+viewing a shared projection fails in production until Blaze; the partner must already be a
+Mastery user with a verified email; reminder delivery is Layer 17.
+
 ### Layer 15E — Recovery Coach — 2026-09-05
 
 **Added**

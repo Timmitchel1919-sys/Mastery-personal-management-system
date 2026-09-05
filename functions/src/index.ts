@@ -9,6 +9,8 @@ export { analyzeExecutionPatterns } from "./ai/analyze-execution-patterns";
 export { generateWeeklySummary } from "./scheduled/generate-weekly-summary";
 export { recordRecoverySetback } from "./recovery/record-recovery-setback";
 export { recoveryCoachQuery } from "./recovery/recovery-coach-query";
+export { configureAccountabilityPartner } from "./recovery/configure-accountability-partner";
+export { getAccountabilityProjection } from "./recovery/get-accountability-projection";
 
 /**
  * Mastery Cloud Functions entrypoint.
@@ -21,12 +23,14 @@ export { recoveryCoachQuery } from "./recovery/recovery-coach-query";
  *   - recovery/      Layer 15C — recordRecoverySetback (the only writer of relapse
  *                    records per RECOVERY_PRIVACY.md §3). Layer 15E — recoveryCoachQuery,
  *                    a separate, isolated AI endpoint (own system prompt + recovery-only
- *                    context + own conversation storage). Accountability access (15F)
- *                    joins them later.
+ *                    context + own conversation storage). Layer 15F —
+ *                    configureAccountabilityPartner (the only writer of grant records) and
+ *                    getAccountabilityProjection (the only way a partner sees anything —
+ *                    verified-email match against an active grant, scoped projection only).
  *   - reports/       Layer 16
  *   - notifications/ Layer 17
  *
- * Written and tested through Layer 15E; NOT YET DEPLOYED — the project is on the Spark
+ * Written and tested through Layer 15F; NOT YET DEPLOYED — the project is on the Spark
  * plan and Cloud Functions deploy needs Blaze (owner's call, see ADR-0017).
  */
 

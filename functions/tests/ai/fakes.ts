@@ -27,6 +27,7 @@ export interface FakeFirestore {
     id: string;
     get(): Promise<{ exists: boolean; id: string; data: () => DocData | undefined }>;
     set(data: DocData): Promise<void>;
+    update(data: DocData): Promise<void>;
   };
   collection(path: string): FakeQuery & { doc(id?: string): ReturnType<FakeFirestore["doc"]> };
 }
@@ -53,6 +54,13 @@ export function createFakeFirestore(): FakeFirestore {
       },
       async set(data: DocData) {
         docs.set(path, data);
+      },
+      async update(data: DocData) {
+        const existing = docs.get(path);
+        if (existing === undefined) {
+          throw new Error(`Fake Firestore: update() on missing doc ${path}`);
+        }
+        docs.set(path, { ...existing, ...data });
       },
     };
   }

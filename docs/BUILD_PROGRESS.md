@@ -8,16 +8,16 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 15E — Recovery Coach (complete) |
-| **Next approved layer** | Layer 15F — Accountability Partner (not started — awaiting explicit go-ahead) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15A · Layer 15B · Layer 15C · Layer 15D · **Layer 15E** |
-| **In-progress work** | Layer 15 (Recovery Center) finishes with 15F on the next "Volgende laag" request |
-| **Test status** | ✅ app: `vitest run` — 116 files, 636 tests (recovery-coach schema + `RecoveryCoachPanel` component tests added). ✅ rules: `npm run test:rules` — 3 files, ~41 tests (`tests/rules/recovery.rules.test.ts` gained a `recoveryCoachSessions — Layer 15E` block: direct client write REJECTED, owner READ allowed after Admin seed, cross-user denied — not re-run in-session, emulator restriction). ⚠️ integration: `npm run test:integration` — 31 files **written**; `tests/integration/recovery-coach.test.ts` added (direct client write rejected; read path resolves) — not executed in-session (Firestore emulator restriction). ✅ functions: `vitest run` — 13 files, 79 tests (`recovery-coach-query.test.ts` +8, `recovery-coach-context.test.ts` +3, `bumpUsageCounters` +3 in `quota.test.ts`). |
-| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `test`, `build`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 15E built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 15E — hosting + `firestore.rules`: the recursive-wildcard owner-only rule now also refuses direct client writes to the top-level `recoveryCoachSessions` collection, via the `collection`-aware `isServerMediatedRecoveryWrite`). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (Layer 13/14 + 15C `recordRecoverySetback` + 15E `recoveryCoachQuery`) still not deployed — Spark plan, see ADR-0017/0018/0021/0023. |
+| **Current layer** | Layer 15F — Accountability Partner (complete) — **Layer 15 (Recovery Center) complete: 15A–15F** |
+| **Next approved layer** | Layer 16 — Reports & PDF Export (not started — awaiting explicit go-ahead) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · **Layer 15 (15A–15F) — Recovery Center complete** |
+| **In-progress work** | — (Layer 15 finished; Layer 16 is next) |
+| **Test status** | ✅ app: `vitest run` — 119 files, ~648 tests (recovery-accountability schema + `AccountabilitySection` + `PartnerProjectionView` component tests added). ✅ rules: `npm run test:rules` — 3 files, ~44 tests (`tests/rules/recovery.rules.test.ts` gained a `recoveryAccountabilityPartners — Layer 15F` block: direct client write REJECTED, owner READ allowed after Admin seed, cross-user read denied — not re-run in-session, emulator restriction). ⚠️ integration: `npm run test:integration` — 32 files **written**; `tests/integration/recovery-accountability.test.ts` added (direct client write rejected; owner list resolves) — not executed in-session (Firestore emulator restriction). ✅ functions: `vitest run` — 16 files, 98 tests (`configure-accountability-partner.test.ts` +7, `get-accountability-projection.test.ts` +9, `accountability-projection.test.ts` +3). |
+| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (48 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `test`, `build`. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 15F built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 15F — hosting + `firestore.rules`: the recursive-wildcard owner-only rule now also refuses direct client writes to the top-level `recoveryAccountabilityPartners` collection). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (Layer 13/14 + 15C `recordRecoverySetback` + 15E `recoveryCoachQuery` + 15F `configureAccountabilityPartner`/`getAccountabilityProjection`) still not deployed — Spark plan, see ADR-0017/0018/0021/0023/0024. |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · (no new deps in Layer 15A–15E) |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · (no new deps in Layer 15A–15F) |
 
 ---
 
@@ -3235,6 +3235,133 @@ smoke-tested `/recovery` in a fresh tab — redirects to sign-in, no new console
 - **Shared spend budget** — a heavy Recovery Coach day can exhaust the same per-user AI
   quota the general coach uses (by design — one user, one cap).
 - **No accountability partner** — Layer 15F.
+- **Rules / integration tests written, not executed in-session** — emulator restriction.
+
+---
+
+### Layer 15F — Accountability Partner — ✅ complete (2026-09-05) — committed + pushed + deployed live
+
+The final Recovery Center sublayer. Opt-in only: the owner shares a **narrow slice** of one
+recovery goal with a trusted person under one of five permission scopes, with an optional
+expiry and one-tap revocation. Per `docs/RECOVERY_PRIVACY.md` §3, grant config is
+Cloud-Function-mediated and **the partner never touches Firestore** — they call an
+authorized function that returns only the scoped projection. Both Cloud Functions are
+written and unit-tested but **not deployed** (Spark plan). Full rationale: ADR-0024.
+**Layer 15 (15A–15F) is now complete.**
+
+**Created — `functions/`:**
+- `src/recovery/configure-accountability-partner.ts` — `configureAccountabilityPartner`
+  onCall (`op: "create" | "update" | "revoke"`): the only writer of
+  `users/{uid}/recoveryAccountabilityPartners/{id}`. `create` verifies the goal is the
+  caller's; `update` / `revoke` verify the grant is. `revoke` stamps `revokedAt`.
+- `src/recovery/accountability-projection.ts` — `buildAccountabilityProjection(db, ownerUid,
+  grant, now)`: reads only the shared goal + its check-ins / relapses, recomputes the
+  streak inline, and returns an allowlist projection — each scope fills only its own fields
+  (`streak-only` → streak; `status-only` → status; `check-in-completed` → checked-in-today +
+  last date; `selected-summary` → status + streak + days-on-track + last date;
+  `custom-limited-access` → only the ticked field subset). A bare `setbackCount` (a number,
+  never narrative) only when the grant opts in. Never returns reflections, HALT, triggers,
+  setback text, coping actions, or coach sessions.
+- `src/recovery/get-accountability-projection.ts` — `getAccountabilityProjection` onCall:
+  the only way a partner sees anything. Requires the caller's **verified** email to match
+  an **active, unexpired, unrevoked** grant; returns nothing but the projection.
+
+**Modified — `functions/`:**
+- `src/index.ts` — exports both functions; JSDoc through Layer 15F.
+- `src/recovery/README.md` — documents both.
+- `tests/ai/fakes.ts` — the fake Firestore doc ref gained `update()` (merge semantics) —
+  first recovery function to use `ref.update()` over `set()`.
+
+**Created — `src/features/recovery/`:**
+- `recovery-accountability-schema.ts` — scopes + labels + descriptions, custom-field
+  vocabulary, grant record schema, the `configure*` discriminated-union request schema, the
+  projection result schema, and the owner form schema.
+- `recovery-accountability-client.ts` — `configureAccountabilityPartner` (callable),
+  `listAccountabilityPartners(goalId)` (owner read of own grants), `getAccountabilityProjection`
+  (partner callable).
+- `use-recovery-accountability.ts` — owner side: load grants, `configure` (create / update /
+  revoke), `saving` / `saveError`.
+- `use-accountability-projection.ts` — partner side: load the one scoped projection.
+- `components/AccountabilityPartnerDialog.tsx` — the grant form (email, label, scope
+  `Select` with a live description, custom-field checkboxes, a setback-count switch, a
+  reminders switch, an expiry date).
+- `components/AccountabilitySection.tsx` — the section in the goal detail view: partner
+  list (label, email, scope badge, expiry, revoked state, the shareable
+  `/recovery/partner?owner=…&grant=…` link), "Share with a partner" → dialog, revoke.
+- `components/PartnerProjectionView.tsx` (+ `PartnerProjectionPage` route wrapper) — the
+  partner-facing card: renders only the fields present in the projection, plus a "no notes,
+  triggers, setback details, or coach conversations" note.
+
+**Created — `src/app/`:**
+- `(app)/recovery/partner/page.tsx` — the partner route, **outside** the Recovery Center
+  PIN gate (the viewer is the partner, not the owner). Still auth-gated by the `(app)`
+  layout; the function re-checks the verified email.
+
+**Modified — `src/`:**
+- `firestore.rules` — `isServerMediatedRecoveryWrite` now also returns true for
+  `collection == 'recoveryAccountabilityPartners'`. Owner reads unchanged.
+- `components/RecoveryGoalDetailView.tsx` — mounts `<AccountabilitySection>` after the
+  Recovery Coach; its test stubs the section.
+- `components/RecoveryHomeView.tsx` (+ test) — the "Coming next" block is removed (Layer 15
+  is done).
+- `src/features/recovery/index.ts` — barrel extended.
+- `docs/DATA_MODEL.md`, `docs/RECOVERY_PRIVACY.md` §6 status; `docs/DECISIONS.md` —
+  ADR-0024.
+
+**Tests added:** `functions/tests/recovery/configure-accountability-partner.test.ts` (7:
+unauth, invalid payload, goal-not-found on create, create normalizes email + null
+`revokedAt`, update changes scope/label, revoke stamps `revokedAt`, update-missing →
+HttpsError); `get-accountability-projection.test.ts` (9: unauth, unverified email denied,
+email mismatch denied, revoked denied, expired denied, `streak-only` shape,
+`selected-summary` shape + no setback count unless opted in, opted-in setback count,
+`custom-limited-access` only ticked fields); `accountability-projection.test.ts` (3: null
+for a missing goal, streak breaks on the most recent hard day, no fields outside scope);
+`src/features/recovery/recovery-accountability-schema.test.ts`;
+`components/AccountabilitySection.test.tsx` (5); `components/PartnerProjectionView.test.tsx`
+(2); `tests/integration/recovery-accountability.test.ts` (direct client write rejected;
+owner list resolves — **written, not executed in-session**); `tests/rules/recovery.rules.test.ts`
+gained a `recoveryAccountabilityPartners — Layer 15F` block (direct client write REJECTED,
+owner READ allowed after an Admin seed, cross-user read denied — **written, not executed
+in-session**).
+
+**Verification:** app `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (119 files / ~648) ·
+`build` ✅ (48 routes, static export, no warnings) · `format:check` ✅. functions
+`typecheck` ✅ · `lint` ✅ · `test` ✅ (16 files / 98) · `build` ✅. `test:rules` /
+`test:integration` — new tests written, not executed (emulator restriction);
+`firestore.rules` compile-checked at deploy.
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production NEXT_PUBLIC_APP_URL=https://mastery-personal-mgmt-system.web.app npm run build`
+then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project
+mastery-personal-mgmt-system --non-interactive` — `firestore.rules` **changed** this layer,
+re-uploaded and compiled clean. Redeployed to https://mastery-personal-mgmt-system.web.app/ ;
+smoke-tested `/recovery` in a fresh tab — redirects to sign-in, no new console errors.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Recovery Center**, PIN, **Open** a recovery goal.
+2. Scroll to **Accountability partner** → **Share with a partner** → enter a partner's
+   email, a label, pick a scope (the description updates live), optionally tick custom
+   fields / a setback count / an expiry → **Share with them**. **In production this
+   currently fails** — `configureAccountabilityPartner` is not deployed (Spark plan).
+   Against the emulator (`firebase emulators:start` + functions) the grant appears in the
+   list with a `/recovery/partner?owner=…&grant=…` link.
+3. As the partner (a second signed-in Mastery account whose verified email matches), open
+   that link → **Shared with you** shows only the fields the scope permits, nothing else.
+4. Back as the owner, **Edit** the grant to a narrower scope, or revoke it (the person
+   icon) → reload the partner link → it now shows "This shared view isn't available".
+5. Firestore console → try to write `users/{uid}/recoveryAccountabilityPartners/x` directly
+   from a client SDK → **permission denied**; reading your own grants works.
+6. Confirm none of this appears on the dashboard, in search, or in notifications.
+
+**Known limitations:**
+- **Both Cloud Functions are not deployed** — Spark plan. Configuring a partner or viewing
+  a projection throws in production until the owner upgrades to Blaze and runs `firebase
+  deploy --only functions`.
+- **The partner must be a Mastery user with a verified email** on the address the owner
+  entered — there is no invite flow for someone without an account.
+- **Reminder delivery is Layer 17** — `sendCheckInReminders` is stored but nothing sends a
+  reminder yet.
+- **No hard delete** — a revoked grant persists (revoked, inert) until the deferred
+  cascading deletion Cloud Function.
 - **Rules / integration tests written, not executed in-session** — emulator restriction.
 
 ---

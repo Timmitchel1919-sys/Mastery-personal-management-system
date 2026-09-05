@@ -9,6 +9,7 @@ import { RECOVERY_GOAL_STATUS_LABEL, type RecoveryGoal } from "../recovery-goal-
 import { recoveryRelapseRequestFromForm } from "../recovery-relapse-schema";
 import { useRecoveryCheckIns } from "../use-recovery-checkins";
 import { useRecoveryRelapses } from "../use-recovery-relapses";
+import { AccountabilitySection } from "./AccountabilitySection";
 import { CheckInDialog } from "./CheckInDialog";
 import { CopingToolkitSection } from "./CopingToolkitSection";
 import { RecoveryCoachPanel } from "./RecoveryCoachPanel";
@@ -130,6 +131,8 @@ export function RecoveryGoalDetailView({
       <CopingToolkitSection goalId={goal.id} faithBased={goal.faithBasedEncouragement} />
 
       <RecoveryCoachPanel goalId={goal.id} />
+
+      <AccountabilitySection goalId={goal.id} />
 
       <section className="space-y-3">
         <h3 className="font-semibold">Setbacks</h3>

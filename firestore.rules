@@ -57,17 +57,19 @@ service cloud.firestore {
     // `recoveryGoals` / `recoveryGoals/*/checkIns` are ordinary client-writable
     // owner-only data, covered here.
     //
-    // Layers 15C / 15E: some recovery writes are Cloud-Function-mediated per
+    // Layers 15C / 15E / 15F: some recovery writes are Cloud-Function-mediated per
     // `docs/RECOVERY_PRIVACY.md` §3 — the Admin SDK bypasses rules entirely, so
     // refusing a direct client write here makes the Cloud Function the only writer.
     // `document` under the recursive wildcard is the sub-path after {collection}; a
-    // setback doc is `.../relapses/{id}`, and a Recovery Coach session lives at the
-    // top level `recoveryCoachSessions/{id}` (so it is matched on {collection}).
+    // setback doc is `.../relapses/{id}`, while a Recovery Coach session and an
+    // accountability grant live at the top level (matched on {collection}).
     // Firestore ORs every matching rule, so this guard lives in the wildcard itself,
-    // not a separate block. Client READS stay allowed; only writes are blocked.
-    // Accountability config (15F) will extend this guard.
+    // not a separate block. Client READS stay allowed (the owner still lists their own
+    // grants); only writes are blocked. A partner never reads Firestore directly — the
+    // `getAccountabilityProjection` function returns only the scoped projection.
     function isServerMediatedRecoveryWrite(collection, document) {
       return collection == 'recoveryCoachSessions'
+        || collection == 'recoveryAccountabilityPartners'
         || string(document).matches('(^|.*/)relapses/[^/]+$');
     }
 

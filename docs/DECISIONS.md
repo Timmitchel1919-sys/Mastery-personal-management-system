@@ -761,3 +761,59 @@ conversation live.
   supported (the request requires `goalId`). Revisit if a use case appears.
 - `bumpUsageCounters` is now the extraction point any future non-general AI surface should
   reuse to share the budget without touching `aiCallLogs`.
+
+---
+
+## ADR-0024 — Accountability partner: email-identified grant, two Cloud Functions, projection-only reads
+**Date:** 2026-09-05 · **Status:** accepted · **Layer:** 15F — Accountability Partner
+
+**Context.** `docs/RECOVERY_PRIVACY.md` §6 lets the owner share a recovery goal with a
+partner under one of five permission scopes (`streak-only`, `status-only`,
+`check-in-completed`, `selected-summary`, `custom-limited-access`), with an optional
+expiry and revocation. §3: "accountability partners never receive direct Firestore
+access — all partner reads go through an authenticated, authorized Cloud Function that
+returns only the explicitly granted projection", and grant configuration is itself
+Cloud-Function-mediated. Open questions: how is a partner identified/authenticated, and
+how much of a partner-facing UI belongs in 15F.
+
+**Decision.**
+- **The partner is another Mastery user, identified by verified email.** The grant stores
+  `partnerEmail` (lowercased). `getAccountabilityProjection` reads `request.auth.token.email`
+  + `email_verified` and requires an exact match against an active, unexpired, unrevoked
+  grant. No invite tokens, no unauthenticated entry point — matches §3's "authenticated,
+  authorized Cloud Function" literally and keeps the surface small.
+- **Two functions, both Cloud-Function-only writes / reads:**
+  `configureAccountabilityPartner` (`op: "create" | "update" | "revoke"`, owner-scoped, the
+  only writer of `recoveryAccountabilityPartners`) and `getAccountabilityProjection` (the
+  only way a partner sees anything). `firestore.rules` `isServerMediatedRecoveryWrite` now
+  also matches `collection == 'recoveryAccountabilityPartners'`. The **owner** still reads
+  their own grants directly (for the config list); a **partner** never touches Firestore.
+- **The projection is built by scope, allowlist-style** (`accountability-projection.ts`).
+  Each scope fills only its fields; everything else stays `null`. `custom-limited-access`
+  exposes only the ticked subset of
+  `{recoveryStatus, currentStreak, daysOnTrack, checkedInToday, lastCheckInDate}`. A bare
+  `setbackCount` (a number, never narrative) is included only when the grant opts in *and*
+  the scope is `selected-summary` or `custom`. Reflections, HALT, triggers, relapse
+  `whatHappened`/`lessonsLearned`, coping actions, journal, and coach sessions are never
+  reachable through this path.
+- **Streak is recomputed inside the function** (consecutive most-recent `stayedOnTrack`
+  days) rather than importing `src/features/recovery/recovery-progress.ts` — `functions/`
+  and `src/` are separate packages, same reason as the coach context builder (ADR-0023).
+- **Partner-facing UI ships in 15F**: a `/recovery/partner?owner=…&grant=…` page
+  (`PartnerProjectionView`), **outside** the Recovery Center PIN gate — the viewer is the
+  partner, not the owner, and has no PIN. The owner shares the relative link from the
+  goal detail view's `AccountabilitySection`.
+- **Reminder delivery is out of scope** — §6's "whether check-in reminders are sent" is
+  stored as `sendCheckInReminders` on the grant; actually sending them is Layer 17.
+- **Not deployed** — same as every Cloud Function so far (Spark plan). Configuring a
+  partner or viewing a projection throws in production until Blaze + `firebase deploy
+  --only functions`.
+
+**Consequences.**
+- Layer 15 (Recovery Center, 15A–15F) is complete. `RecoveryHomeView`'s "Coming next"
+  block is removed.
+- The `fakes.ts` Firestore double gained an `update()` method (merge semantics) — the
+  first recovery function to use `ref.update()` rather than `set()`.
+- A partner must have a Mastery account with a verified email on the same address the owner
+  entered; there is no flow for inviting someone who has not signed up. Acceptable for
+  now; revisit if needed.

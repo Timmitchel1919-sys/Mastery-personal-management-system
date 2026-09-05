@@ -114,5 +114,35 @@ export {
 } from "./recovery-coach-schema";
 export { askRecoveryCoach, listRecoveryCoachSessions } from "./recovery-coach-client";
 export { useRecoveryCoach } from "./use-recovery-coach";
+export {
+  ACCOUNTABILITY_SCOPES,
+  ACCOUNTABILITY_SCOPE_LABEL,
+  ACCOUNTABILITY_SCOPE_DESCRIPTION,
+  ACCOUNTABILITY_CUSTOM_FIELDS,
+  ACCOUNTABILITY_CUSTOM_FIELD_LABEL,
+  accountabilityScopeSchema,
+  recoveryAccountabilityPartnerSchema,
+  configureAccountabilityRequestSchema,
+  configureAccountabilityResultSchema,
+  accountabilityProjectionSchema,
+  getAccountabilityProjectionRequestSchema,
+  accountabilityFormSchema,
+  type AccountabilityScope,
+  type AccountabilityCustomField,
+  type RecoveryAccountabilityPartner,
+  type ConfigureAccountabilityRequest,
+  type ConfigureAccountabilityResult,
+  type AccountabilityProjection,
+  type GetAccountabilityProjectionRequest,
+  type AccountabilityFormValues,
+} from "./recovery-accountability-schema";
+export {
+  configureAccountabilityPartner,
+  listAccountabilityPartners,
+  getAccountabilityProjection,
+} from "./recovery-accountability-client";
+export { useRecoveryAccountability } from "./use-recovery-accountability";
+export { useAccountabilityProjection } from "./use-accountability-projection";
+export { PartnerProjectionView, PartnerProjectionPage } from "./components/PartnerProjectionView";
 export { RecoveryGate } from "./components/RecoveryGate";
 export { RecoveryHomeView } from "./components/RecoveryHomeView";

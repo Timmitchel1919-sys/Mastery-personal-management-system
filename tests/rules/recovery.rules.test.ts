@@ -307,3 +307,49 @@ describe("recoveryCoachSessions — Layer 15E", () => {
     await assertFails(getDoc(doc(db, "users", ALICE, "recoveryCoachSessions", "s1")));
   });
 });
+
+describe("recoveryAccountabilityPartners — Layer 15F", () => {
+  it("REJECTS a direct client write to a grant (Cloud-Function-mediated per §3)", async () => {
+    const db = testEnv.authenticatedContext(ALICE).firestore();
+    await assertFails(
+      setDoc(
+        doc(db, "users", ALICE, "recoveryAccountabilityPartners", "p1"),
+        auditedNested(ALICE, {
+          goalId: "g1",
+          partnerEmail: "sam@example.com",
+          scope: "streak-only",
+        }),
+      ),
+    );
+  });
+
+  it("still lets the owner READ their own grants (for the config list)", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(
+        doc(context.firestore(), "users", ALICE, "recoveryAccountabilityPartners", "p1"),
+        auditedNested(ALICE, {
+          goalId: "g1",
+          partnerEmail: "sam@example.com",
+          scope: "streak-only",
+        }),
+      );
+    });
+    const db = testEnv.authenticatedContext(ALICE).firestore();
+    await assertSucceeds(getDoc(doc(db, "users", ALICE, "recoveryAccountabilityPartners", "p1")));
+  });
+
+  it("denies another signed-in user from reading a grant directly", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(
+        doc(context.firestore(), "users", ALICE, "recoveryAccountabilityPartners", "p1"),
+        auditedNested(ALICE, {
+          goalId: "g1",
+          partnerEmail: "bob@example.com",
+          scope: "streak-only",
+        }),
+      );
+    });
+    const db = testEnv.authenticatedContext(BOB).firestore();
+    await assertFails(getDoc(doc(db, "users", ALICE, "recoveryAccountabilityPartners", "p1")));
+  });
+});

@@ -18,6 +18,16 @@ by Cloud Functions; the Firestore rules reject a direct client write for those p
   (`aiUsageDaily`/`aiUsageMonthly`) — nothing recovery-derived is written to
   `coachExchanges` or `aiCallLogs`. `handleRecoveryCoachQuery(request, { db, provider, now? })`
   takes injectable deps so it is unit-tested against fakes.
-- Accountability-partner access (15F) — scoped projections only.
+- `configure-accountability-partner.ts` — **Layer 15F** — `configureAccountabilityPartner`
+  onCall (`op: "create" | "update" | "revoke"`): the only writer of
+  `users/{uid}/recoveryAccountabilityPartners/{id}` (rules reject a direct client write).
+  Every op is owner-scoped.
+- `get-accountability-projection.ts` + `accountability-projection.ts` — **Layer 15F** —
+  `getAccountabilityProjection` onCall: the only way a partner sees anything. The caller
+  (the partner) must present a verified email matching an active, unexpired, unrevoked
+  grant; the response is nothing but the scope's projection (streak / status / checked-in /
+  a short summary / a custom field subset, optionally a bare setback count). Never returns
+  reflections, HALT, triggers, setback narratives, coping actions, or coach sessions.
+  Both handlers take injectable deps so they are unit-tested against fakes.
 
 Written and unit-tested; **not deployed** — the project is on the Spark plan (ADR-0017/0018).

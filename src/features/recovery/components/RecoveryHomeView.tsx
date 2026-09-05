@@ -4,15 +4,13 @@ import { useState } from "react";
 import { Lock, Plus } from "lucide-react";
 import { BreadcrumbTrail, PageContainer, PageHeader } from "@/components/layout";
 import { EmptyState, ErrorState } from "@/components/shared";
-import { Badge, Button, Card, CardContent, Skeleton } from "@/components/ui";
+import { Button, Card, CardContent, Skeleton } from "@/components/ui";
 import { useRecoveryLock } from "../use-recovery-lock";
 import { useRecoveryGoals } from "../use-recovery-goals";
 import { recoveryGoalInputFromForm, type RecoveryGoal } from "../recovery-goal-schema";
 import { RecoveryGoalCard } from "./RecoveryGoalCard";
 import { RecoveryGoalDetailView } from "./RecoveryGoalDetailView";
 import { RecoveryGoalDialog } from "./RecoveryGoalDialog";
-
-const UPCOMING = [{ label: "Accountability partner", layer: "15F" }] as const;
 
 /** Shown once the privacy gate (Layer 15A) is unlocked. */
 export function RecoveryHomeView() {
@@ -124,18 +122,6 @@ function RecoveryGoalsList({
               This is a personal planning space, not medical or psychological advice, and does not
               replace a licensed professional.
             </p>
-          </div>
-
-          <div>
-            <h3 className="font-medium">Coming next</h3>
-            <ul className="mt-2 space-y-1.5 text-sm">
-              {UPCOMING.map((item) => (
-                <li key={item.label} className="flex items-center gap-2">
-                  <Badge variant="outline">Layer {item.layer}</Badge>
-                  <span className="text-muted">{item.label}</span>
-                </li>
-              ))}
-            </ul>
           </div>
         </CardContent>
       </Card>

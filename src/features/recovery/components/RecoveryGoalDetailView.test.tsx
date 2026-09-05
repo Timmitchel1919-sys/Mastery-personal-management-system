@@ -12,6 +12,9 @@ let checkInsValue: Record<string, unknown>;
 let relapsesValue: Record<string, unknown>;
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/recovery" }));
+vi.mock("./AccountabilitySection", () => ({
+  AccountabilitySection: () => <div data-testid="accountability-section" />,
+}));
 vi.mock("../use-recovery-checkins", () => ({ useRecoveryCheckIns: () => checkInsValue }));
 vi.mock("../use-recovery-relapses", () => ({ useRecoveryRelapses: () => relapsesValue }));
 vi.mock("../use-recovery-coping", () => ({

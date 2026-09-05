@@ -48,13 +48,12 @@ beforeEach(() => {
 });
 
 describe("RecoveryHomeView", () => {
-  it("shows the privacy assurances, the disclaimer, and remaining upcoming sublayers", () => {
+  it("shows the privacy assurances and the disclaimer", () => {
     render(<RecoveryHomeView />);
     expect(
       screen.getByText("Kept out of your dashboard, global search, and ordinary notifications."),
     ).toBeInTheDocument();
     expect(screen.getByText(/not medical or psychological advice/)).toBeInTheDocument();
-    expect(screen.getByText("Accountability partner")).toBeInTheDocument();
   });
 
   it("locks the module when Lock is clicked", async () => {

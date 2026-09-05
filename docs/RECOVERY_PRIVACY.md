@@ -146,4 +146,19 @@ Any new access path must be added to this table in the same layer that introduce
 > other Cloud Functions it is **written and unit-tested but not deployed** (Spark plan) —
 > "Ask for a next step" fails in production until Cloud Functions ship.
 >
-> The accountability partner (15F) does not exist yet.
+> **Layer 15F status:** the **accountability partner** feature is implemented.
+> `configureAccountabilityPartner` (op create / update / revoke) is the only writer of
+> `users/{uid}/recoveryAccountabilityPartners/{id}` (rules reject a direct client write).
+> `getAccountabilityProjection` is the only way a partner sees anything: it checks the
+> caller's *verified* email against an active, unexpired, unrevoked grant and returns
+> nothing but the scope's projection (a streak / a status word / whether they checked in
+> today / a short summary / a custom field subset, optionally a bare setback count).
+> Reflections, HALT, triggers, setback narratives, coping actions, journal, and coach
+> conversations are never in a projection. The owner configures grants in the recovery goal
+> detail view; the partner opens `/recovery/partner?owner=…&grant=…` (outside the PIN gate
+> — the partner is not the owner). Reminder *delivery* (§6) is Layer 17 — 15F stores the
+> `sendCheckInReminders` preference only. Both functions are **written and unit-tested but
+> not deployed** (Spark plan) — configuring or viewing a shared projection fails in
+> production until Cloud Functions ship.
+>
+> **Layer 15 (Recovery Center) is now complete: 15A–15F.**
