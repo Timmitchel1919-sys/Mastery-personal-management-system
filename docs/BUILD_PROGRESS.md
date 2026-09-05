@@ -8,16 +8,16 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 12 — KPI, Analytics & Life Score (complete) |
-| **Next approved layer** | Layer 13 — General AI Architecture (not started — awaiting explicit go-ahead) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · **Layer 12** |
+| **Current layer** | Layer 13 — General AI Architecture (complete — Cloud Functions written + tested, **not deployed**) |
+| **Next approved layer** | Layer 14 — Weekly AI Summary (not started — awaiting explicit go-ahead) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · **Layer 13** |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 99 files, 550 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D–12; rules untouched). ⚠️ integration: `npm run test:integration` — 24 files, 58 tests **written**; the 9D/9E/10A–10C/11A–11D/12 tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`); 10D adds no new integration test — see its layer log entry. ✅ functions: 1 file, 5 tests. |
-| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 12 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 12). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions not deployed (needs Blaze). |
+| **Test status** | ✅ app: `vitest run` — 101 files, 558 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D–13; rules untouched — the generic owner-only subcollection rule already covers the new AI collections). ⚠️ integration: `npm run test:integration` — 25 files, 60 tests **written**; the 9D/9E/10A–10C/11A–11D/12/13 tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`); 10D adds no new integration test. ✅ functions: 6 files, 33 tests (5 new AI test files added this layer; all against in-memory fakes, no real Firestore/AI network call — see Layer 13 log entry). |
+| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`, `format:check`. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 13 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 13 — hosting only). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). **Cloud Functions still not deployed** — the 5 AI callables from this layer are written and unit-tested but require a Blaze-plan upgrade the owner explicitly chose to defer (ADR-0017); the AI Coach page is live but will show a normalized error until they're deployed. |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · (no new deps in Layer 6) |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · **@anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017)** |
 
 ---
 
@@ -2455,6 +2455,148 @@ https://mastery-personal-mgmt-system.web.app/.
   (same trade-off as every prior domain this session) — no realtime, no pagination UI.
 - The dashboard's Layer-12-reserved `lifeScore`/`kpiOverview` fields remain unwired — see
   the note above; this matches every prior layer's precedent, not an oversight.
+
+---
+
+### Layer 13 — General AI Architecture — ✅ complete (2026-09-04) — code written + unit-tested; committed + pushed + hosting deployed; **Cloud Functions NOT deployed** (owner's explicit choice — see ADR-0017)
+
+Server-side general AI Coach per `docs/AI_ARCHITECTURE.md`: five authenticated Cloud
+Functions sharing one flow (auth → validate → quota → minimal context → provider call →
+structured-output validation → usage/audit → persisted exchange → the documented response
+contract), an `AiProvider` abstraction implemented against Anthropic Claude, and a client
+feature that calls the callables and reads back the resulting exchange history. Two
+decisions here were the owner's, not the agent's — asked directly via `AskUserQuestion`:
+**write and unit-test everything now, deploy later** (the project stays on the Spark plan;
+Blaze is a billing upgrade the owner will make when ready), and **Anthropic Claude** as the
+provider. `generateWeeklySummary` (Layer 14) and `recoveryCoachQuery` (Layer 15E, fully
+isolated) are explicitly out of scope. Full rationale: ADR-0017.
+
+**Created — `functions/src/ai/`:**
+- `shared/contracts.ts` — `AI_INTENTS` (coach-query / planning-recommendations /
+  goal-breakdown / reflection-questions / execution-patterns). `aiRequestSchema`
+  (`intent`, nullable `targetRef`, nullable `userMessage`, `options.includePrivateJournal`).
+  `modelOutputSchema` — what the model itself must produce (`answer`, `assumptions[]`,
+  `suggestedActions[]`, `disclaimers[]`) — deliberately **excludes** `influencedBy`:
+  `aiResponseSchema` extends it with that field, always attached server-side from the
+  context that was actually loaded, so the model can never hallucinate a reference to a
+  record it wasn't given.
+- `shared/ai-provider.ts` — the `AiProvider` interface (one `complete()` method).
+  `anthropic-provider.ts` — the concrete implementation via `@anthropic-ai/sdk` (new
+  dependency), model `claude-sonnet-5` behind a named constant. `provider-factory.ts` binds
+  it to a Functions secret (`ANTHROPIC_API_KEY`, `defineSecret` — never read outside a
+  request, never provisioned this layer since nothing is deployed yet).
+- `shared/quota.ts` — per-user cost controls: **pure** `checkQuota(day, month)` (the
+  actual threshold decision) plus `assertWithinQuota`/`recordUsage` (Firestore
+  read-then-write against `aiUsageDaily`/`aiUsageMonthly` rollup docs — plain arithmetic,
+  not `FieldValue.increment`, trading a rare lost update under same-user concurrent
+  requests for logic that's fully unit-testable without a live Firestore) plus a per-call
+  `aiCallLogs` audit record.
+- `shared/context-builder.ts` — per-intent, bounded Admin SDK reads (a `targetRef` doc;
+  active goals for coach-query/planning-recommendations; non-private journal entries for
+  reflection-questions, unless `includePrivateJournal`; recent tasks for
+  execution-patterns) — reads defensively (loose field access) since `functions/` doesn't
+  import the client's Zod schemas.
+- `shared/prompts.ts` — the shared system preamble (context-only, no invented records, no
+  automatic changes, explicit assumptions, no diagnosis, structured-JSON-only) plus one
+  instruction string per intent.
+- `shared/handler.ts` — `handleAiIntent(intent, request, { db, provider, now? })`: the
+  full orchestration, built to take its Firestore instance and provider as parameters
+  (not module singletons) specifically so it's unit-testable against fakes. Also exports
+  **pure** `extractJson` (tolerates a markdown-fenced reply) and `estimateCostUsd` (a
+  rough per-token estimate for the internal spend ceiling, not real billing).
+- Five thin callables (`mastery-coach-query.ts` + four `generate-*`/`analyze-*` files)
+  each supplying their intent to `handleAiIntent`, bound to `ANTHROPIC_API_KEY` via
+  `secrets`. Re-exported from `functions/src/index.ts`.
+
+**Created — `functions/tests/ai/`:** `fakes.ts` (a minimal in-memory Firestore + a
+scriptable fake `AiProvider` — just enough of the chained query API the real code calls;
+no real Firestore/network anywhere), `contracts.test.ts`, `quota.test.ts` (`checkQuota`
+pure threshold logic), `context-builder.test.ts` (per-intent retrieval + the private-
+journal filter), `handler.test.ts` (auth/validation/quota-block/happy-path/malformed-
+model-JSON/passthrough-HttpsError, using the fakes — genuine coverage of the real
+orchestration without touching a live provider). This matches `functions/`'s existing
+pure-unit-test convention; there is no emulator-integration harness in that package.
+
+**Created — `src/features/ai-coach/`:**
+- `schema.ts` — client mirrors of the callable contract (`coachCallResultSchema`) and the
+  persisted `coachExchangeSchema` (read-only: the client never creates/updates it, only
+  the Cloud Function does via the Admin SDK).
+- `ai-coach-client.ts` — `callCoach(intent, options)`: `httpsCallable` to the matching
+  function, response validated with `coachCallResultSchema`, errors normalized via
+  `mapFunctionsError`.
+- `coach-exchange-repository.ts` — `listRecentCoachExchanges()` (bounded 50, newest first).
+- `use-ai-coach.ts` — `useAiCoach()`: loads history; `ask(intent, options)` calls the
+  function then reloads the list.
+- `components/` — `AiCoachView` (an intent picker, a message box for coach-query, a goal
+  picker for goal-breakdown, the other three intents need neither) and `ExchangeCard`
+  (answer, assumptions, suggested actions, disclaimers as a warning alert, `influencedBy`
+  as badges).
+- `index.ts` barrel.
+
+**Modified:**
+- `src/lib/firebase/client.ts` — added a `functions` instance (region `europe-west1`,
+  matching `functions/src/config/region.ts`) and emulator wiring — the first feature to
+  call a Cloud Function from the browser.
+- `src/app/(app)/grow/ai-coach/page.tsx` renders `<AiCoachView />` (was a
+  `ModulePlaceholder`).
+- `functions/package.json` — added `@anthropic-ai/sdk`.
+- `docs/DATA_MODEL.md` annotates `coachExchanges`, `aiUsageDaily`, `aiUsageMonthly`,
+  `aiCallLogs` (all Admin-SDK-only writes; the generic owner-only Firestore rule already
+  covers client reads — no `firestore.rules` change needed).
+
+**Tests added:** see the `functions/tests/ai/` list above (33 functions tests total, 28
+new). App side: `src/features/ai-coach/schema.test.ts`, `components/AiCoachView.test.tsx`
+(empty state; Ask disabled until a message is typed then calls `ask` with the right
+payload; exchange history renders answer/assumptions/actions/influencedBy; error + retry —
+hook mocked), `tests/integration/ai-coach.test.ts` (seeds a `coachExchanges` doc with the
+client SDK — since there's no client `create()`, matching exactly what the Cloud Function
+writes — then reads it back through `listRecentCoachExchanges`; user scoping; **written,
+not executed in-session** — same emulator restriction as prior layers). App suite: 101
+files / 558 tests. Functions suite: 6 files / 33 tests, executed in-session (no emulator
+needed for pure-unit + fake-based tests).
+
+**Verification:** app: `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (101/558) · `build` ✅
+(47 routes, static export, no warnings) · `format:check` ✅. functions: `typecheck` ✅ ·
+`lint` ✅ (0/0) · `test` ✅ (6/33, executed) · `build` ✅ (`tsc`) · `format:check` ✅.
+`test:rules` not run — rules untouched. `test:integration` — see above.
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production NEXT_PUBLIC_APP_URL=https://mastery-personal-mgmt-system.web.app npm run build`
+then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project
+mastery-personal-mgmt-system --non-interactive` — **unchanged from every prior layer**;
+`functions` is deliberately not in that command (ADR-0015, reaffirmed by ADR-0017).
+Redeployed to https://mastery-personal-mgmt-system.web.app/ ; smoke-tested `/grow/ai-coach`
+in a fresh browser tab — loads, redirects to sign-in (auth guard), no console errors.
+
+**Manual test instructions (once functions are deployed — see ADR-0017's two-step turn-on):**
+1. `npm run dev` with the Functions emulator running (`firebase emulators:start`), sign in
+   → **Grow → AI Coach**.
+2. Pick **Ask a question**, type a question, submit → an answer appears with its
+   assumptions, any suggested actions, and the goals/tasks/etc. it drew on as chips.
+3. Pick **Break down a goal**, choose a goal, submit → a breakdown proposal appears as
+   suggested actions (nothing is created automatically).
+4. Ask something describing a crisis or medical situation → the reply includes a
+   disclaimer recommending professional/emergency help, shown as a warning alert.
+5. Firestore console → `users/{uid}/coachExchanges/{id}`, `aiUsageDaily/{date}`,
+   `aiUsageMonthly/{month}`, `aiCallLogs/{id}` all populated after a call.
+6. Without the Functions emulator/deployment running, submitting shows a normalized error
+   in the form instead of crashing the page.
+
+**Known limitations:**
+- **Cloud Functions are not deployed** — the project remains on the Spark plan; the owner
+  chose this explicitly this session (ADR-0017). The AI Coach page is live but every
+  request will fail with a normalized network error until functions are deployed.
+- **No system-calculated context beyond what's read directly** — the context builder reads
+  raw Firestore fields defensively rather than importing client feature logic (e.g. derived
+  KPI attainment, habit streaks); a future pass could enrich context with those computed
+  values.
+- **Quota counters can under-count by one under same-user concurrent requests** — a
+  deliberate trade-off for testability over atomic `FieldValue.increment` (see ADR-0017).
+- **No usage/cost UI** — `aiUsageDaily`/`aiUsageMonthly`/`aiCallLogs` are written but have
+  no client viewer yet; a user hitting a quota only sees the resulting error message.
+- **No conversation threading** — each exchange is independent; the model does not see
+  prior exchanges as conversation history.
+- **`generateGoalBreakdown`'s suggested actions are proposals only** — accepting one does
+  not yet create the underlying project/milestone/task; that wiring is a future layer.
 
 ---
 

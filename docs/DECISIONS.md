@@ -364,3 +364,67 @@ disagreeing with the records it's summarizing. If a future layer needs durable h
 snapshots (e.g. "what did the tracker say last month" after source records changed), that
 would justify a real `executionLogs` collection — revisit with a new ADR rather than
 retrofitting this one.
+
+---
+
+## ADR-0017 — General AI Architecture: Anthropic Claude provider; written and tested but not deployed this layer
+**Date:** 2026-09-04 · **Status:** accepted · **Layer:** 13 — General AI Architecture
+
+**Context.** Layer 13 (`docs/AI_ARCHITECTURE.md`) requires every AI request to go through
+an authenticated Cloud Function, with a swappable `AiProvider` abstraction so the concrete
+vendor is never baked into an endpoint. Two decisions were the owner's to make, not the
+agent's: (1) which AI provider to call, and (2) whether to upgrade the Firebase project
+`mastery-personal-mgmt-system` off the Spark (free) plan — required because Cloud
+Functions cannot be deployed on Spark (ADR-0015 already deferred this once). Asked
+directly, the owner chose Anthropic Claude as the provider and chose to have this layer's
+code **written and unit-tested now, deployed later** rather than upgrading to Blaze this
+session.
+
+**Decision.**
+- `functions/src/ai/shared/ai-provider.ts` defines the `AiProvider` interface (one
+  `complete()` method); `anthropic-provider.ts` implements it via `@anthropic-ai/sdk`
+  (new dependency, model `claude-sonnet-5`, swappable via a named constant).
+  `provider-factory.ts` binds the concrete provider to a Functions secret
+  (`ANTHROPIC_API_KEY`, `defineSecret`) — never read outside a request, never in client code.
+- Five callables share one flow (`shared/handler.ts`): `requireAuth` → validate the
+  request → enforce a per-user quota (`shared/quota.ts`: daily request/token ceiling,
+  monthly token ceiling, via `aiUsageDaily`/`aiUsageMonthly` rollup docs) → build a minimal
+  per-intent context (`shared/context-builder.ts`, bounded Admin SDK reads) → call the
+  provider → validate its structured JSON reply against `modelOutputSchema` → attach the
+  context refs server-side as `influencedBy` (**never model-produced** — the model cannot
+  hallucinate a reference to a record it wasn't actually given) → record a per-call audit
+  entry (`aiCallLogs`) → persist the exchange (`coachExchanges`) → return the documented
+  response contract. `masteryCoachQuery`, `generatePlanningRecommendations`,
+  `generateGoalBreakdown`, `generateReflectionQuestions`, `analyzeExecutionPatterns` are
+  thin wrappers supplying their intent.
+- `handleAiIntent(intent, request, { db, provider, now? })` takes its Firestore instance
+  and provider as parameters rather than importing singletons, so
+  `functions/tests/ai/handler.test.ts` exercises the real orchestration logic against a
+  small in-memory Firestore/provider fake — no real network call, no Firestore emulator,
+  consistent with `functions/`'s existing pure-unit-test convention (there is no
+  emulator-integration-test setup in that package today).
+- Quota counters are read-then-written plain arithmetic, not `FieldValue.increment` —
+  trading a rare lost update under concurrent requests from the same user for logic that's
+  fully unit-testable without a live Firestore.
+- Client side: `src/lib/firebase/client.ts` gains a `functions` instance (region
+  `europe-west1`, matching `functions/src/config/region.ts`) — the first feature to call a
+  Cloud Function from the browser. `src/features/ai-coach/` calls the five callables and
+  reads back `coachExchanges` (read-only — the client never writes it; only the Admin SDK
+  does) for the AI Coach page's history.
+- **Not deployed.** `firebase.json`'s `functions` codebase and predeploy step already
+  existed (ADR-0015); the end-of-session deploy command still deploys `hosting,
+  firestore:rules,firestore:indexes,storage` only, unchanged. `ANTHROPIC_API_KEY` has not
+  been provisioned as a Functions secret. The AI Coach page is live in the static bundle
+  and will show a normalized network error if used before functions are deployed.
+
+**Consequences.**
+- Nothing here blocks §10.1's mandatory hosting deploy — only the Cloud Functions half of
+  this layer is deferred, and that was true for every layer since ADR-0015 (no function
+  has ever been deployed).
+- Turning this on later needs exactly two owner actions, no further code: upgrade
+  `mastery-personal-mgmt-system` to Blaze, then `firebase deploy --only functions --project
+  mastery-personal-mgmt-system` after setting the `ANTHROPIC_API_KEY` secret
+  (`firebase functions:secrets:set ANTHROPIC_API_KEY`).
+- System-calculated KPI/habit-derived context enrichment, `generateWeeklySummary` (Layer
+  14), and `recoveryCoachQuery` (Layer 15E, fully isolated from this code) are explicitly
+  out of scope for this ADR.

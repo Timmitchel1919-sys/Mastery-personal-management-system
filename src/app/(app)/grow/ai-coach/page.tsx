@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { AiCoachView } from "@/features/ai-coach";
 
-export const metadata = { title: "AI Coach" };
+export const metadata: Metadata = { title: "AI Coach" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="AI Coach"
-      description="Server-side coaching over your authorized plans, goals, and habits."
-      plannedLayer={13}
-    />
-  );
+  return <AiCoachView />;
 }

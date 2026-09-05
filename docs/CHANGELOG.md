@@ -6,6 +6,43 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 13 — General AI Architecture — 2026-09-04 — Cloud Functions written and unit-tested, not yet deployed
+
+**Added**
+- `functions/src/ai/` — five authenticated Cloud Functions (`masteryCoachQuery`,
+  `generatePlanningRecommendations`, `generateGoalBreakdown`,
+  `generateReflectionQuestions`, `analyzeExecutionPatterns`) sharing one flow: auth,
+  request validation, a per-user daily/monthly quota, a minimal per-intent context (own
+  data only, bounded reads), a provider call, structured-JSON-output validation, usage/
+  audit logging, and a persisted exchange — returning the documented `answer` /
+  `assumptions` / `suggestedActions` / `disclaimers` / `influencedBy` contract.
+  `influencedBy` is always attached server-side from the context actually loaded, never
+  produced by the model. An `AiProvider` interface keeps the vendor swappable; the
+  concrete implementation calls Anthropic Claude via the new `@anthropic-ai/sdk`
+  dependency, with its key bound as a Functions secret.
+- `src/features/ai-coach/` — calls the five callables and reads back the resulting
+  `coachExchanges` history (write access is Admin-SDK-only); `AiCoachView` with an intent
+  picker and exchange history.
+- `src/lib/firebase/client.ts` gains a Functions client instance — the app's first
+  Cloud-Function-calling feature.
+- `/grow/ai-coach` renders the real feature (was a placeholder).
+- Tests: `functions/tests/ai/` (28 new tests against an in-memory Firestore/provider fake
+  — quota thresholds, context building, and the full handler orchestration, including
+  quota-blocked and malformed-model-output paths); `ai-coach` schema/view unit tests; a
+  read-path emulator integration test (written; not executed in-session).
+
+**Changed**
+- `docs/DATA_MODEL.md` annotates `coachExchanges`, `aiUsageDaily`, `aiUsageMonthly`,
+  `aiCallLogs`.
+- `docs/DECISIONS.md` — ADR-0017: Anthropic as the provider, and the owner's explicit
+  choice to write/test this layer's Cloud Functions now and deploy them later (the Spark
+  plan stays; deploying needs a Blaze upgrade, which remains the owner's call).
+
+**Known limitation:** Cloud Functions are not deployed this layer — the AI Coach page is
+live but calls will fail with a normalized error until they are (two owner actions:
+upgrade to Blaze, then `firebase deploy --only functions` after setting the
+`ANTHROPIC_API_KEY` secret).
+
 ### Layer 12 — KPI, Analytics & Life Score — 2026-09-04
 
 **Added**

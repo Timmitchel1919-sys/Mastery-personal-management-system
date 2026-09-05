@@ -6,6 +6,13 @@ the Recovery Coach are fully isolated from each other.
 Built in **Layer 13** (general architecture) and **Layer 14** (weekly summary); the
 Recovery Coach is **Layer 15E** and governed by `RECOVERY_PRIVACY.md`.
 
+> **Layer 13 status:** the five general-coach endpoints below (everything except
+> `generateWeeklySummary` and `recoveryCoachQuery`) are implemented in `functions/src/ai/`
+> and unit-tested, using Anthropic Claude as the concrete `AiProvider`. They are **not
+> deployed** — the Firebase project is on the Spark plan and the owner chose to defer the
+> Blaze upgrade this session. See ADR-0017 in `docs/DECISIONS.md` and the Layer 13 entry in
+> `docs/BUILD_PROGRESS.md`.
+
 ---
 
 ## 1. Principles

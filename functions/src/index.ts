@@ -1,11 +1,21 @@
 import { onRequest } from "firebase-functions/https";
 import { DEFAULT_REGION } from "./config/region";
 
+export { masteryCoachQuery } from "./ai/mastery-coach-query";
+export { generatePlanningRecommendations } from "./ai/generate-planning-recommendations";
+export { generateGoalBreakdown } from "./ai/generate-goal-breakdown";
+export { generateReflectionQuestions } from "./ai/generate-reflection-questions";
+export { analyzeExecutionPatterns } from "./ai/analyze-execution-patterns";
+
 /**
  * Mastery Cloud Functions entrypoint.
  *
  * Domain functions are added by later layers and re-exported here:
- *   - ai/            Layer 13 (masteryCoachQuery, generate*)
+ *   - ai/            Layer 13 — masteryCoachQuery + the generate/analyze endpoints
+ *                    (above). Written and tested this layer; NOT YET DEPLOYED — the
+ *                    project is on the Spark plan and Cloud Functions deploy needs Blaze
+ *                    (owner's call). recoveryCoachQuery is a separate, isolated endpoint
+ *                    (Layer 15E).
  *   - reports/       Layer 16
  *   - notifications/ Layer 17
  *   - recovery/      Layer 15 (recoveryCoachQuery, accountability access)

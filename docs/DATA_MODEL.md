@@ -61,6 +61,12 @@ users/{uid}/reports/{reportId}
 users/{uid}/notifications/{notificationId}
 users/{uid}/quickNotes/{noteId}                 dashboard quick-capture notes (Layer 7)
 
+# AI (Layer 13) — written only by Cloud Functions (Admin SDK); client reads only
+users/{uid}/coachExchanges/{exchangeId}         one Q&A/generation exchange: intent, optional targetRef, optional userMessage, answer, assumptions[], suggestedActions[], disclaimers[], influencedBy[] (server-attached context refs) — the general coach's history (Layer 13)
+users/{uid}/aiUsageDaily/{date}                 one rollup doc per day: requestCount, totalTokens — quota enforcement (Layer 13)
+users/{uid}/aiUsageMonthly/{month}              one rollup doc per month: requestCount, totalTokens — quota enforcement (Layer 13)
+users/{uid}/aiCallLogs/{logId}                  per-call audit record: intent, inputTokens/outputTokens, latencyMs, outcome, costUsd — cost/audit trail, no client UI yet (Layer 13)
+
 # Recovery — separately protected (see RECOVERY_PRIVACY.md)
 users/{uid}/recoveryProfiles/{profileId}
 users/{uid}/recoveryGoals/{goalId}

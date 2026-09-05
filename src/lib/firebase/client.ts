@@ -1,14 +1,19 @@
 import { getApps, initializeApp, type FirebaseApp } from "firebase/app";
 import { connectAuthEmulator, getAuth, type Auth } from "firebase/auth";
 import { connectFirestoreEmulator, getFirestore, type Firestore } from "firebase/firestore";
+import { connectFunctionsEmulator, getFunctions, type Functions } from "firebase/functions";
 import { connectStorageEmulator, getStorage, type FirebaseStorage } from "firebase/storage";
 import { EMULATOR_CONFIG, getFirebaseClientConfig, useFirebaseEmulators } from "./config";
+
+/** Must match `DEFAULT_REGION` in `functions/src/config/region.ts`. */
+const FUNCTIONS_REGION = "europe-west1";
 
 export interface FirebaseClient {
   app: FirebaseApp;
   auth: Auth;
   db: Firestore;
   storage: FirebaseStorage;
+  functions: Functions;
 }
 
 declare global {
@@ -30,15 +35,17 @@ export function getFirebaseClient(): FirebaseClient {
   const auth = getAuth(app);
   const db = getFirestore(app);
   const storage = getStorage(app);
+  const functions = getFunctions(app, FUNCTIONS_REGION);
 
   if (useFirebaseEmulators && !globalThis.__masteryEmulatorsConnected) {
-    const { host, authPort, firestorePort, storagePort } = EMULATOR_CONFIG;
+    const { host, authPort, firestorePort, storagePort, functionsPort } = EMULATOR_CONFIG;
     connectAuthEmulator(auth, `http://${host}:${authPort}`, { disableWarnings: true });
     connectFirestoreEmulator(db, host, firestorePort);
     connectStorageEmulator(storage, host, storagePort);
+    connectFunctionsEmulator(functions, host, functionsPort);
     globalThis.__masteryEmulatorsConnected = true;
   }
 
-  cached = { app, auth, db, storage };
+  cached = { app, auth, db, storage, functions };
   return cached;
 }
