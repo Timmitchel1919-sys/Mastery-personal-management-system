@@ -6,6 +6,40 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 15C — Check-ins & Tracking — 2026-09-05
+
+**Added**
+- `src/features/recovery/recovery-checkin-schema.ts` / `recovery-checkin-repository.ts` /
+  `recovery-progress.ts` / `use-recovery-checkins.ts` — daily recovery check-ins under a
+  goal (`date`, `stayedOnTrack`, `urgeIntensity` 0-10, HALT booleans, `triggersToday` /
+  `copingUsed`, `reflection`), upserted one-per-day; a bespoke nested repository; and pure
+  `summarizeRecoveryProgress` (current / longest streak, days on track, average urge —
+  derived on read, never stored).
+- `src/features/recovery/recovery-relapse-schema.ts` / `recovery-relapse-client.ts` /
+  `use-recovery-relapses.ts` — setback records read by the client but written **only** by
+  the `recordRecoverySetback` Cloud Function.
+- `functions/src/recovery/record-recovery-setback.ts` — the onCall that validates the
+  request, checks the goal exists, and writes `recoveryGoals/{goalId}/relapses/{id}` via
+  the Admin SDK. Written and unit-tested; **not deployed** (Spark plan — as with the Layer
+  13/14 AI functions).
+- `RecoveryGoalDetailView` with a progress grid, recent check-ins, and setbacks list;
+  `CheckInDialog` and `RelapseLogDialog` (framed as "restart from here", never failure).
+  `RecoveryGoalCard` gains an "Open" button; `RecoveryHomeView` routes to the detail view.
+- Tests: `record-recovery-setback` function tests (6), recovery-progress /
+  recovery-checkin-schema / recovery-relapse-schema unit tests, `RecoveryGoalDetailView`
+  component tests, a check-ins emulator integration test, and a Layer 15C rules block
+  (direct relapse client write rejected) — the last two written, not executed in-session.
+
+**Changed**
+- `firestore.rules` — the recursive-wildcard owner-only rule now refuses a direct client
+  write to `.../relapses/{id}` (`isServerMediatedRecoveryWrite`), making the Cloud Function
+  the only writer. Reads unchanged.
+- `docs/DATA_MODEL.md` describes `checkIns` and `relapses`; `docs/DECISIONS.md` — ADR-0021.
+
+**Known limitation:** `recordRecoverySetback` is not deployed, so "Log a setback" fails in
+production until the owner upgrades to Blaze; check-ins are fully functional (client-only).
+Hard delete of recovery data is still deferred.
+
 ### Layer 15B — Recovery Data Model — 2026-09-08
 
 **Added**

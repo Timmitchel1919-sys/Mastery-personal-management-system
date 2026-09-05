@@ -46,11 +46,12 @@ function ListBlock({ title, items }: { title: string; items: string[] }) {
 
 interface RecoveryGoalCardProps {
   goal: RecoveryGoal;
+  onOpen: (goal: RecoveryGoal) => void;
   onEdit: (goal: RecoveryGoal) => void;
   onArchive: (id: string) => Promise<void>;
 }
 
-export function RecoveryGoalCard({ goal, onEdit, onArchive }: RecoveryGoalCardProps) {
+export function RecoveryGoalCard({ goal, onOpen, onEdit, onArchive }: RecoveryGoalCardProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [archiving, setArchiving] = useState(false);
 
@@ -75,7 +76,10 @@ export function RecoveryGoalCard({ goal, onEdit, onArchive }: RecoveryGoalCardPr
             </div>
             <h3 className="mt-1 font-medium break-words">{goal.behavior}</h3>
           </div>
-          <div className="flex shrink-0 gap-0.5">
+          <div className="flex shrink-0 items-center gap-0.5">
+            <Button variant="ghost" size="sm" onClick={() => onOpen(goal)}>
+              Open
+            </Button>
             <IconButton
               size="sm"
               aria-label="Edit goal"

@@ -614,3 +614,51 @@ through a dedicated Cloud Function. Three calls needed making.
 - Hard delete being deferred means an archived recovery goal (and later its subcollections)
   physically persists until the deletion function ships — acceptable for now, flagged as a
   known limitation.
+
+---
+
+## ADR-0021 — Recovery check-ins & setbacks: client-written check-ins, Cloud-Function-mediated relapses, derived streaks
+**Date:** 2026-09-05 · **Status:** accepted · **Layer:** 15C — Check-ins & Tracking
+
+**Context.** Layer 15C adds the first two subcollections under `recoveryGoals/{goalId}`:
+daily **check-ins** and **setback (relapse) records**. `docs/RECOVERY_PRIVACY.md` §3 says
+relapse/coach/accountability writes "must go through Cloud Functions" with rules rejecting
+direct client writes; §4 mandates growth-oriented, non-shaming language. The existing
+`createFirestoreRepository` factory only models one level under `users/{uid}`. Streak and
+progress numbers could be stored or derived.
+
+**Decision.**
+- **Check-ins are client-written** under the existing generic owner-only subcollection
+  rule — they are low-risk self-report data (`date`, `stayedOnTrack`, `urgeIntensity` 0-10,
+  HALT booleans, `triggersToday`/`copingUsed`, `reflection`), one document per goal per
+  day, upserted by date.
+- **Relapses are written only by the `recordRecoverySetback` Cloud Function.**
+  `firestore.rules` gained `isServerMediatedRecoveryWrite(document)` —
+  `string(document).matches('(^|.*/)relapses/[^/]+$')` — and the generic
+  `users/{uid}/{collection}/{document=**}` create/update/delete rules now carry
+  `&& !isServerMediatedRecoveryWrite(document)`. Firestore ORs all matching rules, so the
+  guard has to sit on the wildcard rule itself, not in a narrower `match` block. The client
+  reads relapses back directly (owner-only read is unchanged); it just cannot write them.
+- **The function (like the AI functions in 13/14) is written and unit-tested but NOT
+  deployed** — the project stays on the Spark plan; `firebase deploy` remains
+  `--only hosting,firestore:rules,firestore:indexes,storage`. Consequence: "Log a setback"
+  will fail in production until the owner upgrades to Blaze and deploys functions.
+- **Bespoke nested repositories** (`recovery-checkin-repository.ts`,
+  `recovery-relapse-client.ts`) hand-rolled with `buildCreateAudit`/`makeConverter`, since
+  the factory is single-level. Handlers take injectable deps for testing.
+- **Streaks and progress are derived, never stored.** `summarizeRecoveryProgress(checkIns)`
+  is a pure function (same pattern as habit streaks in 10B) computing `currentStreak`,
+  `longestStreak`, `daysOnTrack`, `averageUrge`, `lastCheckInDate` on read.
+- **Setback framing is "restart from here."** The relapse dialog leads with "A setback is
+  part of the process, not the end of it"; the submit action is "Save & restart"; the goal
+  has no "relapsed" status (ADR-0020) — a setback is an event, and the streak simply
+  begins again.
+
+**Consequences.**
+- The `relapses` path is now the template for the coach-session (15E) and accountability
+  (15F) Cloud-Function-only writes — the same rules guard extends by adding path patterns.
+- Because progress is derived, a very long check-in history is read in full to compute it;
+  `listRecentCheckIns` caps at 90 days, which bounds the read and the streak window. If a
+  user needs streaks longer than 90 days, that becomes a stored-aggregate concern later.
+- `string(document).matches(...)` in `firestore.rules` is only compile-checked at deploy
+  time; this layer's deploy re-uploads the rules, so a syntax error surfaces there.

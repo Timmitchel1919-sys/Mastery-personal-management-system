@@ -116,4 +116,18 @@ Any new access path must be added to this table in the same layer that introduce
 > `src/features/recovery/`) is implemented and unit-tested. The PIN is a shield against
 > casual/shoulder-surf access, not a security boundary against the account owner — real
 > security is Firebase Auth + the owner-only rule on `recoveryProfiles`, same as any other
-> collection. `recoveryGoals` and everything else in §2 (15B onward) does not exist yet.
+> collection.
+>
+> **Layer 15B status:** `recoveryGoals` (§2's behavioral model — behavior, motivation,
+> triggers/warning-signs/coping-strategies, neutral `recoveryStatus`) is implemented,
+> client-written under the generic owner-only rule, behind the PIN gate.
+>
+> **Layer 15C status:** daily **check-ins** (`recoveryGoals/{goalId}/checkIns`) are
+> implemented and client-written under the owner-only rule; streaks/progress are derived on
+> read. **Setback records** (`recoveryGoals/{goalId}/relapses`) are write-guarded per §3:
+> `firestore.rules` refuses a direct client write, so the `recordRecoverySetback` Cloud
+> Function (Admin SDK) is the only writer; the client reads them back directly. That
+> function is written and unit-tested but **not yet deployed** (project is on the Spark
+> plan) — logging a setback will fail in production until Cloud Functions are deployed.
+> The coping toolkit (15D), Recovery Coach (15E), and accountability partner (15F) do not
+> exist yet.

@@ -39,5 +39,41 @@ export {
 } from "./recovery-goal-schema";
 export { recoveryGoalRepository, listActiveRecoveryGoals } from "./recovery-goal-repository";
 export { useRecoveryGoals } from "./use-recovery-goals";
+export {
+  MAX_URGE,
+  EMPTY_HALT,
+  HALT_LABEL,
+  recoveryCheckInSchema,
+  recoveryCheckInCreateSchema,
+  recoveryCheckInUpdateSchema,
+  recoveryCheckInFormSchema,
+  recoveryCheckInInputFromForm,
+  type Halt,
+  type RecoveryCheckIn,
+  type RecoveryCheckInCreate,
+  type RecoveryCheckInUpdate,
+  type RecoveryCheckInFormValues,
+} from "./recovery-checkin-schema";
+export {
+  listRecentCheckIns,
+  getCheckInForDate,
+  createCheckIn,
+  updateCheckIn,
+} from "./recovery-checkin-repository";
+export { summarizeRecoveryProgress, type RecoveryProgress } from "./recovery-progress";
+export { useRecoveryCheckIns } from "./use-recovery-checkins";
+export {
+  recoveryRelapseSchema,
+  recoveryRelapseRequestSchema,
+  recoveryRelapseResultSchema,
+  recoveryRelapseFormSchema,
+  recoveryRelapseRequestFromForm,
+  type RecoveryRelapse,
+  type RecoveryRelapseRequest,
+  type RecoveryRelapseResult,
+  type RecoveryRelapseFormValues,
+} from "./recovery-relapse-schema";
+export { listRecoveryRelapses, recordRecoverySetback } from "./recovery-relapse-client";
+export { useRecoveryRelapses } from "./use-recovery-relapses";
 export { RecoveryGate } from "./components/RecoveryGate";
 export { RecoveryHomeView } from "./components/RecoveryHomeView";

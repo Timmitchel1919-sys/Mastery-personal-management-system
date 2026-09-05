@@ -176,3 +176,63 @@ describe("users/{uid}/recoveryGoals/{goalId} — Layer 15B", () => {
     );
   });
 });
+
+function auditedNested(uid: string, extra: Record<string, unknown> = {}) {
+  return {
+    createdBy: uid,
+    updatedBy: uid,
+    createdAt: "2026-09-08T00:00:00.000Z",
+    updatedAt: "2026-09-08T00:00:00.000Z",
+    ...extra,
+  };
+}
+
+describe("recoveryGoals subcollections — Layer 15C", () => {
+  it("lets the owner create and read a check-in (client-writable)", async () => {
+    const db = testEnv.authenticatedContext(ALICE).firestore();
+    await assertSucceeds(
+      setDoc(
+        doc(db, "users", ALICE, "recoveryGoals", "g1", "checkIns", "c1"),
+        auditedNested(ALICE),
+      ),
+    );
+    await assertSucceeds(getDoc(doc(db, "users", ALICE, "recoveryGoals", "g1", "checkIns", "c1")));
+  });
+
+  it("REJECTS a direct client write to a relapse (Cloud-Function-mediated per §3)", async () => {
+    const db = testEnv.authenticatedContext(ALICE).firestore();
+    await assertFails(
+      setDoc(
+        doc(db, "users", ALICE, "recoveryGoals", "g1", "relapses", "r1"),
+        auditedNested(ALICE, { whatHappened: "attempt" }),
+      ),
+    );
+  });
+
+  it("still lets the owner READ a relapse (written by the Admin SDK)", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(
+        doc(context.firestore(), "users", ALICE, "recoveryGoals", "g1", "relapses", "r1"),
+        auditedNested(ALICE, { whatHappened: "seeded server-side" }),
+      );
+    });
+    const db = testEnv.authenticatedContext(ALICE).firestore();
+    await assertSucceeds(getDoc(doc(db, "users", ALICE, "recoveryGoals", "g1", "relapses", "r1")));
+  });
+
+  it("denies another signed-in user from reading a check-in or relapse", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(
+        doc(context.firestore(), "users", ALICE, "recoveryGoals", "g1", "checkIns", "c1"),
+        auditedNested(ALICE),
+      );
+      await setDoc(
+        doc(context.firestore(), "users", ALICE, "recoveryGoals", "g1", "relapses", "r1"),
+        auditedNested(ALICE),
+      );
+    });
+    const db = testEnv.authenticatedContext(BOB).firestore();
+    await assertFails(getDoc(doc(db, "users", ALICE, "recoveryGoals", "g1", "checkIns", "c1")));
+    await assertFails(getDoc(doc(db, "users", ALICE, "recoveryGoals", "g1", "relapses", "r1")));
+  });
+});

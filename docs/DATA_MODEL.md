@@ -70,8 +70,8 @@ users/{uid}/aiCallLogs/{logId}                  per-call audit record: intent, i
 # Recovery — separately protected (see RECOVERY_PRIVACY.md)
 users/{uid}/recoveryProfiles/{uid}             singleton, id == uid: lockMethod ("pin", extensible), pinHash/pinSalt (salted SHA-256, client-side only), failedAttempts, lockedUntil — the privacy gate itself, not behavioral data (Layer 15A)
 users/{uid}/recoveryGoals/{goalId}             one per self-identified behavior: behavior, description, motivation, startDate, triggers[]/warningSigns[]/copingStrategies[], supportNotes, faithBasedEncouragement, recoveryStatus (active|going-well|challenging|paused — neutral, no shame framing). Client-written under the generic owner-only rule; archive is reversible, hard delete is a future Cloud Function (Layer 15B)
-users/{uid}/recoveryGoals/{goalId}/checkIns/{checkInId}      reserved — Layer 15C
-users/{uid}/recoveryGoals/{goalId}/relapses/{relapseId}      reserved — Layer 15C (Cloud-Function-mediated writes per RECOVERY_PRIVACY.md §3)
+users/{uid}/recoveryGoals/{goalId}/checkIns/{checkInId}      one per goal per day: date, stayedOnTrack, urgeIntensity (0-10), halt {hungry,angry,lonely,tired}, triggersToday[]/copingUsed[], reflection — client-written; streak & progress derived, never stored (Layer 15C)
+users/{uid}/recoveryGoals/{goalId}/relapses/{relapseId}      setback record: date, whatHappened, contributingFactors[], lessonsLearned, restartPlan — **Cloud-Function-mediated** (recordRecoverySetback); the Firestore rule refuses a direct client write. Client reads it back (Layer 15C)
 users/{uid}/recoveryGoals/{goalId}/copingActions/{actionId}  reserved — Layer 15D
 users/{uid}/recoveryAccountabilityPartners/{partnerId}       reserved — Layer 15F
 users/{uid}/recoveryCoachSessions/{sessionId}                reserved — Layer 15E (isolated from general AI)

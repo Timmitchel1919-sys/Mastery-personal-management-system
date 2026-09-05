@@ -13,6 +13,11 @@ let goalsValue: Record<string, unknown>;
 vi.mock("next/navigation", () => ({ usePathname: () => "/recovery" }));
 vi.mock("../use-recovery-lock", () => ({ useRecoveryLock: () => ({ lock }) }));
 vi.mock("../use-recovery-goals", () => ({ useRecoveryGoals: () => goalsValue }));
+vi.mock("./RecoveryGoalDetailView", () => ({
+  RecoveryGoalDetailView: ({ goal }: { goal: { behavior: string } }) => (
+    <div>Detail for {goal.behavior}</div>
+  ),
+}));
 
 import { RecoveryHomeView } from "./RecoveryHomeView";
 
@@ -80,6 +85,15 @@ describe("RecoveryHomeView", () => {
     await userEvent.click(screen.getByRole("button", { name: /archive goal/i }));
     await userEvent.click(await screen.findByRole("button", { name: /^archive$/i }));
     expect(archive).toHaveBeenCalledWith("rg1");
+  });
+
+  it("opens the goal detail view", async () => {
+    goalsValue.items = [goal];
+    render(<RecoveryHomeView />);
+    await userEvent.click(screen.getByRole("button", { name: /^open$/i }));
+    expect(screen.getByText("Detail for Late-night doomscrolling")).toBeInTheDocument();
+    // The "New recovery goal" action is hidden while a goal is open.
+    expect(screen.queryByRole("button", { name: /new recovery goal/i })).not.toBeInTheDocument();
   });
 
   it("renders an error state with retry", async () => {

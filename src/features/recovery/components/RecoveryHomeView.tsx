@@ -9,10 +9,10 @@ import { useRecoveryLock } from "../use-recovery-lock";
 import { useRecoveryGoals } from "../use-recovery-goals";
 import { recoveryGoalInputFromForm, type RecoveryGoal } from "../recovery-goal-schema";
 import { RecoveryGoalCard } from "./RecoveryGoalCard";
+import { RecoveryGoalDetailView } from "./RecoveryGoalDetailView";
 import { RecoveryGoalDialog } from "./RecoveryGoalDialog";
 
 const UPCOMING = [
-  { label: "Daily check-ins & progress tracking", layer: "15C" },
   { label: "Coping toolkit", layer: "15D" },
   { label: "Recovery Coach", layer: "15E" },
   { label: "Accountability partner", layer: "15F" },
@@ -25,6 +25,7 @@ export function RecoveryHomeView() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<RecoveryGoal | null>(null);
+  const [openGoalId, setOpenGoalId] = useState<string | null>(null);
 
   function openCreate() {
     setEditing(null);
@@ -34,6 +35,8 @@ export function RecoveryHomeView() {
     setEditing(goal);
     setDialogOpen(true);
   }
+
+  const openGoal = openGoalId ? (items.find((goal) => goal.id === openGoalId) ?? null) : null;
 
   return (
     <PageContainer size="wide" className="space-y-6">
@@ -47,14 +50,68 @@ export function RecoveryHomeView() {
               <Lock />
               Lock
             </Button>
-            <Button onClick={openCreate} disabled={status === "loading"}>
-              <Plus />
-              New recovery goal
-            </Button>
+            {!openGoal ? (
+              <Button onClick={openCreate} disabled={status === "loading"}>
+                <Plus />
+                New recovery goal
+              </Button>
+            ) : null}
           </div>
         }
       />
 
+      {openGoal ? (
+        <RecoveryGoalDetailView goal={openGoal} onBack={() => setOpenGoalId(null)} />
+      ) : (
+        <RecoveryGoalsList
+          status={status}
+          items={items}
+          error={error}
+          onReload={reload}
+          onCreate={openCreate}
+          onOpen={(goal) => setOpenGoalId(goal.id)}
+          onEdit={openEdit}
+          onArchive={archive}
+        />
+      )}
+
+      <RecoveryGoalDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        goal={editing}
+        onSubmit={async (values) => {
+          const input = recoveryGoalInputFromForm(values);
+          if (editing) await update(editing.id, input);
+          else await create(input);
+        }}
+      />
+    </PageContainer>
+  );
+}
+
+interface RecoveryGoalsListProps {
+  status: "loading" | "ready" | "error";
+  items: RecoveryGoal[];
+  error: string | null;
+  onReload: () => void;
+  onCreate: () => void;
+  onOpen: (goal: RecoveryGoal) => void;
+  onEdit: (goal: RecoveryGoal) => void;
+  onArchive: (id: string) => Promise<void>;
+}
+
+function RecoveryGoalsList({
+  status,
+  items,
+  error,
+  onReload,
+  onCreate,
+  onOpen,
+  onEdit,
+  onArchive,
+}: RecoveryGoalsListProps) {
+  return (
+    <>
       <Card>
         <CardContent className="space-y-4 p-6">
           <div>
@@ -98,14 +155,14 @@ export function RecoveryHomeView() {
           className="min-h-[30vh]"
           title="We couldn't load your recovery goals"
           description={error ?? "Please try again."}
-          onRetry={reload}
+          onRetry={onReload}
         />
       ) : items.length === 0 ? (
         <EmptyState
           title="No recovery goals yet"
           description="Add one whenever you're ready — there's no rush."
           action={
-            <Button onClick={openCreate}>
+            <Button onClick={onCreate}>
               <Plus />
               Add your first goal
             </Button>
@@ -114,21 +171,16 @@ export function RecoveryHomeView() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {items.map((goal) => (
-            <RecoveryGoalCard key={goal.id} goal={goal} onEdit={openEdit} onArchive={archive} />
+            <RecoveryGoalCard
+              key={goal.id}
+              goal={goal}
+              onOpen={onOpen}
+              onEdit={onEdit}
+              onArchive={onArchive}
+            />
           ))}
         </div>
       )}
-
-      <RecoveryGoalDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        goal={editing}
-        onSubmit={async (values) => {
-          const input = recoveryGoalInputFromForm(values);
-          if (editing) await update(editing.id, input);
-          else await create(input);
-        }}
-      />
-    </PageContainer>
+    </>
   );
 }

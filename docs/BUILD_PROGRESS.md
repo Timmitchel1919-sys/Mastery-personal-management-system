@@ -8,16 +8,16 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 15B — Recovery Data Model (complete) |
-| **Next approved layer** | Layer 15C — Check-ins & Tracking (not started — awaiting explicit go-ahead) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15A · **Layer 15B** |
-| **In-progress work** | Layer 15 (Recovery Center) continues with 15C–15F on future "Volgende laag" requests |
-| **Test status** | ✅ app: `vitest run` — 108 files, 596 tests. ✅ rules: `npm run test:rules` — 3 files, 32 tests (`tests/rules/recovery.rules.test.ts` gained a `recoveryGoals` block, +3 tests — not re-run in-session, emulator restriction; rule unchanged, no regression risk). ⚠️ integration: `npm run test:integration` — 28 files, 71 tests **written**; the 9D/9E/10A–10C/11A–11D/12/13/14/15A/15B tests were not executed in-session (Firestore emulator restriction). ✅ functions: 10 files, 58 tests (unchanged — 15B is app-only, no Cloud Function). |
+| **Current layer** | Layer 15C — Check-ins & Tracking (complete) |
+| **Next approved layer** | Layer 15D — Coping Toolkit (not started — awaiting explicit go-ahead) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15A · Layer 15B · **Layer 15C** |
+| **In-progress work** | Layer 15 (Recovery Center) continues with 15D–15F on future "Volgende laag" requests |
+| **Test status** | ✅ app: `vitest run` — 112 files, 615 tests. ✅ rules: `npm run test:rules` — 3 files, ~36 tests (`tests/rules/recovery.rules.test.ts` gained a `recoveryGoals subcollections — Layer 15C` block: owner check-in create/read allowed, direct relapse client write REJECTED, owner relapse READ allowed after Admin seed, cross-user denied — not re-run in-session, emulator restriction). ⚠️ integration: `npm run test:integration` — 29 files, ~74 tests **written**; `tests/integration/recovery-checkins.test.ts` added (create/find-by-date/update/list, user scoping, direct relapse client write rejected) — not executed in-session (Firestore emulator restriction). ✅ functions: `vitest run` — 11 files, 64 tests (`functions/tests/recovery/record-recovery-setback.test.ts` added, +6). |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: unchanged. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 15B built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 15B — hosting only; `firestore.rules` unchanged, `recoveryGoals` uses the generic owner-only rule). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (Layer 13/14) still not deployed — unchanged this layer, see ADR-0017/0018. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 15C built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 15C — hosting + `firestore.rules`: the recursive-wildcard owner-only rule now refuses direct client writes to `.../relapses/{id}` via `isServerMediatedRecoveryWrite`). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (Layer 13/14 + 15C's `recordRecoverySetback`) still not deployed — Spark plan, see ADR-0017/0018/0021. |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · (no new deps in Layer 15A/15B) |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · (no new deps in Layer 15A/15B/15C) |
 
 ---
 
@@ -2922,6 +2922,125 @@ to sign-in, no console errors.
   partner** — all Layer 15C onward.
 - **Rules/integration tests written, not executed in-session** — same emulator
   restriction as every prior layer this session.
+
+---
+
+### Layer 15C — Check-ins & Tracking — ✅ complete (2026-09-05) — committed + pushed + deployed live
+
+Daily check-ins and setback logging under a recovery goal, plus derived streak/progress
+numbers and a goal detail view. Check-ins are ordinary client-written owner-only data;
+setback (`relapses`) records are written **only** by a Cloud Function, with
+`firestore.rules` refusing a direct client write. The setback function is written and
+unit-tested but **not deployed** (Spark plan — same pattern as the Layer 13/14 AI
+functions). Framing throughout is "restart from here," never failure. Full rationale:
+ADR-0021.
+
+**Created — `src/features/recovery/`:**
+- `recovery-checkin-schema.ts` — `MAX_URGE = 10`, `haltSchema` (hungry / angry / lonely /
+  tired booleans) + `EMPTY_HALT` / `HALT_LABEL`, `checkInFieldsSchema` (`date`,
+  `stayedOnTrack`, `urgeIntensity` 0-10, `halt`, `triggersToday[]` / `copingUsed[]`,
+  `reflection` ≤2000). `recoveryCheckInSchema` via `defineRecordSchema`. Form schema with
+  newline-list text fields + `recoveryCheckInInputFromForm`.
+- `recovery-checkin-repository.ts` — bespoke nested repo (the factory is single-level):
+  `listRecentCheckIns(goalId, max=90)`, `getCheckInForDate`, `createCheckIn`,
+  `updateCheckIn` over `users/{uid}/recoveryGoals/{goalId}/checkIns`, client-written under
+  the generic owner-only rule.
+- `recovery-progress.ts` — pure `summarizeRecoveryProgress(checkIns)` →
+  `{ checkInCount, currentStreak, longestStreak, daysOnTrack, averageUrge, lastCheckInDate }`.
+  Streaks derived on read, never stored (same approach as habit streaks in 10B).
+- `recovery-relapse-schema.ts` — `relapseFieldsSchema` (`date`, `whatHappened` 1-2000,
+  `contributingFactors[]`, `lessonsLearned`, `restartPlan`), `recoveryRelapseSchema`,
+  request/result schemas for the Cloud Function, form schema +
+  `recoveryRelapseRequestFromForm`.
+- `recovery-relapse-client.ts` — `listRecoveryRelapses(goalId, max=50)` (client read only)
+  and `recordRecoverySetback(payload)` (`httpsCallable` → `recordRecoverySetback`).
+- `use-recovery-checkins.ts` — `useRecoveryCheckIns(goalId)`: load, `submitCheckIn` (upsert
+  by date), memoized `progress`.
+- `use-recovery-relapses.ts` — `useRecoveryRelapses(goalId)`: load, `logSetback` (calls the
+  function then re-lists).
+- `components/CheckInDialog.tsx` — keyed form: `Switch` "stayed on track", 0-10 urge
+  `Select`, four HALT `Checkbox`es, triggers / coping newline textareas, reflection.
+- `components/RelapseLogDialog.tsx` — leads with "A setback is part of the process, not the
+  end of it"; submit is "Save & restart".
+- `components/RecoveryGoalDetailView.tsx` — back to list, "Check in" + "Log a setback",
+  progress `Stat` grid (current streak / longest streak / days on track / avg. urge),
+  recent check-ins list (On track / Hard day badge, urge, HALT), setbacks list.
+
+**Created — `functions/`:**
+- `src/recovery/record-recovery-setback.ts` — `handleRecordRecoverySetback(request, db)`
+  (injectable `db` for tests): `requireAuth` → `validateRequest` → verify the goal exists →
+  write `users/{uid}/recoveryGoals/{goalId}/relapses/{id}` via the Admin SDK (audit fields,
+  server timestamps) → `validateResponse({ relapseId })`. Exported as the `recordRecoverySetback`
+  onCall (`DEFAULT_RUNTIME_OPTIONS`, `toHttpsError`). **Not deployed.**
+
+**Modified:**
+- `firestore.rules` — added `isServerMediatedRecoveryWrite(document)`
+  (`string(document).matches('(^|.*/)relapses/[^/]+$')`) and `&& !isServerMediatedRecoveryWrite(document)`
+  on the recursive-wildcard create / update / delete. Read is unchanged (owner reads its
+  relapses). Coach sessions (15E) / accountability (15F) will extend the same guard.
+- `functions/src/index.ts` — exports `recordRecoverySetback`; JSDoc updated ("written and
+  tested through Layer 15C; NOT deployed").
+- `functions/src/recovery/README.md` — documents the setback function.
+- `src/features/recovery/components/RecoveryGoalCard.tsx` — added an "Open" button
+  (`onOpen`) and switched the archive control to an icon button.
+- `src/features/recovery/components/RecoveryHomeView.tsx` — opens the goal detail view when
+  a goal is selected; goals list extracted to a `RecoveryGoalsList` helper.
+- `src/features/recovery/index.ts` — barrel extended with all 15C exports.
+- `docs/DATA_MODEL.md` — `checkIns` and `relapses` described (client-written vs.
+  Cloud-Function-mediated).
+
+**Tests added:** `functions/tests/recovery/record-recovery-setback.test.ts` (6:
+unauthenticated, invalid payload, goal-not-found, writes + returns id, defaults the
+optional fields, wraps errors as `HttpsError`); `recovery-progress.test.ts` (4);
+`recovery-checkin-schema.test.ts` (~5); `recovery-relapse-schema.test.ts` (~4);
+`components/RecoveryGoalDetailView.test.tsx` (5); `RecoveryHomeView.test.tsx` gained an
+"opens the goal detail view" test; `tests/integration/recovery-checkins.test.ts` (create /
+find-by-date / update / list, user scoping, direct relapse client write rejected —
+**written, not executed in-session**); `tests/rules/recovery.rules.test.ts` gained a
+`recoveryGoals subcollections — Layer 15C` block (owner check-in create/read allowed,
+direct relapse client write REJECTED, owner relapse READ allowed after an Admin-SDK seed,
+cross-user denied — **written, not executed in-session**).
+
+**Verification:** app `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (112 files / 615 tests)
+· `build` ✅ (static export, no warnings) · `format:check` ✅. functions `typecheck` ✅ ·
+`lint` ✅ · `test` ✅ (11 files / 64 tests) · `build` ✅. `test:rules` / `test:integration`
+— new tests written, not executed (emulator restriction); `firestore.rules` compile-checked
+at deploy.
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production NEXT_PUBLIC_APP_URL=https://mastery-personal-mgmt-system.web.app npm run build`
+then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project
+mastery-personal-mgmt-system --non-interactive` — `firestore.rules` **changed** this layer,
+re-uploaded and compiled clean. Redeployed to https://mastery-personal-mgmt-system.web.app/ .
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Recovery Center**, enter your PIN, open a recovery goal
+   (**Open** on its card).
+2. **Check in** → set "stayed on track", pick an urge level, tick any HALT factors, add
+   triggers / coping used / a reflection → **Save check-in**. The progress grid updates
+   (current streak, days on track, avg. urge) and the entry appears under "Recent
+   check-ins".
+3. Check in again for the same date → it updates the existing entry, not a duplicate.
+4. Check in for several consecutive days with "stayed on track" on → current streak counts
+   up; toggle one day off → the streak resets from the most recent on-track day.
+5. **Log a setback** → note what happened, contributing factors, a restart plan →
+   **Save & restart**. **In production this currently fails** with a callable-function
+   error — `recordRecoverySetback` is not deployed (Spark plan). Against the emulator
+   (`firebase emulators:start` + functions) it writes `users/{uid}/recoveryGoals/{goalId}/relapses/{id}`
+   and the entry shows under "Setbacks".
+6. Firestore console → try to write `users/{uid}/recoveryGoals/{goalId}/relapses/x`
+   directly from a client SDK → **permission denied** (only the Cloud Function may write
+   it); a `checkIns` doc writes fine.
+
+**Known limitations:**
+- **`recordRecoverySetback` is not deployed** — the project is on the Spark plan and no
+  Cloud Function is shipped. "Log a setback" throws in production until the owner upgrades
+  to Blaze and runs `firebase deploy --only functions`. Check-ins work fully (client-only).
+- **No hard delete** — archived goals and their check-ins / relapses physically persist;
+  the cascading deletion Cloud Function is still deferred (ADR-0020/0021).
+- **Progress is derived from the last 90 check-ins** — streaks longer than that window are
+  not represented; a stored aggregate is a later concern.
+- **No coping toolkit / Recovery Coach / accountability partner** — Layers 15D–15F.
+- **Rules / integration tests written, not executed in-session** — emulator restriction.
 
 ---
 
