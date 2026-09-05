@@ -1112,3 +1112,57 @@ Playwright browsers.
 - e2e + rules + integration remain "green in CI, unrun locally in this environment" — the
   same standing limitation every layer since 9 has carried; it is not new debt from Layer 21.
 - The coverage floor is modest; treat it as a ratchet, not a target.
+
+---
+
+## ADR-0031 — CI/CD: GitHub Actions, deploy-from-`main`, emulator + Playwright in CI
+**Date:** 2026-09-05 · **Status:** accepted · **Layer:** 22 — Deployment & CI/CD
+**Builds on:** ADR-0002 (single `main`), ADR-0008 (project ids), ADR-0015 (static export)
+
+**Context.** Every layer already runs the §9 gate locally and deploys by hand per §10.1.
+Layer 22 automates that: run the full test program (Layer 21) on every push/PR and deploy
+production from `main`. Constraints — single Firebase project on Spark (no Functions
+deploy, no separate staging project yet), a static export, and a repo whose CI has to be
+authored without being able to run GitHub Actions from here.
+
+**Decision.**
+- **GitHub Actions**, one verification workflow (`ci.yml`) + one preview workflow
+  (`pr-preview.yml`) + `dependabot.yml`. Node pinned by `.nvmrc` (24) and read via
+  `actions/setup-node`'s `node-version-file`.
+- **`ci.yml` = five jobs**: `app` (typecheck / lint / format / `test:coverage` / prod
+  build), `functions` (its own package suite), `emulator` (`test:rules` + `test:integration`
+  under `firebase emulators:exec`, JDK 17), `e2e` (`test:e2e:install` then Playwright under
+  `emulators:exec` on the reserved `demo-mastery` id, JDK 17), and `deploy`
+  (`needs: [app, functions, emulator, e2e]`, `if: push && ref == refs/heads/main`). The
+  four verification jobs run in parallel; deploy waits for all of them.
+- **Deploy from `main`, in CI, using a service-account JSON** written from
+  `secrets.FIREBASE_SERVICE_ACCOUNT` to `$RUNNER_TEMP` and exposed as
+  `GOOGLE_APPLICATION_CREDENTIALS`. `--only hosting,firestore:rules,firestore:indexes,storage`
+  — **`functions` is deliberately absent** (Spark; ADR-0017). A `production` GitHub
+  Environment scopes the secret and records the deploy URL.
+- **Web config is inlined at build time** (`output: "export"`), so every build step —
+  `app`, `deploy`, `pr-preview` — receives the `NEXT_PUBLIC_FIREBASE_*` values from repo
+  secrets. `NEXT_PUBLIC_APP_ENV=production` on release builds (shell env beats
+  `.env.local`).
+- **PR previews** publish to a `pr-<number>` Hosting channel (7-day expiry) on the same
+  project — a separate URL, no production data path. Skipped for forked PRs (no secrets).
+- **The manual §2a release stays the documented fallback** until the owner adds the
+  secrets; the workflow doesn't break anything by existing without them (it just fails the
+  `deploy`/`preview` job, which is skipped on forks and easy to re-run once configured).
+- **`test:e2e` / `test:rules` / `test:integration` are CI-first.** They have never run in
+  this build's sandbox (emulator loopback restriction since Layer 9; Playwright browsers
+  uninstallable). `ci.yml` is where they actually execute. A tiny
+  `tests/unit/ci-workflow.test.ts` parses `ci.yml` and asserts the job graph, the gate
+  commands, and that the deploy `--only` list never contains `functions` — so a bad edit
+  to the pipeline fails `npm test`.
+
+**Consequences.**
+- Owner has two one-time setup tasks: add the repo secrets (§3 of `DEPLOYMENT.md`), and —
+  when ready — provision a real `staging` project and split `pr-preview` onto it (the
+  ADR-0008 deferral).
+- Adding a Cloud Function later means: move to Blaze, add `functions` to the `deploy`
+  `--only` list and a `functions` deploy step, add the AI provider secret to the
+  `functions` env. `ci-workflow.test.ts` will need its `not…functions` assertion relaxed
+  then.
+- CI wall-clock is dominated by `e2e` (browser download + emulator boot + two viewports);
+  acceptable for a per-push gate, revisit with sharding if it drags.

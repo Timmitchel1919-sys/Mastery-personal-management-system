@@ -81,21 +81,44 @@ Notes / follow-ups:
 
 ## 3. CI/CD (Layer 22)
 
-On every push to `main` and every pull request, CI runs:
+**GitHub Actions.** Two workflows, Node pinned by `.nvmrc` (24), plus `dependabot.yml`
+(weekly npm + actions updates). ADR-0031.
 
-1. Dependency installation (clean, locked)
-2. `npm run typecheck`
-3. `npm run lint`
-4. `npm test`
-5. `npm run test:rules` (emulator)
-6. `npm run build` (production)
-7. Security checks where supported (dependency audit, secret scan)
+### `.github/workflows/ci.yml` — on push to `main` and every PR to `main`
 
-On `main`, after green CI: `npm run build` then `firebase deploy --only
-hosting,firestore:rules,firestore:indexes,storage` (static export → Firebase Hosting,
-ADR-0015). Functions deploy is added when a Cloud Function ships and the project is on
-Blaze. Preview builds for pull requests where supported. **No production secrets in
-preview environments.**
+| Job | What it runs | Runner needs |
+|---|---|---|
+| **`app`** | `npm ci` → `typecheck` → `lint` → `format:check` → `test:coverage` (unit + component + a11y, v8 coverage gate) → `build` (production static export). Uploads `out/` + `coverage/` artifacts. | Node |
+| **`functions`** | `functions/`: `npm ci` → `typecheck` → `lint` → `test` (vitest, fakes) → `build`. | Node |
+| **`emulator`** | `npm run test:rules` + `npm run test:integration` under `firebase emulators:exec`. | Node + JDK 17 |
+| **`e2e`** | `npm run test:e2e:install` (Playwright browsers) → `firebase emulators:exec --only auth,firestore,storage --project demo-mastery "npm run test:e2e"` (chromium-desktop + mobile-safari). Uploads `playwright-report/`. | Node + JDK 17 |
+| **`deploy`** | `needs: [app, functions, emulator, e2e]`; `if: push && ref == refs/heads/main`. `npm ci` → `build` (prod) → `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --non-interactive` against the production project, auth via a service-account JSON written from `secrets.FIREBASE_SERVICE_ACCOUNT`. GitHub Environment `production` (URL pinned). | Node |
+
+`concurrency` cancels superseded runs per ref. **`functions` is never in the deploy
+`--only` list** — needs Blaze + a shipped function (ADR-0017 / ADR-0029); it joins when
+that happens.
+
+### `.github/workflows/pr-preview.yml` — on every same-repo PR
+
+Builds with `NEXT_PUBLIC_APP_ENV=staging` and `firebase hosting:channel:deploy
+pr-<number> --expires 7d`. Skipped for forked PRs (no secrets). **No production data path
+is touched** — a preview channel is a separate Hosting URL on the same project.
+
+### Required repository secrets (owner sets these once)
+
+| Secret | Used by | Notes |
+|---|---|---|
+| `FIREBASE_SERVICE_ACCOUNT` | `deploy`, `pr-preview` | JSON for a service account with **Firebase Hosting Admin** + **Cloud Datastore Index Admin** + rules deploy on the prod project. Paste the whole JSON. |
+| `FIREBASE_PROJECT_ID` | `deploy`, `pr-preview` | optional — defaults to `mastery-personal-mgmt-system`. |
+| `NEXT_PUBLIC_APP_URL` | `app` | optional — defaults to the live URL. |
+| `NEXT_PUBLIC_FIREBASE_API_KEY` … `_MEASUREMENT_ID` | all build steps | the web SDK config (not secret, but environment-scoped); the export inlines them at build time (ADR-0015). |
+
+The `emulator` and `e2e` jobs use the reserved `demo-*` project id and need **no** secret.
+The manual per-session release (§2a) stays the fallback while the secrets are being set up.
+
+Security checks: `npm audit` findings are reviewed per ADR-0029 (currently 6 moderate,
+all dev-only transitive); a dedicated `audit`/secret-scan job can be added once a policy on
+failing the build is agreed.
 
 ## 4. Configuration
 
@@ -110,7 +133,9 @@ preview environments.**
 
 | Task | Command / process |
 |---|---|
-| Per-session release | §2a — `npm run build` then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project mastery-personal-mgmt-system --non-interactive` |
+| Release (automated) | push to `main` → `ci.yml` runs the four verification jobs → `deploy` job builds + `firebase deploy` to production. |
+| Release (manual fallback) | §2a — `npm run build` then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project mastery-personal-mgmt-system --non-interactive` |
+| Preview a PR | open the PR → `pr-preview.yml` publishes `pr-<n>` channel (7-day expiry); URL in the run log. |
 | Deploy frontend only | `npm run build && firebase deploy --only hosting` (static export in `out/`) |
 | Deploy rules only | `firebase deploy --only firestore:rules,storage` |
 | Deploy indexes | `firebase deploy --only firestore:indexes` |
@@ -122,10 +147,25 @@ preview environments.**
 
 ## 6. Pre-launch checklist (Layer 22)
 
-- [ ] All four environments provisioned and isolated
-- [ ] Rules + indexes + functions deploy cleanly per environment
-- [ ] App Check enforced in staging + production
-- [ ] CSP / CORS / security headers verified
-- [ ] No secret in any client bundle or preview environment
-- [ ] Rollback tested for frontend and functions
-- [ ] CI green on `main`
+- [x] CI workflow (`ci.yml`) covers typecheck, lint, format, unit/component/a11y + coverage
+      gate, functions suite, rules + integration (emulator), e2e (Playwright + emulator),
+      production build — all as blocking jobs before `deploy`.
+- [x] `deploy` job gated on all four verification jobs and `push` to `main` only; uses a
+      GitHub Environment (`production`) and a service-account secret.
+- [x] PR preview channel workflow (`pr-preview.yml`), skipped for forks (no secrets).
+- [x] `firebase.json` `--only` list excludes `functions` (Spark plan) — CI cannot
+      accidentally attempt a Blaze-only deploy.
+- [x] CSP / security headers verified live (Layer 20).
+- [x] No secret in any client bundle — only `NEXT_PUBLIC_*` web config is inlined; the
+      service account lives only in GitHub secrets and is written to `$RUNNER_TEMP`.
+- [ ] **Owner action:** add the repository secrets in §3 (`FIREBASE_SERVICE_ACCOUNT`, the
+      `NEXT_PUBLIC_FIREBASE_*` set). Until then, releases use the manual fallback (§2a).
+- [ ] **Owner action:** provision `staging` (+ optionally isolated `test`) Firebase
+      projects and point `pr-preview` / a `staging` branch at them (ADR-0008 deferral).
+- [ ] App Check enforced in staging + production (Layer 20 wiring done; console toggle
+      pending — ADR-0029).
+- [ ] Cloud Functions deploy added to `ci.yml` `deploy` `--only` list once the project is
+      on Blaze and a function ships.
+- [ ] Rollback rehearsed: `firebase hosting:rollback` (frontend); prior version from the
+      Hosting console.
+- [ ] Custom domain configured in the Hosting console (optional).

@@ -1,5 +1,7 @@
 # Mastery
 
+[![CI](https://github.com/Timmitchel1919-sys/Mastery-personal-management-system/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Timmitchel1919-sys/Mastery-personal-management-system/actions/workflows/ci.yml)
+
 **AI-Powered Personal Operating System** — Plan. Focus. Act. Grow.
 
 Mastery is a secure, multi-user personal operating system that helps each authenticated

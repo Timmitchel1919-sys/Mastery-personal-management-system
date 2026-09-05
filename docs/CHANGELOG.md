@@ -6,6 +6,36 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 22 — Deployment & CI/CD — 2026-09-05
+
+**Added**
+- `.github/workflows/ci.yml` — GitHub Actions pipeline on push/PR to `main`: `app`
+  (typecheck → lint → format:check → test:coverage → prod build), `functions`
+  (typecheck / lint / test / build), `emulator` (`test:rules` + `test:integration` under
+  `firebase emulators:exec`), `e2e` (Playwright + emulator), then `deploy` — `needs` all
+  four, gated to `push` on `main`, runs `firebase deploy --only
+  hosting,firestore:rules,firestore:indexes,storage` via a service-account secret to the
+  `production` GitHub Environment. `functions` is deliberately absent from the `--only`
+  list (Spark plan).
+- `.github/workflows/pr-preview.yml` — same-repo PRs get a `firebase
+  hosting:channel:deploy pr-<n> --expires 7d` preview URL; forks skipped.
+- `.github/dependabot.yml` — weekly npm (root + `functions/`) and github-actions updates.
+- `.nvmrc` (`24`); `tests/unit/ci-workflow.test.ts` — parses `ci.yml` and asserts the job
+  graph, the full verification gate, and that the deploy step never ships `functions`.
+- `README.md` CI badge.
+
+**Changed**
+- `docs/DEPLOYMENT.md` — §3 rewritten (job table, required repository secrets, preview
+  workflow), §5 runbook and §6 pre-launch checklist updated. `docs/DECISIONS.md` —
+  ADR-0031. `package.json` — `yaml` devDependency (workflow test).
+
+**Known limitation:** no runtime change and no deploy content — CI config, one workflow
+test, and docs only; the live site is unchanged from Layer 20. The `deploy` / `pr-preview`
+jobs need the owner to add the repository secrets in `docs/DEPLOYMENT.md` §3 before they
+can run; a dedicated `staging` project is still deferred (ADR-0008); `functions` joins the
+deploy `--only` list at the Blaze move. GitHub Actions itself cannot execute in this
+sandbox — the workflows are authored and YAML-/graph-verified only.
+
 ### Layer 21 — Complete Testing Program — 2026-09-05
 
 **Added**

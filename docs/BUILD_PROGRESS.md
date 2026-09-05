@@ -8,16 +8,16 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 21 — Complete Testing Program (complete) |
-| **Next approved layer** | Layer 22 — Deployment & CI/CD (not started — awaiting explicit go-ahead) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15 (15A–15F) — Recovery Center complete · Layer 16 · Layer 17 · Layer 18 · Layer 19 · Layer 20 · **Layer 21** |
-| **In-progress work** | — (Layer 22 is next — wire the four suites into an actual CI pipeline). **i18n string-migration backlog** (ADR-0027) still open. **App Check enforcement + CORS** land with the Blaze/Functions deploy (ADR-0029). |
-| **Test status** | ✅ app: `vitest run` — 137 files, 720 tests (`src/test/a11y.test.tsx` — axe over shared states / offline banner / sidebar nav / a report document — added). ✅ coverage: `npm run test:coverage` — v8, baseline ≈ 54% stmts / 57% lines / 60% branches / 49% funcs; thresholds pinned at that floor (CI ratchet). ✅ e2e: `npm run test:e2e` — `tests/e2e/` (5 specs → 22 runs across chromium-desktop + mobile-safari) — **written; Playwright browsers + emulators not available in-session, runs in CI** (`playwright test --list` verified all 22 resolve). ✅ rules: `npm run test:rules` — 3 files, ~45 tests (unchanged this layer; not re-run in-session — emulator restriction). ⚠️ integration: `npm run test:integration` — 34 files **written**; unchanged. ✅ functions: `vitest run` — 16 files, 98 tests (unchanged — Layer 21 has no Cloud Function). |
+| **Current layer** | Layer 22 — Deployment & CI/CD (complete) |
+| **Next approved layer** | Layer 23 — Performance, Cost, Accessibility (not started — awaiting explicit go-ahead) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15 (15A–15F) — Recovery Center complete · Layer 16 · Layer 17 · Layer 18 · Layer 19 · Layer 20 · Layer 21 · **Layer 22** |
+| **In-progress work** | — (Layer 23 is next). **Owner setup for CI deploy**: add the repo secrets in `docs/DEPLOYMENT.md` §3 (`FIREBASE_SERVICE_ACCOUNT`, `NEXT_PUBLIC_FIREBASE_*`); provision a real `staging` project. **i18n backlog** (ADR-0027) + **App Check enforcement** (ADR-0029) still open. |
+| **Test status** | ✅ app: `vitest run` — 138 files, 727 tests (`tests/unit/ci-workflow.test.ts` — parses `ci.yml`, asserts the job graph + gate commands + no-`functions`-in-deploy — added). ✅ coverage: `npm run test:coverage` — v8, baseline ≈ 54% stmts / 57% lines / 60% branches / 49% funcs; thresholds pinned at that floor (CI ratchet). ✅ e2e: `npm run test:e2e` — `tests/e2e/` (5 specs → 22 runs across chromium-desktop + mobile-safari) — **written; Playwright browsers + emulators not available in-session, runs in CI** (`playwright test --list` verified all 22 resolve). ✅ rules: `npm run test:rules` — 3 files, ~45 tests (unchanged this layer; not re-run in-session — emulator restriction). ⚠️ integration: `npm run test:integration` — 34 files **written**; unchanged. ✅ functions: `vitest run` — 16 files, 98 tests (unchanged — Layer 21 has no Cloud Function). |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (50 routes, static export, no warnings), `format:check`. `npm audit` — 6 moderate advisories, all transitive under the **dev-only** `firebase-admin`, none in a shipped bundle (ADR-0029). ✅ functions: `typecheck`, `lint`, `test`, `build`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 21 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 21 adds no runtime change — testing infra only; the last deploy is Layer 20's) (Layer 20 — hosting + a `firebase.json` `"source": "**"` security-header block (CSP, HSTS, `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `COOP: same-origin-allow-popups`, deny-all `Permissions-Policy`, …) + `firestore.rules` (profile `email` frozen on update)). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (13/14 + 15C/15E/15F recovery) still not deployed — Spark plan; App Check *enforcement* + CORS also await that (ADR-0029). Layer 19's service worker is hand-rolled (ADR-0028). |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. **CI/CD wired (Layer 22)**: `.github/workflows/ci.yml` (app / functions / emulator / e2e → deploy-on-`main`) + `pr-preview.yml` + `dependabot.yml`; needs the owner to add repo secrets before the CI deploy job can run (manual §2a release stays the fallback). Layers 9D → 22 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layers 21 & 22 add no runtime change — testing + CI infra only; the last runtime deploy is Layer 20's, re-verified live) (Layer 20 — hosting + a `firebase.json` `"source": "**"` security-header block (CSP, HSTS, `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `COOP: same-origin-allow-popups`, deny-all `Permissions-Policy`, …) + `firestore.rules` (profile `email` frozen on update)). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (13/14 + 15C/15E/15F recovery) still not deployed — Spark plan; App Check *enforcement* + CORS also await that (ADR-0029). Layer 19's service worker is hand-rolled (ADR-0028). |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · **next-intl 4.14** (Layer 18 — ADR-0027) · **@playwright/test 1.63 · axe-core 4.13 · @vitest/coverage-v8 4.1** (devDeps, Layer 21 — ADR-0030) · (no new deps in Layer 15A–17, or Layer 19–20) |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · **next-intl 4.14** (Layer 18 — ADR-0027) · **@playwright/test 1.63 · axe-core 4.13 · @vitest/coverage-v8 4.1** (devDeps, Layer 21 — ADR-0030) · **yaml 2.9** (devDep, Layer 22 — CI-workflow test) · (no new deps in Layer 15A–17, or Layer 19–20) |
 
 ---
 
@@ -3861,6 +3861,76 @@ from Layer 20. Committed + pushed per §10.
   follow-up as thin areas (`*View.tsx` branches, error paths) get covered.
 - **Journey 3 (real Google sign-in popup)** stays a manual check; the mocked-provider path
   is component-tested.
+
+---
+
+### Layer 22 — Deployment & CI/CD — ✅ complete (2026-09-05) — committed + pushed (no runtime deploy)
+
+The GitHub Actions pipeline that runs the whole Layer-21 test program on every push/PR and
+deploys production from `main`. No runtime code change. New devDep: `yaml` (for the
+workflow test). Full rationale: ADR-0031.
+
+**Created:**
+- `.nvmrc` — `24` (read by `actions/setup-node`'s `node-version-file`).
+- `.github/workflows/ci.yml` — five jobs, `concurrency` cancelling superseded runs:
+  - **`app`** — `npm ci` → `typecheck` → `lint` → `format:check` → `test:coverage` → prod
+    `build`; uploads `out/` + `coverage/`.
+  - **`functions`** — `functions/`: `typecheck` / `lint` / `test` / `build`.
+  - **`emulator`** — `test:rules` + `test:integration` under `firebase emulators:exec`
+    (setup-java 17).
+  - **`e2e`** — `test:e2e:install` then Playwright under `emulators:exec` on `demo-mastery`
+    (chromium-desktop + mobile-safari); uploads `playwright-report/`.
+  - **`deploy`** — `needs: [app, functions, emulator, e2e]`, `if: push && ref == refs/heads/main`;
+    prod `build` → `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage`
+    via a service-account JSON from `secrets.FIREBASE_SERVICE_ACCOUNT`; GitHub Environment
+    `production`. **`functions` never in the `--only` list** (Spark — ADR-0017/0031).
+- `.github/workflows/pr-preview.yml` — same-repo PRs → `firebase hosting:channel:deploy
+  pr-<n> --expires 7d` (staging env build); skipped for forks.
+- `.github/dependabot.yml` — weekly npm (root + `functions/`) + github-actions updates.
+
+**Modified:**
+- `README.md` — CI status badge.
+- `docs/DEPLOYMENT.md` — §3 rewritten (the job table, required repo secrets, preview
+  workflow), §5 runbook (automated release + fallback + preview), §6 checklist (what's
+  done vs the two owner-action items). `docs/DECISIONS.md` — ADR-0031. `package.json` —
+  `yaml` devDep.
+
+**Tests added:** `tests/unit/ci-workflow.test.ts` (7 — parses `ci.yml`: triggers on
+push/PR to `main`; the five jobs exist; `app` runs the full §9 gate; `emulator` runs
+rules + integration; `e2e` installs browsers and runs under `emulators:exec`; `deploy`
+`needs` all four and is gated to `push` on `main`; the deploy `--only` list ships
+hosting/rules/indexes/storage and **never** `functions`).
+
+**Verification:** app `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (138 files / 727) ·
+`build` ✅ (50 routes, no warnings) · `format:check` ✅. Workflow YAML parsed +
+job-graph-asserted by the new test; `.github/` files are not executable in-session (no
+GitHub Actions runner) — they run on the next push to GitHub. functions unchanged.
+
+**No runtime deploy** — Layer 22 adds CI config + a workflow test + docs only; the live
+site is unchanged from Layer 20 (re-verified: `/` 200, CSP header present). Committed +
+pushed per §10.
+
+**Manual test instructions (on GitHub):**
+1. Add the repository secrets from `docs/DEPLOYMENT.md` §3 (`FIREBASE_SERVICE_ACCOUNT`
+   + the `NEXT_PUBLIC_FIREBASE_*` set; `FIREBASE_PROJECT_ID` / `NEXT_PUBLIC_APP_URL`
+   optional).
+2. Push a trivial commit to `main` → the `ci.yml` run shows `app` / `functions` /
+   `emulator` / `e2e` green, then `deploy` runs and the live URL updates. The GitHub
+   Environment "production" records the deployment.
+3. Open a PR → `ci.yml` runs the four verification jobs (no `deploy`), and `pr-preview.yml`
+   posts a `pr-<n>` Hosting channel URL in its run log.
+
+**Known limitations:**
+- **CI deploy needs owner setup** — the repo secrets in §3 must be added; until then the
+  `deploy` / `preview` jobs fail (and the manual §2a release remains the way to ship). CI
+  authored but not yet executed on GitHub from this session.
+- **No isolated `staging` / `test` projects** — `pr-preview` deploys a channel on the
+  production project; a real staging project + a `staging` branch is a deferred
+  owner-action (ADR-0008).
+- **No `functions` deploy step** — added with the Blaze move; `ci-workflow.test.ts`'s
+  `not…functions` assertion relaxes then.
+- **e2e / rules / integration still CI-first** — unrun in this sandbox (unchanged since
+  Layer 9); `ci.yml` is where they finally execute.
 
 ---
 
