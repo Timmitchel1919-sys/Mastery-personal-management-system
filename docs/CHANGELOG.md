@@ -6,6 +6,34 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 23 — Performance, Cost & Accessibility — 2026-09-05
+
+**Added**
+- `scripts/analyze-bundle.mjs` + `npm run analyze` / `npm run build:analyze` — reports
+  every `out/_next/static` JS/CSS asset by gzip size and **fails on a budget breach**
+  (total JS 900 KiB gzip / 3200 KiB raw, largest chunk 240 KiB gzip — a ratchet ~10–25%
+  above today). Wired into the CI `app` job after `npm run build`.
+- `docs/PERFORMANCE.md` — the standing review: bundle budget, code-splitting inventory,
+  Firestore read-discipline audit (no listeners; pagination enforced), Cloud Function
+  cold-start / token-cost review, Core Web Vitals plan, accessibility status.
+- `tests/unit/bundle-budget.test.ts` (script logic + "real build within budget");
+  `tests/unit/ci-workflow.test.ts` now asserts the CI `analyze` step.
+- Two `src/test/a11y.test.tsx` cases — `FormField` label/description/error wiring and the
+  `Sparkline` accessible name.
+
+**Changed**
+- `src/components/layout/app-shell.tsx` — the command palette (`cmdk`) now loads through
+  `next/dynamic`, mounted only after the first ⌘K, so it is a separate chunk most sessions
+  never fetch. The keyboard shortcut (in `ShellProvider`) is unaffected.
+- `eslint.config.mjs` — `no-console` off for `scripts/**/*.mjs` (Node CLI tooling).
+  `docs/ARCHITECTURE.md` §10, `README.md` doc index, `docs/DECISIONS.md` — ADR-0032.
+
+**Known limitation:** no user-visible change and no deploy content. Core Web Vitals are
+still not collected in production (needs a Blaze callable to POST to — deferred);
+colour-contrast is checked by Lighthouse/eye, not in CI (jsdom limitation); deferring
+`firebase/functions`/`firebase/storage` out of the eager client singleton is left as an
+open recommendation (`docs/PERFORMANCE.md` §3).
+
 ### Layer 22 — Deployment & CI/CD — 2026-09-05
 
 **Added**

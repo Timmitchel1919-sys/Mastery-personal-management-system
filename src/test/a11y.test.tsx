@@ -8,9 +8,10 @@ vi.mock("next/navigation", () => ({ usePathname: () => "/plan/goals" }));
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { LoadingState } from "@/components/shared/LoadingState";
+import { Sparkline } from "@/components/shared/Sparkline";
 import { OfflineBanner } from "@/components/pwa/offline-banner";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
-import { TooltipProvider } from "@/components/ui";
+import { FormField, Input, TooltipProvider } from "@/components/ui";
 import { ReportDocument } from "@/features/reports";
 import type { ReportData } from "@/features/reports";
 
@@ -53,6 +54,36 @@ describe("accessibility — chrome", () => {
       <TooltipProvider>
         <SidebarNav />
       </TooltipProvider>,
+    );
+    await expectNoAxeViolations(container);
+  });
+});
+
+describe("accessibility — forms & charts", () => {
+  it("FormField wires label, description and error to the control", async () => {
+    const { container } = render(
+      <FormField
+        label="Email"
+        description="We never share it."
+        error="Enter a valid email address."
+      >
+        <Input type="email" defaultValue="not-an-email" />
+      </FormField>,
+    );
+    await expectNoAxeViolations(container);
+  });
+
+  it("Sparkline exposes an accessible name", async () => {
+    const { container } = render(
+      <Sparkline
+        ariaLabel="Weight trend over the last 7 entries"
+        points={[
+          { date: "2026-09-01", value: 80 },
+          { date: "2026-09-03", value: 79.4 },
+          { date: "2026-09-05", value: 78.6 },
+        ]}
+        targetValue={77}
+      />,
     );
     await expectNoAxeViolations(container);
   });

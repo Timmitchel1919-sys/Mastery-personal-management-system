@@ -20,7 +20,7 @@ describe(".github/workflows/ci.yml", () => {
     );
   });
 
-  it("the app job runs the full §9 gate", () => {
+  it("the app job runs the full §9 gate plus the bundle-budget check", () => {
     const app = runs("app");
     for (const cmd of [
       "npm run typecheck",
@@ -28,6 +28,7 @@ describe(".github/workflows/ci.yml", () => {
       "npm run format:check",
       "npm run test:coverage",
       "npm run build",
+      "npm run analyze",
     ]) {
       expect(app).toContain(cmd);
     }

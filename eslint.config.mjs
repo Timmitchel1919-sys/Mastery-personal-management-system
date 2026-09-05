@@ -17,6 +17,11 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  {
+    // Node CLI tooling (bundle report, etc.) — writing to stdout is the whole point.
+    files: ["scripts/**/*.mjs"],
+    rules: { "no-console": "off" },
+  },
   // Keep Prettier last so it disables stylistic rules that would conflict.
   prettier,
 ]);

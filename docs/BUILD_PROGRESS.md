@@ -8,16 +8,16 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 22 — Deployment & CI/CD (complete) |
-| **Next approved layer** | Layer 23 — Performance, Cost, Accessibility (not started — awaiting explicit go-ahead) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15 (15A–15F) — Recovery Center complete · Layer 16 · Layer 17 · Layer 18 · Layer 19 · Layer 20 · Layer 21 · **Layer 22** |
-| **In-progress work** | — (Layer 23 is next). **Owner setup for CI deploy**: add the repo secrets in `docs/DEPLOYMENT.md` §3 (`FIREBASE_SERVICE_ACCOUNT`, `NEXT_PUBLIC_FIREBASE_*`); provision a real `staging` project. **i18n backlog** (ADR-0027) + **App Check enforcement** (ADR-0029) still open. |
-| **Test status** | ✅ app: `vitest run` — 138 files, 727 tests (`tests/unit/ci-workflow.test.ts` — parses `ci.yml`, asserts the job graph + gate commands + no-`functions`-in-deploy — added). ✅ coverage: `npm run test:coverage` — v8, baseline ≈ 54% stmts / 57% lines / 60% branches / 49% funcs; thresholds pinned at that floor (CI ratchet). ✅ e2e: `npm run test:e2e` — `tests/e2e/` (5 specs → 22 runs across chromium-desktop + mobile-safari) — **written; Playwright browsers + emulators not available in-session, runs in CI** (`playwright test --list` verified all 22 resolve). ✅ rules: `npm run test:rules` — 3 files, ~45 tests (unchanged this layer; not re-run in-session — emulator restriction). ⚠️ integration: `npm run test:integration` — 34 files **written**; unchanged. ✅ functions: `vitest run` — 16 files, 98 tests (unchanged — Layer 21 has no Cloud Function). |
-| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (50 routes, static export, no warnings), `format:check`. `npm audit` — 6 moderate advisories, all transitive under the **dev-only** `firebase-admin`, none in a shipped bundle (ADR-0029). ✅ functions: `typecheck`, `lint`, `test`, `build`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. **CI/CD wired (Layer 22)**: `.github/workflows/ci.yml` (app / functions / emulator / e2e → deploy-on-`main`) + `pr-preview.yml` + `dependabot.yml`; needs the owner to add repo secrets before the CI deploy job can run (manual §2a release stays the fallback). Layers 9D → 22 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layers 21 & 22 add no runtime change — testing + CI infra only; the last runtime deploy is Layer 20's, re-verified live) (Layer 20 — hosting + a `firebase.json` `"source": "**"` security-header block (CSP, HSTS, `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `COOP: same-origin-allow-popups`, deny-all `Permissions-Policy`, …) + `firestore.rules` (profile `email` frozen on update)). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (13/14 + 15C/15E/15F recovery) still not deployed — Spark plan; App Check *enforcement* + CORS also await that (ADR-0029). Layer 19's service worker is hand-rolled (ADR-0028). |
+| **Current layer** | Layer 23 — Performance, Cost & Accessibility (complete) |
+| **Next approved layer** | — none. **All 24 layers (0–23) are complete.** Remaining items are owner actions / post-Blaze work, tracked below. |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15 (15A–15F) — Recovery Center complete · Layer 16 · Layer 17 · Layer 18 · Layer 19 · Layer 20 · Layer 21 · Layer 22 · **Layer 23 — build order complete** |
+| **In-progress work** | — (build order finished). **Owner setup for CI deploy**: add the repo secrets in `docs/DEPLOYMENT.md` §3 (`FIREBASE_SERVICE_ACCOUNT`, `NEXT_PUBLIC_FIREBASE_*`); provision a real `staging` project. **Post-Blaze**: Cloud Functions deploy + App Check enforcement (ADR-0029) + `web-vitals` sink (`docs/PERFORMANCE.md` §6). **i18n backlog** (ADR-0027) still open. |
+| **Test status** | ✅ app: `vitest run` — 139 files, 733 tests (`tests/unit/bundle-budget.test.ts` — script logic + real-build-within-budget — added; `ci-workflow.test.ts` asserts the CI `analyze` step; 2 new `a11y.test.tsx` cases). ✅ coverage: `npm run test:coverage` — v8, baseline ≈ 54% stmts / 57% lines / 60% branches / 49% funcs; thresholds pinned at that floor (CI ratchet). ✅ analyze: `npm run analyze` — bundle within budget (~801 KiB total JS gzip / 900 · ~192 KiB largest chunk / 240). ✅ e2e: `npm run test:e2e` — `tests/e2e/` (5 specs → 22 runs) — **written; runs in CI** (sandbox has no Playwright browsers / emulator). ✅ rules: `npm run test:rules` — 3 files, ~45 tests (unchanged; emulator restriction). ⚠️ integration: `npm run test:integration` — 34 files **written**; unchanged. ✅ functions: `vitest run` — 16 files, 98 tests (unchanged — Layer 23 touches no Cloud Function). |
+| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (50 routes, static export, no warnings), `format:check`, `analyze` (bundle budget). `npm audit` — 6 moderate advisories, all transitive under the **dev-only** `firebase-admin`, none in a shipped bundle (ADR-0029). ✅ functions: `typecheck`, `lint`, `test`, `build`. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. **CI/CD wired (Layer 22)**: `.github/workflows/ci.yml` (app / functions / emulator / e2e → deploy-on-`main`) + `pr-preview.yml` + `dependabot.yml`; the `app` job now also runs the Layer 23 bundle-budget gate. Needs the owner to add repo secrets before the CI deploy job can run (manual §2a release stays the fallback). Layers 9D → 23 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layers 21–23 add no runtime change — testing + CI + perf-tooling only; the last runtime deploy is Layer 20's, re-verified live) (Layer 20 — hosting + a `firebase.json` `"source": "**"` security-header block (CSP, HSTS, `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `COOP: same-origin-allow-popups`, deny-all `Permissions-Policy`, …) + `firestore.rules` (profile `email` frozen on update)). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (13/14 + 15C/15E/15F recovery) still not deployed — Spark plan; App Check *enforcement* + CORS also await that (ADR-0029). Layer 19's service worker is hand-rolled (ADR-0028). |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · **next-intl 4.14** (Layer 18 — ADR-0027) · **@playwright/test 1.63 · axe-core 4.13 · @vitest/coverage-v8 4.1** (devDeps, Layer 21 — ADR-0030) · **yaml 2.9** (devDep, Layer 22 — CI-workflow test) · (no new deps in Layer 15A–17, or Layer 19–20) |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · **next-intl 4.14** (Layer 18 — ADR-0027) · **@playwright/test 1.63 · axe-core 4.13 · @vitest/coverage-v8 4.1** (devDeps, Layer 21 — ADR-0030) · **yaml 2.9** (devDep, Layer 22 — CI-workflow test) · (Layer 23 adds **no dependency** — the bundle analyzer uses only `node:zlib`/`node:fs`) · (no new deps in Layer 15A–17, or Layer 19–20) |
 
 ---
 
@@ -3931,6 +3931,68 @@ pushed per §10.
   `not…functions` assertion relaxes then.
 - **e2e / rules / integration still CI-first** — unrun in this sandbox (unchanged since
   Layer 9); `ci.yml` is where they finally execute.
+
+---
+
+### Layer 23 — Performance, Cost & Accessibility — ✅ complete (2026-09-05) — **build order finished**
+
+The optimisation pass and the last layer in the 24-layer plan. No user-visible change and
+no dependency added. Full review: `docs/PERFORMANCE.md`; rationale: ADR-0032.
+
+**Created:**
+- `scripts/analyze-bundle.mjs` — walks `out/_next/static`, prints every JS/CSS asset by
+  gzip size, checks three budgets (total JS **900 KiB** gzip / **3200 KiB** raw, largest
+  chunk **240 KiB** gzip — each ~10–25% above today's ~801 / ~2760 / ~192) and exits
+  non-zero on a breach. Pure `node:fs` + `node:zlib`; exports `BUDGETS` / `collectAssets`
+  / `summarize` / `checkBudgets` for the test.
+- `docs/PERFORMANCE.md` — the standing performance/cost/a11y record: app shape, the
+  enforced budget + what's in the big chunks, code-splitting inventory (route level;
+  modular Firebase; the `next/dynamic` command palette; no charting dep), Firestore
+  read-discipline audit (zero `onSnapshot`; `DEFAULT_PAGE_SIZE`/`MAX_PAGE_SIZE` enforced;
+  no startup bulk load), Cloud Function cold-start + token-cost review, Core Web Vitals
+  plan, accessibility status, and the carried-forward recommendations.
+- `tests/unit/bundle-budget.test.ts` — budget-object shape, `checkBudgets` pass/fail, and
+  (when `out/` is present) the real build within every budget.
+
+**Modified:**
+- `src/components/layout/app-shell.tsx` — `CommandPalette` now loads via `next/dynamic`
+  (`ssr: false`), mounted only after the first ⌘K via a render-time latch; `cmdk` becomes
+  a chunk most sessions never fetch. The shortcut handler in `ShellProvider` is unchanged.
+- `package.json` — `analyze` + `build:analyze` scripts.
+- `.github/workflows/ci.yml` — `app` job runs `npm run analyze` after `build`.
+- `tests/unit/ci-workflow.test.ts` — asserts the CI `analyze` step (gate list).
+- `src/test/a11y.test.tsx` — +2 cases: `FormField` label/description/error wiring, and the
+  `Sparkline` accessible name.
+- `eslint.config.mjs` — `no-console: off` for `scripts/**/*.mjs`.
+- `docs/ARCHITECTURE.md` §10 (enforced-budget note + link), `README.md` (doc index row),
+  `docs/DECISIONS.md` (ADR-0032).
+
+**Verification:** `typecheck` ✅ · `lint` ✅ (0 errors, 0 warnings) · `test` ✅ (139 files
+/ 733) · `build` ✅ (50 routes, static export) · `format:check` ✅ · `analyze` ✅ (within
+budget). functions suite unchanged (98).
+
+**No runtime deploy** — Layer 23 is tooling + docs + a lazy-load refactor with no visible
+effect; the live site is unchanged from Layer 20 (re-verified: `/` 200, CSP intact).
+Committed + pushed per §10.
+
+**Manual test instructions:**
+1. `npm run build && npm run analyze` — prints the asset table and `✓ within budget`.
+   Temporarily lower a value in `BUDGETS` and re-run → it exits non-zero with the breach.
+2. `npm run dev`, sign in, load any page → DevTools Network shows no `cmdk` chunk. Press
+   ⌘K (Ctrl-K) → the palette chunk loads and the dialog opens; Esc and re-open → no second
+   fetch.
+3. `npm test` → the new `bundle-budget` and `a11y` cases are green.
+
+**Known limitations:**
+- **Core Web Vitals not collected in production** — needs a Blaze callable to POST to.
+  Deferred; Lighthouse-against-live is the interim check (`docs/PERFORMANCE.md` §6).
+- **Colour-contrast not in CI** — jsdom can't compute it; `axe` runs with that rule off.
+  Checked at the token level (Layer 18) + Lighthouse.
+- **Firebase SDK deferral not done** — moving `firebase/functions` + `firebase/storage`
+  out of the eager singleton (~15–25 KiB gzip) touches every repository; left as an open
+  recommendation.
+- **The budget is a ratchet, not a floor** — it catches a big regression, not gradual
+  creep. Revisit the numbers if headroom gets thin.
 
 ---
 

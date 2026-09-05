@@ -42,6 +42,8 @@ jobs:
         env:
           NEXT_PUBLIC_APP_ENV: production
           NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL || 'https://mastery-personal-mgmt-system.web.app' }}
+      - name: Bundle budget (Layer 23)
+        run: npm run analyze
       - uses: actions/upload-artifact@v4
         with:
           name: export

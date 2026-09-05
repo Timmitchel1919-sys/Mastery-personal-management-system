@@ -1166,3 +1166,43 @@ authored without being able to run GitHub Actions from here.
   then.
 - CI wall-clock is dominated by `e2e` (browser download + emulator boot + two viewports);
   acceptable for a per-push gate, revisit with sharding if it drags.
+
+---
+
+## ADR-0032 — Layer 23: an enforced bundle budget, a deferred command palette, no CWV sink yet
+
+**Status:** accepted (2026-09-05) · **Layer:** 23 — Performance, Cost & Accessibility
+
+**Context.** Layer 23 is the optimisation pass. The app is a static export SPA on the
+Spark plan, so the levers are initial JS, route splitting, Firestore read volume, and
+(future) Cloud Function cost. Most guardrails were already honoured — modular Firebase
+imports, one-time reads only, `DEFAULT_PAGE_SIZE`/`MAX_PAGE_SIZE`, aggregation hooks on the
+dashboard, no charting dependency. What was missing was a *regression guard* and a written
+record.
+
+**Decision.**
+- **`scripts/analyze-bundle.mjs` + a budget gate.** Walks `out/_next/static`, reports gzip
+  sizes, fails on breach. Budgets: total JS 900 KiB gzip / 3200 KiB raw, largest chunk
+  240 KiB gzip — each ~10–25% above today's real numbers. Runs locally (`npm run analyze`
+  / `build:analyze`) and in CI (`app` job, after `build`). It is a **ratchet like the
+  coverage floor** (ADR-0030): a moved budget needs a line + reason in
+  `docs/PERFORMANCE.md` §2.
+- **Command palette behind `next/dynamic`.** `cmdk` is never on screen at first paint; the
+  shell mounts `CommandPalette` only after the first ⌘K (latched so re-opens don't
+  re-fetch). The shortcut handler stays in `ShellProvider` so the key works before mount.
+- **No `web-vitals` dependency yet.** Real CWV collection needs a callable to POST to —
+  that's a Blaze/Functions concern. Documented as a deferred item; Lighthouse-against-live
+  is the interim check.
+- **Accessibility: two more `axe` cases** (`FormField` wiring, `Sparkline` name). No CSS
+  change — reduced-motion, focus rings, skip link, landmarks were already there.
+- **Not done on purpose:** deferring `firebase/functions` + `firebase/storage` out of the
+  eager client singleton (touches every repository — recorded as an open recommendation in
+  `docs/PERFORMANCE.md` §3), and a real `_next/static` build-id strategy.
+
+**Consequences.**
+- A dependency that adds >~100 KiB gzip now fails CI until someone justifies the budget
+  bump. `scripts/**/*.mjs` gets a `no-console: off` ESLint override (Node CLI tooling).
+- `tests/unit/bundle-budget.test.ts` covers the script logic and asserts the real build is
+  within budget when `out/` exists; `ci-workflow.test.ts` asserts the CI `analyze` step.
+- `web-vitals` wiring, colour-contrast in CI, and the Firebase-SDK deferral are carried
+  forward in `docs/PERFORMANCE.md` §3/§6.

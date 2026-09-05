@@ -1,12 +1,30 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import dynamic from "next/dynamic";
 import { ShellProvider } from "./shell-context";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
 import { BottomNav } from "./bottom-nav";
 import { NavDrawer } from "./nav-drawer";
-import { CommandPalette } from "./command-palette";
+import { useShell } from "./shell-context";
+
+// The command palette pulls in `cmdk`; it is never visible on first paint (opens
+// on ⌘K / Ctrl-K, handled in ShellProvider). Split it out and mount it only once
+// the user has actually opened it — see docs/PERFORMANCE.md §3.
+const CommandPalette = dynamic(() => import("./command-palette").then((m) => m.CommandPalette), {
+  ssr: false,
+  loading: () => null,
+});
+
+function DeferredCommandPalette() {
+  const { commandOpen } = useShell();
+  const [everOpened, setEverOpened] = useState(false);
+  // Latch on first open so the close animation and re-opens keep working without
+  // re-fetching the chunk. Adjusting state during render is the supported pattern.
+  if (commandOpen && !everOpened) setEverOpened(true);
+  return everOpened ? <CommandPalette /> : null;
+}
 
 /**
  * Responsive application shell for the authenticated area.
@@ -34,7 +52,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <BottomNav />
       <NavDrawer />
-      <CommandPalette />
+      <DeferredCommandPalette />
     </ShellProvider>
   );
 }

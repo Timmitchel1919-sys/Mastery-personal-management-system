@@ -50,6 +50,7 @@ for the current layer, test status, and known limitations.
 | [`docs/RECOVERY_PRIVACY.md`](docs/RECOVERY_PRIVACY.md) | Recovery Center privacy architecture |
 | [`docs/TESTING_STRATEGY.md`](docs/TESTING_STRATEGY.md) | Test types, critical journeys, per-layer gate |
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Environments, Firebase projects, CI/CD, rollback |
+| [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) | Bundle budget, code splitting, Firestore/AI cost review, a11y, Core Web Vitals |
 | [`docs/BUILD_PROGRESS.md`](docs/BUILD_PROGRESS.md) | Living build tracker |
 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | Architecture decision records |
 | [`docs/CHANGELOG.md`](docs/CHANGELOG.md) | Human-readable change history |

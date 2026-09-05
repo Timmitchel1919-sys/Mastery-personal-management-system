@@ -188,3 +188,11 @@ editors); analyze the bundle each release; review Firestore queries and indexes;
 aggregate; control subscriptions; optimize images; review Cloud Function cold starts;
 review AI token cost; monitor Core Web Vitals. Never ship client bundles containing
 privileged credentials.
+
+**Enforced (Layer 23):** `scripts/analyze-bundle.mjs` (`npm run analyze`) checks the
+static export against a gzip budget — total JS, total raw, and largest single chunk — and
+fails the build on a breach; it runs in the CI `app` job after `npm run build`. The budget
+is a ratchet, not a target: see [`PERFORMANCE.md`](PERFORMANCE.md) for the numbers, the
+code-splitting inventory (incl. the `next/dynamic` command palette), the Firestore
+read-discipline audit, the Cloud Function cold-start / token-cost review, and the Core Web
+Vitals plan.
