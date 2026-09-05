@@ -58,7 +58,8 @@ users/{uid}/weeklySummaries/{summaryId}        weekStart/weekEnd, computed facts
 users/{uid}/reports/{reportId}                 export metadata only: title, period (weekly|monthly|quarterly|annual|custom), periodStart/periodEnd, sections[] (summary|goals|habits|focus|kpis|planning), format ("pdf"), generatedAt — the report body is composed on the client from the domain repositories and rendered to a branded, print-styled page; the PDF is the browser's "Save as PDF". Client-written under the generic owner-only rule. **Never includes Recovery Center data** (the aggregation only reads non-recovery collections) (Layer 16)
 
 # System
-users/{uid}/notifications/{notificationId}     type, title, body, relatedId, read — first populated by `generateWeeklySummary` (type "weekly-summary", Layer 14); full delivery/consumption UI is Layer 17
+users/{uid}/notifications/{notificationId}     type (weekly-summary|task-due|milestone-due|habit-due|kpi-stale|event-today|planning-review), title, body, relatedId, read, dedupeKey (`<type>:<relatedId>:<localDay>` — blank on the Layer 14 rows) — the weekly-summary row is written by `generateWeeklySummary`; reminder rows are created client-side by an idempotent due-item scan (`reminder-scan.ts`). Client reads / marks read / archives. In-app center + preferences UI at `/notifications` (Layer 17). A server-side sweep + FCM push is deferred (ADR-0026)
+users/{uid}/notificationPreferences/{uid}      singleton, id == uid: categories {updates,tasks,habits,planning,kpis} on/off, quietHoursStart/End (HH:mm, nullable), timeZone, pushEnabled (inert until push ships), milestoneLeadDays, kpiStaleDays — client-written under the generic owner-only rule (Layer 17)
 users/{uid}/quickNotes/{noteId}                 dashboard quick-capture notes (Layer 7)
 
 # AI (Layer 13) — written only by Cloud Functions (Admin SDK); client reads only

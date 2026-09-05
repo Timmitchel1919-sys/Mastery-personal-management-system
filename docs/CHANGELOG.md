@@ -6,6 +6,43 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 17 — Notifications — 2026-09-05
+
+**Added**
+- `src/features/notifications/` — the in-app notification centre:
+  - `notification-schema.ts` — 7 notification types + 5 preference categories + a
+    type→category map, the `notifications` record (`dedupeKey` default `""`),
+    `notificationHref` (safe deep link per type), the `notificationPreferences` singleton
+    (category toggles, quiet hours, timezone, `pushEnabled`, milestone-lead / KPI-stale
+    windows), `defaultNotificationPreferences`, `isWithinQuietHours`.
+  - `reminder-scan.ts` — pure `computeDueReminders`: task due-today/overdue, milestone in
+    the lead window, habit not logged after its reminder time, KPI stale, goal review
+    overdue. Every seed carries `dedupeKey = <type>:<relatedId>:<localDay>`.
+  - `notification-repository.ts` + `use-notifications.ts` + `use-unread-count.ts` — the
+    `notifications` repo (generic owner-only) with mark-read / mark-all / archive /
+    create-if-absent, a `notificationPreferences` singleton upsert, the page hook (runs the
+    scan idempotently on mount), and a light unread count for the topbar.
+  - `NotificationsView` (unread / earlier split, deep links, read toggle, dismiss,
+    mark-all-read), `NotificationPreferences` (category switches, quiet hours, timezone,
+    lead/stale numbers, an inert push toggle), `NotificationBell` (topbar unread badge).
+
+**Changed**
+- `src/app/(app)/notifications/page.tsx` — `ModulePlaceholder` → `<NotificationsView />`.
+- `src/components/layout/topbar.tsx` — the plain Bell link → `<NotificationBell />`.
+- `docs/DATA_MODEL.md` (`notifications` expanded, `notificationPreferences` added),
+  `docs/ARCHITECTURE.md` §5, `docs/PRODUCT_REQUIREMENTS.md` §12; `docs/DECISIONS.md` —
+  ADR-0026.
+
+**Tests:** `notification-schema` (schema + defaults + `notificationHref` +
+`isWithinQuietHours`), `reminder-scan` (6), `NotificationsView` (5),
+`NotificationPreferences` (2), and a notifications integration test (written, not executed
+in-session).
+
+**Known limitation:** no background delivery / FCM push — reminders refresh only while the
+app is open and the notifications page is visited. Push (service worker, VAPID, token
+lifecycle, a server send/sweep) and `event-today` reminders are deferred (ADR-0026);
+`pushEnabled` is stored but inert.
+
 ### Layer 16 — Reports & PDF Export — 2026-09-05
 
 **Added**

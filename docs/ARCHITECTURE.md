@@ -120,6 +120,11 @@ interface GoalRepository {
   filtered to the chosen period, returning one `ReportData` object. It only ever reads
   non-recovery collections, so a report can never leak Recovery Center data.
 - No global "load everything on login". Fetch per route, on demand, paginated.
+- Layer 17's notification reminders are produced by an **idempotent client-side due-item
+  scan** (`reminder-scan.ts`, pure) run when the notifications page mounts: it reads the
+  same domain repositories, compares against the user's preferences, and creates only the
+  rows whose `dedupeKey` isn't already present. A server-side sweep (timezone-exact, works
+  while the app is closed, drives FCM push) is deferred to a Blaze move (ADR-0026).
 
 ## 6. Error, loading, empty, success states
 

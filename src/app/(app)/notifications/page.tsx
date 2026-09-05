@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { NotificationsView } from "@/features/notifications";
 
-export const metadata = { title: "Notifications" };
+export const metadata: Metadata = { title: "Notifications" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Notifications"
-      description="In-app notifications, reminders, and delivery preferences."
-      plannedLayer={17}
-    />
-  );
+  return <NotificationsView />;
 }

@@ -8,16 +8,16 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 16 — Reports & PDF Export (complete) |
-| **Next approved layer** | Layer 17 — Notifications (not started — awaiting explicit go-ahead) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15 (15A–15F) — Recovery Center complete · **Layer 16** |
-| **In-progress work** | — (Layer 17 is next) |
-| **Test status** | ✅ app: `vitest run` — 123 files, ~669 tests (`report-schema` + `report-data` + `ReportsView` + `ReportDocument` tests added). ✅ rules: `npm run test:rules` — 3 files, ~44 tests (no rules change in Layer 16 — `reports` is client-written under the generic owner-only rule). ⚠️ integration: `npm run test:integration` — 33 files **written**; `tests/integration/reports.test.ts` added (create/list/archive a report metadata record, user scoping) — not executed in-session (Firestore emulator restriction). ✅ functions: `vitest run` — 16 files, 98 tests (unchanged — Layer 16 has no Cloud Function). |
+| **Current layer** | Layer 17 — Notifications (complete) |
+| **Next approved layer** | Layer 18 — Internationalization & Theme (not started — awaiting explicit go-ahead) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15 (15A–15F) — Recovery Center complete · Layer 16 · **Layer 17** |
+| **In-progress work** | — (Layer 18 is next) |
+| **Test status** | ✅ app: `vitest run` — 127 files, ~688 tests (`notification-schema` + `reminder-scan` + `NotificationsView` + `NotificationPreferences` tests added). ✅ rules: `npm run test:rules` — 3 files, ~44 tests (no rules change in Layer 17 — `notifications` / `notificationPreferences` use the generic owner-only rule). ⚠️ integration: `npm run test:integration` — 34 files **written**; `tests/integration/notifications.test.ts` added (create/mark-read/archive, preferences upsert, user scoping) — not executed in-session (Firestore emulator restriction). ✅ functions: `vitest run` — 16 files, 98 tests (unchanged — Layer 17 has no Cloud Function). |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (49 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `test`, `build`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 16 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 16 — hosting only; `firestore.rules` unchanged — `reports` uses the generic owner-only rule). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (Layer 13/14 + 15C `recordRecoverySetback` + 15E `recoveryCoachQuery` + 15F `configureAccountabilityPartner`/`getAccountabilityProjection`) still not deployed — Spark plan, see ADR-0017/0018/0021/0023/0024. Layer 16 ships **no** Cloud Function (client-composed reports, print-to-PDF — ADR-0025). |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 17 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 17 — hosting only; `firestore.rules` unchanged — `notifications` / `notificationPreferences` use the generic owner-only rule). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (13/14 + 15C/15E/15F recovery) still not deployed — Spark plan, ADR-0017/0018/0021/0023/0024. Layers 16 & 17 ship **no** Cloud Function (client-composed reports + client reminder scan; server PDF / FCM push deferred — ADR-0025/0026). |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · (no new deps in Layer 15A–16 — Layer 16 reuses the browser's print-to-PDF, no PDF library) |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · (no new deps in Layer 15A–17 — Layer 16 reuses the browser's print-to-PDF; Layer 17 has no FCM/SW yet) |
 
 ---
 
@@ -3453,6 +3453,100 @@ upload. Redeployed to https://mastery-personal-mgmt-system.web.app/ ; smoke-test
   completion-timestamp field) — same approximation as the Execution Tracker (ADR-0016) and
   the weekly summary.
 - **No i18n yet** — report strings are English until Layer 18.
+- **Integration test written, not executed in-session** — emulator restriction.
+
+---
+
+### Layer 17 — Notifications — ✅ complete (2026-09-05) — committed + pushed + deployed live
+
+The in-app notification centre + preferences + an idempotent client-side reminder scan.
+No Cloud Function, no `firestore.rules` change, no new dependency. FCM push (service
+worker, VAPID, token lifecycle, a server send/sweep) is deferred to a Blaze move (ADR-0026);
+the `pushEnabled` preference is stored but inert.
+
+**Created — `src/features/notifications/`:**
+- `notification-schema.ts` — `NOTIFICATION_TYPES` (`weekly-summary`, `task-due`,
+  `milestone-due`, `habit-due`, `kpi-stale`, `event-today`, `planning-review`), the
+  `updates` / `tasks` / `habits` / `planning` / `kpis` categories + a type→category map;
+  `notificationSchema` (`type`, `title`, `body`, `relatedId` nullable, `dedupeKey` default
+  `""`, `read`); `notificationHref` (safe in-app deep link per type); the
+  `notificationPreferences` singleton schema (categories on/off, quiet hours `HH:mm`
+  nullable, `timeZone`, `pushEnabled`, `milestoneLeadDays`, `kpiStaleDays`) +
+  `defaultNotificationPreferences` + `isWithinQuietHours` (midnight-crossing aware).
+- `notification-repository.ts` — `notificationRepository` (`notifications`, generic
+  owner-only) + `listRecentNotifications` / `markNotificationRead` /
+  `markAllNotificationsRead` / `archiveNotification` / `createNotificationIfAbsent` /
+  `countUnreadNotifications`; a bespoke `notificationPreferences` singleton (id == uid)
+  get/upsert.
+- `reminder-scan.ts` — pure `computeDueReminders(input)`: task due-today/overdue,
+  milestone within the lead window, habit not logged today after its reminder time, KPI
+  with no reading in the stale window, goal review overdue for its cadence. Each seed
+  carries `dedupeKey = <type>:<relatedId>:<localDay>`; category prefs gate whole types.
+- `use-notifications.ts` — the page hook: loads notifications + prefs, resolves "today"/"now"
+  in the pref timezone, runs the scan over the domain repositories, creates only absent
+  reminders, then exposes list / `unreadCount` / `markRead` / `markAllRead` / `dismiss` /
+  `savePrefs`.
+- `use-unread-count.ts` — a light bounded read for the topbar badge, re-run on navigation.
+- `components/NotificationsView.tsx` (unread / earlier split, per-row read-toggle +
+  dismiss + deep-link, mark-all-read, "Recovery Center notifications are separate" note),
+  `components/NotificationPreferences.tsx` (category switches, quiet-hours, timezone,
+  lead/stale numbers, an inert push toggle with a "not available yet" note),
+  `components/NotificationBell.tsx` (topbar bell + unread badge).
+
+**Modified:**
+- `src/app/(app)/notifications/page.tsx` — `ModulePlaceholder` → `<NotificationsView />`.
+- `src/components/layout/topbar.tsx` — the plain Bell link → `<NotificationBell />`
+  (imported by direct path so the shell chunk doesn't pull in the scan's repo graph).
+- `docs/DATA_MODEL.md` (`notifications` expanded, `notificationPreferences` added),
+  `docs/ARCHITECTURE.md` §5, `docs/PRODUCT_REQUIREMENTS.md` §12 status; `docs/DECISIONS.md`
+  — ADR-0026.
+
+**Tests added:** `notification-schema.test.ts` (row/prefs schema + defaults,
+`notificationHref`, `isWithinQuietHours`); `reminder-scan.test.ts` (6 — task
+today/overdue/excluded, milestone lead window, habit time+not-logged, KPI stale, goal
+review cadence, category prefs); `components/NotificationsView.test.tsx` (5 — empty state +
+note, unread/earlier split + deep link, mark-all-read, dismiss, save prefs);
+`components/NotificationPreferences.test.tsx` (2 — save a toggled draft, push note);
+`tests/integration/notifications.test.ts` (create/mark-read/archive, preferences upsert,
+user scoping — **written, not executed in-session**).
+
+**Verification:** app `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (127 files / ~688) ·
+`build` ✅ (49 routes, static export, no warnings) · `format:check` ✅. functions
+unchanged. `test:integration` — new test written, not executed (emulator restriction).
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production NEXT_PUBLIC_APP_URL=https://mastery-personal-mgmt-system.web.app npm run build`
+then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project
+mastery-personal-mgmt-system --non-interactive` — `firestore.rules` unchanged, skipped on
+upload. Redeployed to https://mastery-personal-mgmt-system.web.app/ ; smoke-tested
+`/notifications` in a fresh tab — redirects to sign-in, no console errors.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in. The topbar **bell** shows a badge if you have unread
+   notifications (e.g. the Layer 14 weekly-summary row).
+2. Create a task with today's due date, and a habit with a `reminderTime` earlier than now
+   and no log for today.
+3. Open **Notifications** → the scan adds "Due today: …" and "Time for: …" rows under
+   **Unread**. Reload the page → no duplicates (the `dedupeKey` guard).
+4. Click a row's title → it deep-links to the section (task list, habits, …) and marks the
+   row read. Toggle read/unread with the check icon; dismiss with the ✕.
+5. **Mark all read** → the badge clears after navigating away and back.
+6. In **Preferences**, turn off "Habit reminders", **Save preferences**, reload → the habit
+   reminder is not re-created. Set quiet hours / a timezone / change the milestone-lead
+   window — all persist to `users/{uid}/notificationPreferences/{uid}`.
+7. Confirm no Recovery Center content appears here.
+
+**Known limitations:**
+- **No background delivery / FCM push** — reminders only refresh while the app is open and
+  the notifications page is visited. Push (service worker + VAPID + token lifecycle + a
+  server send/sweep) is deferred to a Blaze move (ADR-0026); `pushEnabled` is stored but
+  inert.
+- **No `event-today` reminders** — the type exists but the client scan skips events
+  (recurrence-aware "next occurrence" needs the calendar engine); arrives with the server
+  sweep.
+- **"Planning-review due" is approximated from `updatedAt`** vs the goal's `reviewFrequency`
+  cadence (no last-reviewed field) — same approximation family as Layers 14 / 16.
+- **Scan reads one repository page (100 rows) per collection** — the app-wide cap.
+- **No i18n yet** — notification strings are English until Layer 18.
 - **Integration test written, not executed in-session** — emulator restriction.
 
 ---

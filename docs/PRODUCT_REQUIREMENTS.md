@@ -193,6 +193,16 @@ unread states, safe deep links, permission handling, token lifecycle, duplicate
 prevention. Recovery notifications use privacy-safe wording and are separately
 configurable.
 
+> **Layer 17 status.** The in-app notification centre (`/notifications`), preferences
+> (category toggles, quiet hours, timezone, milestone-lead / KPI-stale windows), read/unread
+> state, safe deep links, the topbar unread badge, and an **idempotent client-side reminder
+> scan** (task-due, milestone-due, habit-due, kpi-stale, planning-review — `dedupeKey`
+> prevents duplicates) are implemented. `weekly-summary` rows still come from the Layer 14
+> function. **FCM push** (service worker, VAPID key, token lifecycle, a server send/sweep
+> function) and `event-today` reminders (recurrence-aware) are **deferred** (ADR-0026) — the
+> `pushEnabled` preference is stored but inert. Recovery Center notifications remain out of
+> this centre by construction.
+
 ## 13. Internationalization (Layer 18)
 
 next-intl; translations in locale files; no hardcoded user-facing strings; translate

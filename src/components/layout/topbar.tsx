@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { Bell, Menu } from "lucide-react";
-import { Button, IconButton, ThemeToggle } from "@/components/ui";
+import { Menu } from "lucide-react";
+import { IconButton, ThemeToggle } from "@/components/ui";
 import { UserMenu } from "@/features/auth";
+import { NotificationBell } from "@/features/notifications/components/NotificationBell";
 import { BreadcrumbTrail } from "./breadcrumb-trail";
 import { SearchTrigger } from "./search-trigger";
 import { useShell } from "./shell-context";
@@ -28,11 +28,7 @@ export function Topbar() {
 
       <SearchTrigger />
 
-      <Button asChild variant="ghost" size="icon" aria-label="Notifications">
-        <Link href="/notifications">
-          <Bell />
-        </Link>
-      </Button>
+      <NotificationBell />
 
       <ThemeToggle className="hidden md:inline-flex" />
       <UserMenu />

@@ -865,3 +865,52 @@ control a PDF today.
   (ADR-0016) and the weekly summary (Layer 14) already make.
 - The report renders in a fixed light "paper" palette regardless of the app theme — a
   deliberate document metaphor, and it prints correctly.
+
+---
+
+## ADR-0026 — Notifications: in-app centre + client reminder scan now; FCM push deferred
+**Date:** 2026-09-05 · **Status:** accepted · **Layer:** 17 — Notifications
+
+**Context.** `docs/PRODUCT_REQUIREMENTS.md` §12 asks for in-app **and** Firebase Cloud
+Messaging notifications: task / event / habit / milestone / planning-review / KPI reminders,
+weekly-summary alerts, user preferences with quiet hours and timezone, read/unread state,
+safe deep links, permission handling, token lifecycle, and duplicate prevention. But the
+app is a **static export** (ADR-0015) with **no deployed Cloud Functions** (Spark, ADR-0017
+onward), and FCM needs a service worker, a VAPID key, a token store, and a server-side
+send — none of which have a runtime today.
+
+**Decision.**
+- **Ship the in-app notification centre in full.** `/notifications` lists notifications
+  (unread / earlier), marks read/unread, dismisses (archive), deep-links each row to a safe
+  in-app route (`notificationHref`), and shows a preferences panel — category toggles,
+  quiet hours (`HH:mm`, midnight-crossing aware), timezone, and the milestone-lead /
+  KPI-stale windows. The topbar bell shows an unread badge (`useUnreadNotificationCount`, a
+  single bounded read, re-run on navigation).
+- **Reminders are produced by an idempotent client-side scan** (`reminder-scan.ts`, a pure
+  function; run by `use-notifications.ts` when the page mounts). It reads the goal /
+  milestone / task / habit / habitLog / kpi / kpiEntry repositories, resolves "today" and
+  "now" in the user's timezone, and returns the reminders that should exist. Each carries
+  `dedupeKey = <type>:<relatedId>:<localDay>`; the caller creates only the ones not already
+  present, so re-running is safe. Category preferences gate whole reminder types.
+- **`notifications` and `notificationPreferences` are client-written** under the generic
+  owner-only rule — no server mediation (a reminder row and a preferences singleton carry
+  nothing sensitive; Recovery is excluded by construction, not by a rule). No
+  `firestore.rules` change. The existing Layer 14 `generateWeeklySummary` still writes the
+  `weekly-summary` row via the Admin SDK; its rows simply lack a `dedupeKey` (schema
+  default `""`).
+- **FCM push is deferred.** No service worker, no `registerPushToken`, no VAPID key, no
+  send/sweep function this layer. The `pushEnabled` preference is stored (so the UI is
+  complete) but inert, with a "not available in this build yet" note. Push — and a
+  timezone-exact server sweep that works while the app is closed, plus `event-today`
+  reminders that need the recurrence engine — arrive together when the project moves to
+  Blaze / App Hosting. Same lineage as the deferred `generateReportPdf` (ADR-0025).
+
+**Consequences.**
+- Reminders only refresh while the app is open and the notifications page is visited;
+  there is no background delivery. Acceptable for an in-app-only centre; the server sweep
+  fixes it later.
+- The scan reads one repository page (100 rows) per collection — the same cap the rest of
+  the app uses.
+- "Planning-review due" is approximated from a goal's `updatedAt` vs its `reviewFrequency`
+  cadence (no dedicated last-reviewed field) — same approximation family as Layers 14 / 16.
+- `notificationPreferences` is a new collection; added to `docs/DATA_MODEL.md`.
