@@ -40,6 +40,7 @@ export function buildDefaultProfile(
     timezone: detectTimezone(),
     accentColorPreference: null,
     onboardingCompleted: false,
+    weeklySummaryEnabled: true,
     status: "active",
     version: 1,
     createdAt: now,

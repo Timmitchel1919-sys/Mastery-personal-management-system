@@ -428,3 +428,71 @@ session.
 - System-calculated KPI/habit-derived context enrichment, `generateWeeklySummary` (Layer
   14), and `recoveryCoachQuery` (Layer 15E, fully isolated from this code) are explicitly
   out of scope for this ADR.
+
+---
+
+## ADR-0018 — Weekly AI Summary: timezone-respecting daily scheduler; a new opt-in field; first use of `notifications`
+**Date:** 2026-09-04 · **Status:** accepted · **Layer:** 14 — Weekly AI Summary
+
+**Context.** `docs/AI_ARCHITECTURE.md` §6 requires the weekly summary to "respect timezone
+and opt-in" and to notify the user. Three things didn't exist yet: (1) no scheduled
+(`onSchedule`) function anywhere in `functions/`; (2) no opt-in field on the user profile
+— `userProfileSchema` had `timezone` (Layer 4/6) but nothing for this preference; (3) the
+`notifications` collection was reserved since Layer 0 but never written to (Layer 17 owns
+its delivery/consumption UI).
+
+**Decision.**
+- **Scheduling, not per-user cron.** `generateWeeklySummary` (`functions/src/scheduled/
+  generate-weekly-summary.ts`) is one `onSchedule` job running daily at 01:00 UTC — not 24
+  separate per-offset triggers. It lists every active user
+  (`weekly-summary/list-users.ts` — paginated, ordered by `__name__`) and, for each,
+  checks whether **today is Monday in that user's own stored `timezone`**
+  (`week-window.ts`'s `localWeekday`, via `Intl.DateTimeFormat`) before generating anything
+  for them. This is a real per-user timezone check, not a fixed UTC day, at the cost of a
+  small (≤24h) latency versus firing exactly at each user's local midnight.
+- **A new opt-in field.** `userProfileSchema` gains `weeklySummaryEnabled: z.boolean().
+  default(true)` (opt-out by default, since there's no onboarding flow asking either way
+  yet) — checked by the scheduler before generating. No Settings UI exists to toggle it
+  yet (Layer 18); until then it can only be changed by editing the Firestore document
+  directly. `userProfileUpdateSchema` already accepts it so Layer 18 needs no schema work.
+- **Facts computed server-side, defensively** (`weekly-summary/collect-week-data.ts`) —
+  the same "read raw Firestore fields, don't import client schemas" approach Layer 13's
+  `context-builder.ts` established, extended with `toDateKey()` to duck-type a Firestore
+  `Timestamp` (`updatedAt`/`createdAt`, real server timestamps) alongside the plain ISO
+  date strings the client already writes for fields like `dueDate`/`completedAt`. Task
+  on-time/late/cancelled/overdue classification mirrors the Execution Tracker's approach
+  (10D, ADR-0016) reimplemented for Admin SDK reads — the same known limitation applies
+  ("cancelled" timing approximated from `updatedAt`, no dedicated event timestamp).
+- **AI touches only "lessons" and "suggestedPriorities."** Every other field in a
+  `weeklySummaries` document is a computed fact, never asked of the model — avoiding any
+  chance of the AI inventing a number. This mirrors Layer 13's `influencedBy` design
+  (attach facts server-side, ask the model only for the synthesis it's actually good at).
+- **Idempotent by week.** Before generating, the job checks for an existing summary with
+  the same `weekStart` for that user and skips if found — a rerun (manual retry, a
+  double-fire) never produces a duplicate.
+- **First write to `notifications`.** One record per generated summary
+  (`type: "weekly-summary"`, `title`, `body`, `relatedId`, `read: false`) — a minimal,
+  forward-compatible shape; Layer 17 owns the full delivery/consumption UI and may extend
+  this shape, not replace it.
+- **Client:** `src/features/weekly-summaries/` reads/archives/deletes (all three
+  operations the spec asks for: "review, archive, delete"); the Cloud Function is the only
+  writer. No new nav item — the feature surfaces as a second tab ("Weekly Summaries") on
+  the existing AI Coach page (`Grow → AI Coach`) rather than a new sidebar entry, since no
+  slot was reserved for it and the two features are closely related.
+- **Testing:** `functions/tests/ai/fakes.ts`'s fake Firestore gained real `orderBy`/
+  `startAfter` support (previously a no-op) and an `.empty` flag on query results — both
+  needed for `listActiveUserIds`'s pagination and `generateWeeklySummaryForUser`'s
+  idempotency check — and both are now exercised by dedicated tests, not just assumed.
+- **Not deployed**, same as Layer 13 (ADR-0017) — the Spark-plan / Blaze decision is
+  layer-independent; this scheduled function joins the same not-yet-deployed set.
+
+**Consequences.**
+- A user's summary can land anywhere in a ~24h window after their local Monday begins,
+  not at a precise local time — acceptable for a weekly digest, called out explicitly so
+  it isn't mistaken for a bug later.
+- `weeklySummaryEnabled` will likely move into a richer preferences object when Layer 17/18
+  build real notification/settings management — this field is intentionally minimal and
+  additive, not a preview of that future shape.
+- `listActiveUserIds` reads every active user's profile once per run; fine at today's
+  scale, revisit (batching, a materialized "due today" index) if the user base grows large
+  enough to make a full daily scan expensive.

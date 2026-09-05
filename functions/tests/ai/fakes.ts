@@ -7,8 +7,8 @@ import type {
 
 /**
  * Minimal in-memory stand-ins for `Firestore`/`AiProvider` — just enough of the chained
- * query API that `handler.ts`/`quota.ts`/`context-builder.ts` actually call. No real
- * Firestore or AI provider is touched in these tests.
+ * query API the real code calls (across `ai/` and `scheduled/`). No real Firestore or AI
+ * provider is touched in these tests.
  */
 
 type DocData = Record<string, unknown>;
@@ -17,7 +17,8 @@ interface FakeQuery {
   where(field: string, op: "==", value: unknown): FakeQuery;
   orderBy(field: string, direction?: "asc" | "desc"): FakeQuery;
   limit(n: number): FakeQuery;
-  get(): Promise<{ docs: { id: string; data: () => DocData }[] }>;
+  startAfter(cursor: unknown): FakeQuery;
+  get(): Promise<{ docs: { id: string; data: () => DocData }[]; empty: boolean }>;
 }
 
 export interface FakeFirestore {
@@ -28,6 +29,14 @@ export interface FakeFirestore {
     set(data: DocData): Promise<void>;
   };
   collection(path: string): FakeQuery & { doc(id?: string): ReturnType<FakeFirestore["doc"]> };
+}
+
+interface QueryState {
+  filters: ((data: DocData) => boolean)[];
+  limitN?: number;
+  orderField?: string;
+  orderDir?: "asc" | "desc";
+  cursor?: unknown;
 }
 
 export function createFakeFirestore(): FakeFirestore {
@@ -48,32 +57,57 @@ export function createFakeFirestore(): FakeFirestore {
     };
   }
 
-  function makeQuery(
-    path: string,
-    filters: ((data: DocData) => boolean)[],
-    limitN?: number,
-  ): FakeQuery {
+  function sortKey(id: string, data: DocData, field: string): unknown {
+    return field === "__name__" ? id : data[field];
+  }
+
+  function makeQuery(path: string, state: QueryState): FakeQuery {
     return {
       where(field, op, value) {
         if (op !== "==") throw new Error(`Fake Firestore only supports "==", got "${op}"`);
-        return makeQuery(path, [...filters, (data) => data[field] === value], limitN);
+        return makeQuery(path, {
+          ...state,
+          filters: [...state.filters, (data) => data[field] === value],
+        });
       },
-      orderBy() {
-        // Ordering isn't simulated — tests seed data already in the order they assert on,
-        // or assert on set membership rather than order.
-        return makeQuery(path, filters, limitN);
+      orderBy(field, direction = "asc") {
+        return makeQuery(path, { ...state, orderField: field, orderDir: direction });
       },
       limit(n) {
-        return makeQuery(path, filters, n);
+        return makeQuery(path, { ...state, limitN: n });
+      },
+      startAfter(cursor) {
+        return makeQuery(path, { ...state, cursor });
       },
       async get() {
         const prefix = `${path}/`;
         let results = [...docs.entries()]
           .filter(([key]) => key.startsWith(prefix) && !key.slice(prefix.length).includes("/"))
           .map(([key, data]) => ({ id: key.slice(prefix.length), data: () => data }));
-        results = results.filter(({ data }) => filters.every((filter) => filter(data())));
-        if (limitN !== undefined) results = results.slice(0, limitN);
-        return { docs: results };
+        results = results.filter(({ data }) => state.filters.every((filter) => filter(data())));
+
+        if (state.orderField) {
+          const field = state.orderField;
+          const dir = state.orderDir === "desc" ? -1 : 1;
+          results = [...results].sort((a, b) => {
+            const av = sortKey(a.id, a.data(), field);
+            const bv = sortKey(b.id, b.data(), field);
+            if (av === bv) return 0;
+            return (av! < bv! ? -1 : 1) * dir;
+          });
+        }
+
+        if (state.cursor !== undefined && state.orderField) {
+          const field = state.orderField;
+          const cursor = state.cursor;
+          const index = results.findIndex(
+            (entry) => sortKey(entry.id, entry.data(), field) === cursor,
+          );
+          results = index === -1 ? [] : results.slice(index + 1);
+        }
+
+        if (state.limitN !== undefined) results = results.slice(0, state.limitN);
+        return { docs: results, empty: results.length === 0 };
       },
     };
   }
@@ -84,7 +118,7 @@ export function createFakeFirestore(): FakeFirestore {
     },
     doc: (path: string) => makeDocRef(path),
     collection(path: string) {
-      const query = makeQuery(path, []);
+      const query = makeQuery(path, { filters: [] });
       return {
         ...query,
         doc(id?: string) {

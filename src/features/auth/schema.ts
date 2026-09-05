@@ -51,6 +51,8 @@ export const userProfileSchema = z.object({
   timezone: z.string().min(1).default("UTC"),
   accentColorPreference: z.string().min(1).nullable().default(null),
   onboardingCompleted: z.boolean().default(false),
+  /** Opt-in for the scheduled Weekly AI Summary (Layer 14) — respected by `generateWeeklySummary`. */
+  weeklySummaryEnabled: z.boolean().default(true),
   status: z.enum(["active", "disabled"]).default("active"),
   version: z.number().int().nonnegative().default(1),
   createdAt: z.string(),
@@ -70,6 +72,7 @@ export const userProfileUpdateSchema = userProfileSchema
     timezone: true,
     accentColorPreference: true,
     onboardingCompleted: true,
+    weeklySummaryEnabled: true,
   })
   .partial();
 export type UserProfileUpdate = z.infer<typeof userProfileUpdateSchema>;

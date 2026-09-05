@@ -8,16 +8,16 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 13 — General AI Architecture (complete — Cloud Functions written + tested, **not deployed**) |
-| **Next approved layer** | Layer 14 — Weekly AI Summary (not started — awaiting explicit go-ahead) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · **Layer 13** |
+| **Current layer** | Layer 14 — Weekly AI Summary (complete — scheduled Cloud Function written + tested, **not deployed**) |
+| **Next approved layer** | Layer 15 — Recovery Center (15A–15F) (not started — awaiting explicit go-ahead) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · **Layer 14** |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 101 files, 558 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D–13; rules untouched — the generic owner-only subcollection rule already covers the new AI collections). ⚠️ integration: `npm run test:integration` — 25 files, 60 tests **written**; the 9D/9E/10A–10C/11A–11D/12/13 tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`); 10D adds no new integration test. ✅ functions: 6 files, 33 tests (5 new AI test files added this layer; all against in-memory fakes, no real Firestore/AI network call — see Layer 13 log entry). |
+| **Test status** | ✅ app: `vitest run` — 103 files, 566 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D–14; rules untouched — the generic owner-only subcollection rule already covers `weeklySummaries`/`notifications`). ⚠️ integration: `npm run test:integration` — 26 files, 64 tests **written**; the 9D/9E/10A–10C/11A–11D/12/13/14 tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`); 10D adds no new integration test. ✅ functions: 10 files, 58 tests (5 new scheduled/weekly-summary test files added this layer, 25 new tests; all against in-memory fakes, no real Firestore/AI network call — see Layer 14 log entry). |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`, `format:check`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 13 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 13 — hosting only). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). **Cloud Functions still not deployed** — the 5 AI callables from this layer are written and unit-tested but require a Blaze-plan upgrade the owner explicitly chose to defer (ADR-0017); the AI Coach page is live but will show a normalized error until they're deployed. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 14 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 14 — hosting only). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works) — confirmed present but unrelated to this layer's changes. **Cloud Functions still not deployed** — the Layer 13 AI callables and this layer's `generateWeeklySummary` scheduled function are all written and unit-tested but require a Blaze-plan upgrade the owner explicitly chose to defer (ADR-0017/0018); the AI Coach page (with its new Weekly Summaries tab) is live but coach calls will show a normalized error until functions are deployed, and no summaries will be generated until then either. |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · **@anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017)** |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) |
 
 ---
 
@@ -2597,6 +2597,137 @@ in a fresh browser tab — loads, redirects to sign-in (auth guard), no console 
   prior exchanges as conversation history.
 - **`generateGoalBreakdown`'s suggested actions are proposals only** — accepting one does
   not yet create the underlying project/milestone/task; that wiring is a future layer.
+
+---
+
+### Layer 14 — Weekly AI Summary — ✅ complete (2026-09-04) — scheduled Cloud Function written + unit-tested; committed + pushed + hosting deployed; **not deployed** (owner's explicit choice, ADR-0017, reaffirmed ADR-0018)
+
+A daily `onSchedule` function that, for every active user whose local calendar day is
+Monday and who hasn't opted out, evaluates their past 7 local days (goals/milestones
+completed, task completion/cancellation/overdue, habit consistency, focus time, KPI
+movement), asks the AI provider for lessons and suggested priorities grounded only in
+those facts, and stores the result — plus a notification — per `docs/AI_ARCHITECTURE.md`
+§6. A client feature surfaces the history for review, archive, and delete. Full rationale:
+ADR-0018.
+
+**Created — `functions/src/scheduled/`:**
+- `weekly-summary/week-window.ts` — **pure** `localWeekday`/`localDateKey`
+  (`Intl.DateTimeFormat` in the user's own timezone, not the server's), `pastWeekRange`
+  (the 7 local calendar days before today, `[start, end)`), `inRange`.
+- `weekly-summary/list-users.ts` — `listActiveUserIds`: paginated (bounded per page,
+  ordered by document id, loops via `startAfter` until exhausted) rather than one
+  unbounded read, even though the job is expected to touch every user.
+- `weekly-summary/collect-week-data.ts` — bounded, defensive Admin SDK reads (same
+  approach as Layer 13's `context-builder.ts`) producing goals/milestones completed, task
+  classification (completed on-time/late, cancelled, still overdue — mirroring the
+  Execution Tracker's 10D logic, same `updatedAt`-approximation known limitation, ADR-0016),
+  habit consistency (`completed logs / (active habits × 7)`, `null` with no active habits),
+  focus minutes, and KPI movement (first-to-last entry in the week; single-field
+  `orderBy` + in-memory grouping avoids a composite index, same trade-off the client's own
+  KPI entry list makes). **Pure** `toDateKey` duck-types a Firestore `Timestamp` (for
+  `updatedAt`) alongside the plain ISO strings the client already writes for
+  `dueDate`/`completedAt`.
+- `weekly-summary/weekly-summary-prompt.ts` — the AI touches only two fields: `lessons`
+  and `suggestedPriorities`; every other field in the stored document is a computed fact,
+  never asked of the model.
+- `weekly-summary/generate-weekly-summary-for-user.ts` — orchestrates one user: skips if a
+  summary for that exact week already exists (idempotent against a rerun), else collects
+  facts, calls the provider, validates its output, and writes both the `weeklySummaries`
+  doc and a `notifications` doc (the collection's first-ever write — a minimal, forward-
+  compatible shape; Layer 17 owns full delivery/consumption).
+- `weekly-summary/run-weekly-summaries.ts` — the batch loop: lists active users, checks
+  timezone-aware Monday + opt-in per user, generates, and collects per-user errors without
+  aborting the batch.
+- `generate-weekly-summary.ts` — the actual `onSchedule` trigger (daily, 01:00 UTC),
+  bound to the same `ANTHROPIC_API_KEY` secret as Layer 13's callables. Re-exported from
+  `functions/src/index.ts`.
+
+**Modified:**
+- `src/features/auth/schema.ts` — `userProfileSchema` gains
+  `weeklySummaryEnabled: z.boolean().default(true)` (opt-out model, since no onboarding
+  flow asks either way); added to `userProfileUpdateSchema`'s pick list so a future
+  Settings UI (Layer 18) needs no schema change. `user-profile-repository.ts`'s
+  `buildDefaultProfile` sets it explicitly.
+- `functions/tests/ai/fakes.ts` — the shared fake Firestore gained real `orderBy`/
+  `startAfter` support (previously `orderBy` was a documented no-op) and an `.empty` flag
+  on query results, both needed by this layer's tests and now exercised by them.
+
+**Created — `src/features/weekly-summaries/`** (client — read/archive/delete only; the
+scheduled function is the sole writer): `schema.ts`, `weekly-summary-repository.ts`
+(`listRecentWeeklySummaries`, `archiveWeeklySummary`, `deleteWeeklySummary` — the spec's
+"review, archive, delete" in full, delete being a genuine hard `deleteDoc` since the
+generic Firestore rule already allows owner delete on subcollections), `use-weekly-
+summaries.ts`, `components/` (`WeeklySummaryCard` with stat tiles + lessons +
+suggested-priorities + an archive button + a delete-with-confirm dialog,
+`WeeklySummariesView`), `index.ts`.
+
+**Modified — `src/features/ai-coach/components/AiCoachView.tsx`:** restructured around a
+`Tabs` component — "Ask" (the existing coach flow, unchanged) and "Weekly Summaries" (the
+new view) — rather than adding a new sidebar nav item, since none was reserved for this
+layer and the two features are closely related.
+
+**Tests added:** `functions/tests/scheduled/` — `week-window.test.ts` (timezone-aware
+weekday resolution, including a UTC-vs-Auckland case where the two disagree; range math),
+`list-users.test.ts` (pagination across pages via the newly-real fake `startAfter`),
+`collect-week-data.test.ts` (every fact category, including the Firestore-Timestamp vs.
+plain-string `toDateKey` duck-typing), `generate-weekly-summary-for-user.test.ts`
+(persists summary + notification; idempotent against a rerun),
+`run-weekly-summaries.test.ts` (opt-in/opted-out/disabled/wrong-weekday filtering; one
+user's failure doesn't abort the batch) — 25 new tests. App side:
+`src/features/weekly-summaries/schema.test.ts`, `components/WeeklySummariesView.test.tsx`
+(empty state; card renders stats/lessons/priorities; archive; delete-with-confirm; error +
+retry — hook mocked); `AiCoachView.test.tsx` gained a tab-switch test (mocking
+`WeeklySummariesView` as a stub, since Radix `Tabs.Content` doesn't mount the inactive
+panel); `tests/integration/weekly-summaries.test.ts` (seeds a summary with the client SDK
+— since there's no client `create()` — then exercises read/archive/delete and user
+scoping; **written, not executed in-session** — same emulator restriction as prior
+layers). App suite: 103 files / 566 tests. Functions suite: 10 files / 58 tests, all
+executed in-session.
+
+**Verification:** app: `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (103/566) · `build` ✅
+(47 routes, static export, no warnings) · `format:check` ✅. functions: `typecheck` ✅ ·
+`lint` ✅ (0/0) · `test` ✅ (10/58, executed) · `build` ✅ (`tsc`) · `format:check` ✅.
+`test:rules` not run — rules untouched. `test:integration` — see above.
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production NEXT_PUBLIC_APP_URL=https://mastery-personal-mgmt-system.web.app npm run build`
+then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project
+mastery-personal-mgmt-system --non-interactive` — unchanged, `functions` deliberately
+excluded (ADR-0015/0017/0018). Redeployed to
+https://mastery-personal-mgmt-system.web.app/ ; smoke-tested `/grow/ai-coach` in a fresh
+browser tab — loads (title "AI Coach · Mastery"), redirects to sign-in, no new console
+errors (the pre-existing RSC-prefetch-404 cosmetic issue on `/register`/`/forgot-password`
+links was confirmed present but predates this layer).
+
+**Manual test instructions (once functions are deployed):**
+1. Set a test user's `weeklySummaryEnabled: true` and `timezone` to a zone whose local day
+   is currently Monday; ensure they have some goals/tasks/habits/KPI activity in the past
+   week.
+2. Trigger `generateWeeklySummary` manually (Cloud Scheduler console, or the Functions
+   emulator's manual-trigger UI) and check Firestore for a new
+   `users/{uid}/weeklySummaries/{id}` and `users/{uid}/notifications/{id}`.
+3. Sign in as that user → **Grow → AI Coach → Weekly Summaries** tab → the summary appears
+   with its stat tiles, lessons, and suggested priorities.
+4. Click **Archive** → it disappears from the list (but the document remains, just
+   `status: "archived"`). Click **Delete** on another one → confirm → it's gone for good.
+5. Set `weeklySummaryEnabled: false` on a user and rerun the job → no new summary is
+   created for them.
+6. Rerun the job again for a user who already has this week's summary → no duplicate is
+   created (idempotency check).
+
+**Known limitations:**
+- **Not deployed** — same Spark-plan / Blaze situation as Layer 13; nothing generates
+  until the owner upgrades and deploys (see ADR-0017/0018's two-step turn-on).
+- **No precise local-midnight firing** — the job runs once daily at a fixed UTC time and
+  checks each user's local weekday; a user's summary can land anywhere in the following
+  ~24h window, not at an exact local time.
+- **No Settings UI to toggle `weeklySummaryEnabled`** yet — only editable by hand in
+  Firestore until Layer 18. Defaults to opted-in.
+- **`listActiveUserIds` reads every active user's profile once per run** — fine at today's
+  scale; would need batching or a materialized "due today" index at much larger scale.
+- **No conversation/history awareness** — each week's summary is generated independently,
+  with no reference to prior weeks' lessons or priorities.
+- **`notifications` has no delivery/consumption UI** — the collection now has real
+  documents in it, but no bell icon, list, or read/unread UI exists until Layer 17.
 
 ---
 

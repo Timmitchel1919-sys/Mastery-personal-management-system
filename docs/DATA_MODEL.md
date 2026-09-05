@@ -54,11 +54,11 @@ users/{uid}/skillReviews/{reviewId}            skillId link, date + proficiency 
 users/{uid}/kpis/{kpiId}                       category (free text), pillarIds, unit, direction (higher-is-better|lower-is-better), targetValue, weight (1-5, its Life Score influence), goal link — no "current value" here, it's derived from kpiEntries (Layer 12)
 users/{uid}/kpiEntries/{entryId}               kpiId link, date + value + note — append-only time series, user-entered only this layer (Layer 12)
 users/{uid}/lifeScoreEntries/{entryId}         date, score (0-100), frozen factors[] snapshot ({kpiId,title,value,attainment,weight}), note — saved on demand; the live score is always recomputed from current KPIs, this is history (Layer 12)
-users/{uid}/weeklySummaries/{summaryId}
+users/{uid}/weeklySummaries/{summaryId}        weekStart/weekEnd, computed facts (goals/milestones completed, task completion/cancellation/overdue counts, habitConsistencyPercent, focusMinutes, kpiMovements[]), AI-generated lessons[]/suggestedPriorities[] — written only by the scheduled `generateWeeklySummary` function; client reads/archives/deletes (Layer 14)
 users/{uid}/reports/{reportId}
 
 # System
-users/{uid}/notifications/{notificationId}
+users/{uid}/notifications/{notificationId}     type, title, body, relatedId, read — first populated by `generateWeeklySummary` (type "weekly-summary", Layer 14); full delivery/consumption UI is Layer 17
 users/{uid}/quickNotes/{noteId}                 dashboard quick-capture notes (Layer 7)
 
 # AI (Layer 13) — written only by Cloud Functions (Admin SDK); client reads only

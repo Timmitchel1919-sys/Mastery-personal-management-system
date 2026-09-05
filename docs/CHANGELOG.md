@@ -6,6 +6,36 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 14 — Weekly AI Summary — 2026-09-04 — scheduled Cloud Function written and unit-tested, not yet deployed
+
+**Added**
+- `functions/src/scheduled/generate-weekly-summary.ts` — a daily `onSchedule` function
+  that, for every active user whose local calendar day is Monday (via each user's own
+  stored `timezone`) and who hasn't opted out, evaluates their past 7 local days and
+  stores a Weekly AI Summary: computed facts (goals/milestones completed, task
+  completion/cancellation/overdue, habit consistency, focus time, KPI movement) plus
+  AI-generated `lessons`/`suggestedPriorities` grounded only in those facts. Idempotent
+  against a rerun for the same week. Also writes the app's first `notifications` document.
+- `src/features/auth/schema.ts` — `userProfileSchema` gains `weeklySummaryEnabled`
+  (default `true`), the opt-in this layer's scheduler respects.
+- `src/features/weekly-summaries/` — reads the summary history and lets the user archive
+  or delete an entry (the Cloud Function is the sole writer); surfaced as a new "Weekly
+  Summaries" tab on the existing AI Coach page rather than a new nav item.
+- Tests: `functions/tests/scheduled/` (25 new tests covering timezone-aware scheduling,
+  paginated user listing, fact collection, generation + idempotency, and batch error
+  isolation); `weekly-summaries` schema/view unit tests; a read/archive/delete emulator
+  integration test (written; not executed in-session).
+
+**Changed**
+- `functions/tests/ai/fakes.ts` — the shared fake Firestore now really implements
+  `orderBy`/`startAfter` (was a documented no-op) and an `.empty` flag, both needed by
+  this layer's tests.
+- `docs/DATA_MODEL.md` annotates `weeklySummaries` and `notifications`.
+- `docs/DECISIONS.md` — ADR-0018.
+
+**Known limitation:** not deployed this layer — same Spark-plan situation as Layer 13
+(ADR-0017); no summary is generated until the owner upgrades to Blaze and deploys.
+
 ### Layer 13 — General AI Architecture — 2026-09-04 — Cloud Functions written and unit-tested, not yet deployed
 
 **Added**

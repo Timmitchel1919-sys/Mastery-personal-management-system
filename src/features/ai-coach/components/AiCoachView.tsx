@@ -16,9 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
   Skeleton,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
   Textarea,
 } from "@/components/ui";
 import { useGoalOptions } from "@/features/goals";
+import { WeeklySummariesView } from "@/features/weekly-summaries";
 import { useAiCoach } from "../use-ai-coach";
 import { AI_INTENT_LABEL, AI_INTENTS, type AiIntent } from "../schema";
 import { ExchangeCard } from "./ExchangeCard";
@@ -48,85 +53,98 @@ export function AiCoachView() {
     <PageContainer size="wide" className="space-y-6">
       <PageHeader
         title="AI Coach"
-        description="Ask a question or generate structured recommendations — grounded only in your own data, never applied automatically."
+        description="Ask a question, generate structured recommendations, or review your weekly summaries — grounded only in your own data, never applied automatically."
         breadcrumbs={<BreadcrumbTrail />}
       />
 
-      <Card>
-        <CardContent className="space-y-4 p-4">
-          <Select value={intent} onValueChange={(next) => setIntent(next as AiIntent)}>
-            <SelectTrigger aria-label="What do you need">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {AI_INTENTS.map((value) => (
-                <SelectItem key={value} value={value}>
-                  {AI_INTENT_LABEL[value]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <Tabs defaultValue="ask">
+        <TabsList>
+          <TabsTrigger value="ask">Ask</TabsTrigger>
+          <TabsTrigger value="weekly-summaries">Weekly Summaries</TabsTrigger>
+        </TabsList>
 
-          {needsMessage ? (
-            <Textarea
-              rows={3}
-              placeholder="What's on your mind?"
-              value={userMessage}
-              onChange={(event) => setUserMessage(event.target.value)}
+        <TabsContent value="ask" className="space-y-6">
+          <Card>
+            <CardContent className="space-y-4 p-4">
+              <Select value={intent} onValueChange={(next) => setIntent(next as AiIntent)}>
+                <SelectTrigger aria-label="What do you need">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {AI_INTENTS.map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {AI_INTENT_LABEL[value]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {needsMessage ? (
+                <Textarea
+                  rows={3}
+                  placeholder="What's on your mind?"
+                  value={userMessage}
+                  onChange={(event) => setUserMessage(event.target.value)}
+                />
+              ) : null}
+
+              {needsGoal ? (
+                <Select value={goalId} onValueChange={setGoalId}>
+                  <SelectTrigger aria-label="Goal">
+                    <SelectValue placeholder="Pick a goal" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {goalOptions.map((option) => (
+                      <SelectItem key={option.id} value={option.id}>
+                        {option.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : null}
+
+              {askError ? (
+                <Alert variant="danger">
+                  <AlertDescription>{askError}</AlertDescription>
+                </Alert>
+              ) : null}
+
+              <div className="flex justify-end">
+                <Button onClick={handleAsk} loading={asking} disabled={!canSubmit}>
+                  <Send />
+                  {needsMessage ? "Ask" : "Generate"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {status === "loading" ? (
+            <Skeleton className="h-40" />
+          ) : status === "error" ? (
+            <ErrorState
+              className="min-h-[30vh]"
+              title="We couldn't load your coach history"
+              description={error ?? "Please try again."}
+              onRetry={reload}
             />
-          ) : null}
+          ) : exchanges.length === 0 ? (
+            <EmptyState
+              title="No coach exchanges yet"
+              description="Ask a question above to get started."
+            />
+          ) : (
+            <div className="space-y-4">
+              {exchanges.map((exchange) => (
+                <ExchangeCard key={exchange.id} exchange={exchange} />
+              ))}
+            </div>
+          )}
+        </TabsContent>
 
-          {needsGoal ? (
-            <Select value={goalId} onValueChange={setGoalId}>
-              <SelectTrigger aria-label="Goal">
-                <SelectValue placeholder="Pick a goal" />
-              </SelectTrigger>
-              <SelectContent>
-                {goalOptions.map((option) => (
-                  <SelectItem key={option.id} value={option.id}>
-                    {option.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : null}
-
-          {askError ? (
-            <Alert variant="danger">
-              <AlertDescription>{askError}</AlertDescription>
-            </Alert>
-          ) : null}
-
-          <div className="flex justify-end">
-            <Button onClick={handleAsk} loading={asking} disabled={!canSubmit}>
-              <Send />
-              {needsMessage ? "Ask" : "Generate"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {status === "loading" ? (
-        <Skeleton className="h-40" />
-      ) : status === "error" ? (
-        <ErrorState
-          className="min-h-[30vh]"
-          title="We couldn't load your coach history"
-          description={error ?? "Please try again."}
-          onRetry={reload}
-        />
-      ) : exchanges.length === 0 ? (
-        <EmptyState
-          title="No coach exchanges yet"
-          description="Ask a question above to get started."
-        />
-      ) : (
-        <div className="space-y-4">
-          {exchanges.map((exchange) => (
-            <ExchangeCard key={exchange.id} exchange={exchange} />
-          ))}
-        </div>
-      )}
+        <TabsContent value="weekly-summaries">
+          <WeeklySummariesView />
+        </TabsContent>
+      </Tabs>
     </PageContainer>
   );
 }

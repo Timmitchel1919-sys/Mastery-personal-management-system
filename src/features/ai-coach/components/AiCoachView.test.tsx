@@ -14,6 +14,9 @@ vi.mock("@/features/goals", async (importOriginal) => ({
   ...(await importOriginal<typeof GoalsModule>()),
   useGoalOptions: () => ({ options: [{ id: "goal-1", title: "Ship v1" }], loading: false }),
 }));
+vi.mock("@/features/weekly-summaries", () => ({
+  WeeklySummariesView: () => <div>Weekly summaries stub</div>,
+}));
 
 import { AiCoachView } from "./AiCoachView";
 
@@ -81,6 +84,14 @@ describe("AiCoachView", () => {
     expect(screen.getByText("You have a few hours available")).toBeInTheDocument();
     expect(screen.getByText(/Block 2h/)).toBeInTheDocument();
     expect(screen.getByText("Ship v1")).toBeInTheDocument();
+  });
+
+  it("shows the Weekly Summaries tab when selected", async () => {
+    render(<AiCoachView />);
+    expect(screen.queryByText("Weekly summaries stub")).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("tab", { name: "Weekly Summaries" }));
+    expect(screen.getByText("Weekly summaries stub")).toBeInTheDocument();
   });
 
   it("renders an error with retry", async () => {
