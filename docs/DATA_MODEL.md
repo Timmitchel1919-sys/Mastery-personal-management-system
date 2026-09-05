@@ -74,7 +74,7 @@ users/{uid}/recoveryGoals/{goalId}/checkIns/{checkInId}      one per goal per da
 users/{uid}/recoveryGoals/{goalId}/relapses/{relapseId}      setback record: date, whatHappened, contributingFactors[], lessonsLearned, restartPlan — **Cloud-Function-mediated** (recordRecoverySetback); the Firestore rule refuses a direct client write. Client reads it back (Layer 15C)
 users/{uid}/recoveryGoals/{goalId}/copingActions/{actionId}  per-goal coping toolkit: title, category (grounding|physical|social|cognitive|faith|other), howTo — client-written under the generic owner-only rule; reversible archive, added freely or one-tap from a built-in suggestion library (Layer 15D)
 users/{uid}/recoveryAccountabilityPartners/{partnerId}       reserved — Layer 15F
-users/{uid}/recoveryCoachSessions/{sessionId}                reserved — Layer 15E (isolated from general AI)
+users/{uid}/recoveryCoachSessions/{sessionId}                one Recovery Coach exchange: goalId, message, reply, suggestedSteps[], disclaimers[], influencedBy[] (recovery-only context refs), per-call token/latency/cost metrics — **written only by the `recoveryCoachQuery` Cloud Function** (isolated system prompt + recovery-only context); the Firestore rule refuses a direct client write. Client reads it back. Nothing lands in `coachExchanges`/`aiCallLogs` (Layer 15E)
 ```
 
 ## 2. Common record fields

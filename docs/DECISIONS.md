@@ -708,3 +708,56 @@ content.
   (and a translatable-strings concern when i18n lands in Layer 18) — acceptable for a small
   curated set.
 - No Cloud Function and no new dependency this layer.
+
+---
+
+## ADR-0023 — Recovery Coach: an isolated AI endpoint that shares only the spend budget
+**Date:** 2026-09-05 · **Status:** accepted · **Layer:** 15E — Recovery Coach
+
+**Context.** `docs/RECOVERY_PRIVACY.md` §5 and `docs/AI_ARCHITECTURE.md` §7 require the
+Recovery Coach to be *fully isolated* from the general planning AI: separate endpoint,
+system prompt, context builder, and conversation storage. Layer 13 already built a reusable
+AI stack (`AiProvider`, `handleAiIntent`, quota/usage, fakes). The open questions: how much
+of that stack does the Recovery Coach reuse without breaching isolation, and where does its
+conversation live.
+
+**Decision.**
+- **`recoveryCoachQuery` lives in `functions/src/recovery/`, not `functions/src/ai/`**, and
+  does **not** go through `handleAiIntent`. It has its own request/response contracts,
+  its own `RECOVERY_COACH_SYSTEM` prompt (supportive, non-judgmental, "restart from here"
+  framing, immediate safe next step, explicit crisis→professional/emergency-help clause,
+  no diagnosis, no coercive language), and its own `buildRecoveryCoachContext` that reads
+  **only** `recoveryGoals/{goalId}` + its `checkIns` / `relapses` / `copingActions`. The
+  general `buildContext` already reads only `goals` / `journalEntries` / `tasks`, so
+  isolation holds in both directions by construction.
+- **Storage: `users/{uid}/recoveryCoachSessions/{id}`, Cloud-Function-only.**
+  `firestore.rules` `isServerMediatedRecoveryWrite` gained a `collection` parameter and now
+  also returns true for `collection == 'recoveryCoachSessions'` (a top-level collection, so
+  it can't be matched by the `.../relapses/{id}` path regex). Client reads are unchanged;
+  only writes are blocked, making the function the sole writer. Nothing is written to
+  `coachExchanges`.
+- **Shared surface = the spend budget only.** `quota.ts` gained `bumpUsageCounters(db, uid,
+  totalTokens, now)`, extracted from `recordUsage` (a controlled refactor — `recordUsage`
+  now calls it, behavior identical, covered by new tests). The Recovery Coach calls
+  `assertWithinQuota` + `bumpUsageCounters` so it shares one per-user daily/monthly AI
+  cap, but it writes **no `aiCallLogs` record** — its per-call token/latency/cost metrics
+  live on the `recoveryCoachSessions` document instead. The rollup counters are bare
+  integers with no intent breakdown, so sharing them leaks nothing about recovery use;
+  putting an `intent: "recovery-coach"` row in the general `aiCallLogs` collection would
+  have (§1: "never used for unrelated analytics").
+- **Faith-based encouragement** is gated on the goal's `faithBasedEncouragement` flag
+  (ADR-0020) and passed to the model as an explicit one-line instruction ("has / has not
+  opted in") rather than left implicit.
+- **UI: a `RecoveryCoachPanel` section in the goal detail view**, goal-scoped. No new
+  route, no nav entry. `RecoveryHomeView`'s "Coming next" list drops to just 15F.
+- **Not deployed** — same as every Cloud Function so far (Spark plan, ADR-0017/0018/0021).
+  "Ask for a next step" throws in production until Blaze + `firebase deploy --only
+  functions`.
+
+**Consequences.**
+- `recoveryCoachSessions` docs carry token/latency/cost fields the client schema doesn't
+  model; `makeConverter`'s Zod parse strips them on read, so the client history is clean.
+- The coach is goal-scoped; a general "recovery, no specific goal" conversation is not
+  supported (the request requires `goalId`). Revisit if a use case appears.
+- `bumpUsageCounters` is now the extraction point any future non-general AI surface should
+  reuse to share the budget without touching `aiCallLogs`.

@@ -99,5 +99,20 @@ export {
   archiveCopingAction,
 } from "./recovery-coping-repository";
 export { useRecoveryCoping } from "./use-recovery-coping";
+export {
+  MAX_COACH_MESSAGE,
+  recoveryCoachRequestSchema,
+  recoveryCoachResultSchema,
+  recoveryCoachSessionSchema,
+  recoveryCoachFormSchema,
+  type RecoveryCoachStep,
+  type RecoveryCoachContextRef,
+  type RecoveryCoachRequest,
+  type RecoveryCoachResult,
+  type RecoveryCoachSession,
+  type RecoveryCoachFormValues,
+} from "./recovery-coach-schema";
+export { askRecoveryCoach, listRecoveryCoachSessions } from "./recovery-coach-client";
+export { useRecoveryCoach } from "./use-recovery-coach";
 export { RecoveryGate } from "./components/RecoveryGate";
 export { RecoveryHomeView } from "./components/RecoveryHomeView";

@@ -54,7 +54,7 @@ describe("RecoveryHomeView", () => {
       screen.getByText("Kept out of your dashboard, global search, and ordinary notifications."),
     ).toBeInTheDocument();
     expect(screen.getByText(/not medical or psychological advice/)).toBeInTheDocument();
-    expect(screen.getByText("Recovery Coach")).toBeInTheDocument();
+    expect(screen.getByText("Accountability partner")).toBeInTheDocument();
   });
 
   it("locks the module when Lock is clicked", async () => {

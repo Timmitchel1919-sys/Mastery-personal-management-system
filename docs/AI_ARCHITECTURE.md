@@ -6,12 +6,12 @@ the Recovery Coach are fully isolated from each other.
 Built in **Layer 13** (general architecture) and **Layer 14** (weekly summary); the
 Recovery Coach is **Layer 15E** and governed by `RECOVERY_PRIVACY.md`.
 
-> **Layer 13/14 status:** the five general-coach endpoints (everything except
-> `generateWeeklySummary` and `recoveryCoachQuery`) are implemented in `functions/src/ai/`,
-> and `generateWeeklySummary` (§6) is implemented in `functions/src/scheduled/`, all
-> unit-tested, using Anthropic Claude as the concrete `AiProvider`. None are **deployed**
-> — the Firebase project is on the Spark plan and the owner chose to defer the Blaze
-> upgrade. See ADR-0017 in `docs/DECISIONS.md` and the Layer 13/14 entries in
+> **Status (Layers 13 / 14 / 15E):** the five general-coach endpoints are implemented in
+> `functions/src/ai/`, `generateWeeklySummary` (§6) in `functions/src/scheduled/`, and the
+> isolated `recoveryCoachQuery` (§7) in `functions/src/recovery/`, all unit-tested, using
+> Anthropic Claude as the concrete `AiProvider`. None are **deployed** — the Firebase
+> project is on the Spark plan and the owner chose to defer the Blaze upgrade. See
+> ADR-0017 / ADR-0023 in `docs/DECISIONS.md` and the Layer 13 / 14 / 15E entries in
 > `docs/BUILD_PROGRESS.md`.
 
 ---
@@ -96,3 +96,17 @@ privacy boundaries.
   conversation storage (`recoveryCoachSessions` vs general coach history).
 - Recovery Coach context never flows into the general planning AI, and recovery data is
   never used for unrelated analytics or personalization.
+
+**Layer 15E implementation.** `recoveryCoachQuery` lives in `functions/src/recovery/`
+(not `functions/src/ai/`): `RECOVERY_COACH_SYSTEM` is its own supportive, non-judgmental
+system prompt that recommends professional/emergency help on any sign of risk and never
+diagnoses; `buildRecoveryCoachContext` reads **only** `recoveryGoals/{goalId}` and its
+`checkIns` / `relapses` / `copingActions` — it never touches `goals`, `journalEntries`,
+`tasks`, and the general `buildContext` never touches recovery paths. Sessions persist to
+`users/{uid}/recoveryCoachSessions/{id}` (rules reject a direct client write). The only
+shared surface is the per-user spend budget: `recoveryCoachQuery` bumps the plain
+`aiUsageDaily` / `aiUsageMonthly` counters (integers, no intent breakdown) via
+`bumpUsageCounters`, and writes **nothing** to `coachExchanges` or `aiCallLogs` — its
+per-call token / latency / cost metrics live on the session document instead. Faith-based
+encouragement is included only when the goal's `faithBasedEncouragement` flag is set,
+passed to the model as an explicit guidance line.

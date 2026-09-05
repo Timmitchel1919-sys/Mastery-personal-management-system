@@ -8,16 +8,16 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 15D — Coping Toolkit (complete) |
-| **Next approved layer** | Layer 15E — Recovery Coach (not started — awaiting explicit go-ahead) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15A · Layer 15B · Layer 15C · **Layer 15D** |
-| **In-progress work** | Layer 15 (Recovery Center) continues with 15E–15F on future "Volgende laag" requests |
-| **Test status** | ✅ app: `vitest run` — 114 files, 626 tests (recovery-coping schema + `CopingToolkitSection` component tests added). ✅ rules: `npm run test:rules` — 3 files, ~38 tests (`tests/rules/recovery.rules.test.ts` gained a `recoveryGoals copingActions — Layer 15D` block: owner create/read/archive allowed, cross-user denied — not re-run in-session, emulator restriction). ⚠️ integration: `npm run test:integration` — 30 files **written**; `tests/integration/recovery-coping.test.ts` added (create/update/list/archive, user scoping) — not executed in-session (Firestore emulator restriction). ✅ functions: `vitest run` — 11 files, 64 tests (unchanged — 15D is app-only, no Cloud Function). |
-| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: unchanged. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 15D built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 15D — hosting only; `firestore.rules` unchanged this layer — `copingActions` is client-written under the generic owner-only rule, and the 15C relapse guard matches `.../relapses/{id}` only). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (Layer 13/14 + 15C's `recordRecoverySetback`) still not deployed — Spark plan, see ADR-0017/0018/0021. |
+| **Current layer** | Layer 15E — Recovery Coach (complete) |
+| **Next approved layer** | Layer 15F — Accountability Partner (not started — awaiting explicit go-ahead) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15A · Layer 15B · Layer 15C · Layer 15D · **Layer 15E** |
+| **In-progress work** | Layer 15 (Recovery Center) finishes with 15F on the next "Volgende laag" request |
+| **Test status** | ✅ app: `vitest run` — 116 files, 636 tests (recovery-coach schema + `RecoveryCoachPanel` component tests added). ✅ rules: `npm run test:rules` — 3 files, ~41 tests (`tests/rules/recovery.rules.test.ts` gained a `recoveryCoachSessions — Layer 15E` block: direct client write REJECTED, owner READ allowed after Admin seed, cross-user denied — not re-run in-session, emulator restriction). ⚠️ integration: `npm run test:integration` — 31 files **written**; `tests/integration/recovery-coach.test.ts` added (direct client write rejected; read path resolves) — not executed in-session (Firestore emulator restriction). ✅ functions: `vitest run` — 13 files, 79 tests (`recovery-coach-query.test.ts` +8, `recovery-coach-context.test.ts` +3, `bumpUsageCounters` +3 in `quota.test.ts`). |
+| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `test`, `build`. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 15E built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 15E — hosting + `firestore.rules`: the recursive-wildcard owner-only rule now also refuses direct client writes to the top-level `recoveryCoachSessions` collection, via the `collection`-aware `isServerMediatedRecoveryWrite`). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (Layer 13/14 + 15C `recordRecoverySetback` + 15E `recoveryCoachQuery`) still not deployed — Spark plan, see ADR-0017/0018/0021/0023. |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · (no new deps in Layer 15A–15D) |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · (no new deps in Layer 15A–15E) |
 
 ---
 
@@ -3123,6 +3123,118 @@ upload. Redeployed to https://mastery-personal-mgmt-system.web.app/ ; smoke-test
 - **Not wired into the check-in form** — the 15C `copingUsed` free-text field is unchanged;
   selecting toolkit items there is possible future polish, not part of 15D.
 - **No Recovery Coach / accountability partner** — Layers 15E–15F.
+- **Rules / integration tests written, not executed in-session** — emulator restriction.
+
+---
+
+### Layer 15E — Recovery Coach — ✅ complete (2026-09-05) — committed + pushed + deployed live
+
+A **fully isolated** AI Recovery Coach per `docs/RECOVERY_PRIVACY.md` §5 and
+`docs/AI_ARCHITECTURE.md` §7 — separate endpoint, system prompt, context builder, and
+conversation storage, sharing only the per-user AI spend budget. Goal-scoped: it lives in
+the recovery goal detail view. The Cloud Function is written and unit-tested but **not
+deployed** (Spark plan — same as the Layer 13/14 AI functions and 15C's setback function).
+Full rationale: ADR-0023.
+
+**Created — `functions/`:**
+- `src/recovery/recovery-coach-context.ts` — `buildRecoveryCoachContext(db, uid, goalId)`:
+  reads **only** `recoveryGoals/{goalId}` + its `checkIns` (7) / `relapses` (3) /
+  `copingActions` (30), returns `{ text, refs, faithBased, goalBehavior }` or `null` if the
+  goal isn't the caller's. Never touches `goals` / `journalEntries` / `tasks`.
+- `src/recovery/recovery-coach-query.ts` — `RECOVERY_COACH_SYSTEM` (its own supportive,
+  non-judgmental prompt: immediate safe next step, explicit crisis → professional/emergency
+  help clause, no diagnosis, no coercive language, structured JSON). `handleRecoveryCoachQuery(request, { db, provider, now? })`:
+  `requireAuth` → validate `{ goalId, message }` → `assertWithinQuota` → build context (404
+  if the goal is missing) → provider call with an explicit faith-based guidance line
+  (opted-in vs not) → `validateResponse` → `bumpUsageCounters` (shared budget only) →
+  persist `users/{uid}/recoveryCoachSessions/{id}` with per-call token/latency/cost metrics
+  on the doc → return `{ reply, suggestedSteps, disclaimers, influencedBy, sessionId, createdAt }`.
+  Exported as the `recoveryCoachQuery` onCall (`ANTHROPIC_API_KEY` secret, 60s). **Not
+  deployed.**
+
+**Modified — `functions/`:**
+- `src/ai/shared/quota.ts` — extracted `bumpUsageCounters(db, uid, totalTokens, now)` (day +
+  month rollups) from `recordUsage`; `recordUsage` now calls it and still writes the
+  `aiCallLogs` record for the **general** endpoints. The Recovery Coach calls only
+  `bumpUsageCounters`, so nothing recovery-derived lands in `aiCallLogs`.
+- `src/index.ts` — exports `recoveryCoachQuery`; JSDoc updated (through Layer 15E).
+- `src/recovery/README.md` — documents the coach endpoint + context builder.
+
+**Created — `src/features/recovery/`:**
+- `recovery-coach-schema.ts` — request / callable-result / stored-session (`defineRecordSchema`) /
+  form schemas.
+- `recovery-coach-client.ts` — `askRecoveryCoach(payload)` (`httpsCallable("recoveryCoachQuery")`),
+  `listRecoveryCoachSessions(goalId)` (client read, filters to the goal in JS to avoid a
+  composite index).
+- `use-recovery-coach.ts` — `useRecoveryCoach(goalId)`: load sessions, `ask(message)`,
+  `asking` / `askError`, reload.
+- `components/RecoveryCoachPanel.tsx` — the goal-scoped panel: isolation note, message box,
+  "Ask for a next step", recent replies with steps + disclaimers, loading/empty/error.
+
+**Modified — `src/`:**
+- `firestore.rules` — `isServerMediatedRecoveryWrite(collection, document)` now also returns
+  true for `collection == 'recoveryCoachSessions'` (top-level, so not matchable by the
+  `.../relapses/{id}` regex); the three write rules pass `collection` through. Reads
+  unchanged.
+- `components/RecoveryGoalDetailView.tsx` — mounts `<RecoveryCoachPanel>` after the coping
+  toolkit; its test mocks `../use-recovery-coach`.
+- `components/RecoveryHomeView.tsx` (+ test) — "Coming next" drops to just the accountability
+  partner (15F).
+- `src/features/recovery/index.ts` — barrel extended.
+- `docs/DATA_MODEL.md`, `docs/AI_ARCHITECTURE.md` §7, `docs/RECOVERY_PRIVACY.md` updated;
+  `docs/DECISIONS.md` — ADR-0023.
+
+**Tests added:** `functions/tests/recovery/recovery-coach-query.test.ts` (8: unauth, no
+message, no goalId, goal-not-found, quota exceeded, happy path — session written with
+metrics + shared counters bumped + **no `aiCallLogs`**, faith-off prompt line, faith-on
+prompt line, malformed reply → HttpsError + counter still bumped);
+`functions/tests/recovery/recovery-coach-context.test.ts` (3: null for a missing goal;
+summarizes goal/check-ins/setbacks/coping and skips archived; reads **no** general
+collections); `functions/tests/ai/quota.test.ts` +3 (`bumpUsageCounters` creates / adds /
+writes no log); `src/features/recovery/recovery-coach-schema.test.ts`;
+`components/RecoveryCoachPanel.test.tsx` (5); `tests/integration/recovery-coach.test.ts`
+(direct client write rejected; read path resolves — **written, not executed in-session**);
+`tests/rules/recovery.rules.test.ts` gained a `recoveryCoachSessions — Layer 15E` block
+(direct client write REJECTED, owner READ allowed after an Admin seed, cross-user denied —
+**written, not executed in-session**).
+
+**Verification:** app `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (116 files / 636) ·
+`build` ✅ (static export, no warnings) · `format:check` ✅. functions `typecheck` ✅ ·
+`lint` ✅ · `test` ✅ (13 files / 79) · `build` ✅. `test:rules` / `test:integration` — new
+tests written, not executed (emulator restriction); `firestore.rules` compile-checked at
+deploy.
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production NEXT_PUBLIC_APP_URL=https://mastery-personal-mgmt-system.web.app npm run build`
+then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project
+mastery-personal-mgmt-system --non-interactive` — `firestore.rules` **changed** this layer,
+re-uploaded and compiled clean. Redeployed to https://mastery-personal-mgmt-system.web.app/ ;
+smoke-tested `/recovery` in a fresh tab — redirects to sign-in, no new console errors.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Recovery Center**, PIN, **Open** a recovery goal.
+2. Scroll to **Recovery Coach**. Type what's going on and **Ask for a next step**. **In
+   production this currently fails** with a callable-function error — `recoveryCoachQuery`
+   is not deployed (Spark plan). Against the emulator (`firebase emulators:start` +
+   functions) it returns a reply with 0-N suggested steps and any disclaimers, and the
+   exchange appears in the list below.
+3. Repeat — history accumulates (most recent first, capped at 5 shown).
+4. On a goal with faith-based encouragement **on**, replies may include a brief faith-based
+   line; with it **off** they never do.
+5. Firestore console → try to write `users/{uid}/recoveryCoachSessions/x` directly from a
+   client SDK → **permission denied** (only the Cloud Function may write it); reading your
+   own sessions works.
+6. Confirm the coach and its history never appear on the dashboard, in search, or in
+   notifications, and that the general AI Coach (`/grow/ai-coach`) shows none of this.
+
+**Known limitations:**
+- **`recoveryCoachQuery` is not deployed** — Spark plan, no Cloud Function shipped. "Ask
+  for a next step" throws in production until the owner upgrades to Blaze and runs
+  `firebase deploy --only functions`.
+- **Goal-scoped only** — there is no general "recovery, no specific goal" coach
+  conversation; the request requires a `goalId`.
+- **Shared spend budget** — a heavy Recovery Coach day can exhaust the same per-user AI
+  quota the general coach uses (by design — one user, one cap).
+- **No accountability partner** — Layer 15F.
 - **Rules / integration tests written, not executed in-session** — emulator restriction.
 
 ---

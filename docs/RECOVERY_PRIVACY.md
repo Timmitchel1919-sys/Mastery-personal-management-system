@@ -136,4 +136,14 @@ Any new access path must be added to this table in the same layer that introduce
 > only when the goal opts in per ADR-0020). The prompts are short and non-clinical — the
 > module still never diagnoses or claims to replace a professional.
 >
-> The Recovery Coach (15E) and accountability partner (15F) do not exist yet.
+> **Layer 15E status:** the **Recovery Coach** (`recoveryCoachQuery`) is implemented — a
+> fully isolated AI Cloud Function with its own supportive, non-judgmental system prompt
+> (recommends professional/emergency help on any sign of risk; never diagnoses), a context
+> builder that reads only the caller's recovery data for one goal, and its own storage
+> `users/{uid}/recoveryCoachSessions` (rules reject a direct client write — §3). It shares
+> only the plain per-user AI spend counters and writes nothing to `coachExchanges` /
+> `aiCallLogs`. Faith-based encouragement is used only when the goal opts in. Like the
+> other Cloud Functions it is **written and unit-tested but not deployed** (Spark plan) —
+> "Ask for a next step" fails in production until Cloud Functions ship.
+>
+> The accountability partner (15F) does not exist yet.

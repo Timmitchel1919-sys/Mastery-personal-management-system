@@ -273,3 +273,37 @@ describe("recoveryGoals copingActions — Layer 15D", () => {
     );
   });
 });
+
+describe("recoveryCoachSessions — Layer 15E", () => {
+  it("REJECTS a direct client write to a coach session (Cloud-Function-mediated per §3)", async () => {
+    const db = testEnv.authenticatedContext(ALICE).firestore();
+    await assertFails(
+      setDoc(
+        doc(db, "users", ALICE, "recoveryCoachSessions", "s1"),
+        auditedNested(ALICE, { goalId: "g1", message: "hi", reply: "hello" }),
+      ),
+    );
+  });
+
+  it("still lets the owner READ a coach session (written by the Admin SDK)", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(
+        doc(context.firestore(), "users", ALICE, "recoveryCoachSessions", "s1"),
+        auditedNested(ALICE, { goalId: "g1", message: "hi", reply: "hello" }),
+      );
+    });
+    const db = testEnv.authenticatedContext(ALICE).firestore();
+    await assertSucceeds(getDoc(doc(db, "users", ALICE, "recoveryCoachSessions", "s1")));
+  });
+
+  it("denies another signed-in user from reading a coach session", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(
+        doc(context.firestore(), "users", ALICE, "recoveryCoachSessions", "s1"),
+        auditedNested(ALICE, { goalId: "g1", message: "hi", reply: "hello" }),
+      );
+    });
+    const db = testEnv.authenticatedContext(BOB).firestore();
+    await assertFails(getDoc(doc(db, "users", ALICE, "recoveryCoachSessions", "s1")));
+  });
+});

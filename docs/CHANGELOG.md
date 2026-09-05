@@ -6,6 +6,43 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 15E — Recovery Coach — 2026-09-05
+
+**Added**
+- `functions/src/recovery/recovery-coach-query.ts` + `recovery-coach-context.ts` —
+  `recoveryCoachQuery`, a fully isolated AI Cloud Function: its own `RECOVERY_COACH_SYSTEM`
+  prompt (supportive, non-judgmental, immediate safe next step, crisis→professional/emergency
+  help, no diagnosis), its own context builder that reads **only** the caller's recovery
+  data for one goal (goal + check-ins + setbacks + coping toolkit), and its own storage
+  `users/{uid}/recoveryCoachSessions/{id}`. Shares only the per-user AI spend counters via
+  the new `bumpUsageCounters` (extracted from `recordUsage`); writes nothing to
+  `coachExchanges` / `aiCallLogs`. Faith-based encouragement is gated on the goal's opt-in.
+  Written and unit-tested; **not deployed** (Spark plan).
+- `src/features/recovery/recovery-coach-schema.ts` / `recovery-coach-client.ts` /
+  `use-recovery-coach.ts` — client side: `askRecoveryCoach` calls the callable,
+  `listRecoveryCoachSessions` reads history back (sessions are Cloud-Function-only).
+- `RecoveryCoachPanel` — a goal-scoped section in the recovery goal detail view: a message
+  box, "Ask for a next step", and the recent replies with their suggested steps and
+  disclaimers.
+
+**Changed**
+- `firestore.rules` — `isServerMediatedRecoveryWrite` gained a `collection` parameter and
+  now also refuses a direct client write to the top-level `recoveryCoachSessions`
+  collection (reads unchanged).
+- `functions/src/ai/shared/quota.ts` — `bumpUsageCounters` extracted from `recordUsage`
+  (behavior identical; the general endpoints still write their `aiCallLogs` record).
+- `RecoveryHomeView`'s "Coming next" list drops to just the accountability partner (15F).
+- `docs/AI_ARCHITECTURE.md` §7, `docs/DATA_MODEL.md`, `docs/RECOVERY_PRIVACY.md` updated;
+  `docs/DECISIONS.md` — ADR-0023.
+
+**Tests:** `recovery-coach-query` function tests (8), `recovery-coach-context` tests (3),
+`bumpUsageCounters` tests (3), recovery-coach schema tests, `RecoveryCoachPanel` component
+tests, plus a Layer 15E rules block and a coach integration test (both written, not
+executed in-session — emulator restriction).
+
+**Known limitation:** `recoveryCoachQuery` is not deployed, so "Ask for a next step" fails
+in production until the owner upgrades to Blaze; the coach is goal-scoped only.
+
 ### Layer 15D — Coping Toolkit — 2026-09-05
 
 **Added**

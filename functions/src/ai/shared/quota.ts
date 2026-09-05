@@ -64,26 +64,20 @@ export async function assertWithinQuota(db: Firestore, uid: string, now: Date): 
   }
 }
 
-export interface UsageRecord {
-  intent: string;
-  inputTokens: number;
-  outputTokens: number;
-  latencyMs: number;
-  outcome: "success" | "error";
-  costUsd: number;
-}
-
-/** Rolls the call into the daily/monthly counters and writes a per-call audit record. */
-export async function recordUsage(
+/**
+ * Roll a call's tokens into the shared daily/monthly quota counters — one request, N
+ * tokens. These two rollup docs are plain integers with no intent breakdown, so every AI
+ * surface (including the isolated Recovery Coach, Layer 15E) shares one spend budget
+ * without any of them leaking what the others were used for.
+ */
+export async function bumpUsageCounters(
   db: Firestore,
   uid: string,
-  usage: UsageRecord,
+  totalTokens: number,
   now: Date,
 ): Promise<void> {
-  const totalTokens = usage.inputTokens + usage.outputTokens;
   const dayRef = db.doc(`users/${uid}/aiUsageDaily/${todayKey(now)}`);
   const monthRef = db.doc(`users/${uid}/aiUsageMonthly/${monthKey(now)}`);
-  const logRef = db.collection(`users/${uid}/aiCallLogs`).doc();
 
   const [daySnap, monthSnap] = await Promise.all([dayRef.get(), monthRef.get()]);
   const day = (daySnap.data() as UsageCounters | undefined) ?? { requestCount: 0, totalTokens: 0 };
@@ -105,6 +99,36 @@ export async function recordUsage(
       totalTokens: month.totalTokens + totalTokens,
       updatedAt: now.toISOString(),
     }),
+  ]);
+}
+
+export interface UsageRecord {
+  intent: string;
+  inputTokens: number;
+  outputTokens: number;
+  latencyMs: number;
+  outcome: "success" | "error";
+  costUsd: number;
+}
+
+/**
+ * Rolls the call into the daily/monthly counters and writes a per-call audit record in
+ * `aiCallLogs`. Used by the **general** AI endpoints (Layer 13/14). The Recovery Coach
+ * (15E) deliberately does not call this — it bumps the shared counters directly and keeps
+ * its per-call metrics on the `recoveryCoachSessions` document, so nothing recovery-derived
+ * lands in a general collection (`docs/RECOVERY_PRIVACY.md` §1/§7).
+ */
+export async function recordUsage(
+  db: Firestore,
+  uid: string,
+  usage: UsageRecord,
+  now: Date,
+): Promise<void> {
+  const totalTokens = usage.inputTokens + usage.outputTokens;
+  const logRef = db.collection(`users/${uid}/aiCallLogs`).doc();
+
+  await Promise.all([
+    bumpUsageCounters(db, uid, totalTokens, now),
     logRef.set({
       id: logRef.id,
       intent: usage.intent,

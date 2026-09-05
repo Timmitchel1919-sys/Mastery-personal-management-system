@@ -12,10 +12,7 @@ import { RecoveryGoalCard } from "./RecoveryGoalCard";
 import { RecoveryGoalDetailView } from "./RecoveryGoalDetailView";
 import { RecoveryGoalDialog } from "./RecoveryGoalDialog";
 
-const UPCOMING = [
-  { label: "Recovery Coach", layer: "15E" },
-  { label: "Accountability partner", layer: "15F" },
-] as const;
+const UPCOMING = [{ label: "Accountability partner", layer: "15F" }] as const;
 
 /** Shown once the privacy gate (Layer 15A) is unlocked. */
 export function RecoveryHomeView() {

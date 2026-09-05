@@ -27,6 +27,17 @@ vi.mock("../use-recovery-coping", () => ({
     saving: false,
   }),
 }));
+vi.mock("../use-recovery-coach", () => ({
+  useRecoveryCoach: () => ({
+    status: "ready",
+    sessions: [],
+    error: null,
+    reload: vi.fn(),
+    ask: vi.fn(),
+    asking: false,
+    askError: null,
+  }),
+}));
 
 import { RecoveryGoalDetailView } from "./RecoveryGoalDetailView";
 

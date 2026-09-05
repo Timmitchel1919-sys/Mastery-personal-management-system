@@ -57,33 +57,36 @@ service cloud.firestore {
     // `recoveryGoals` / `recoveryGoals/*/checkIns` are ordinary client-writable
     // owner-only data, covered here.
     //
-    // Layer 15C: recovery *setback* records are Cloud-Function-mediated per
+    // Layers 15C / 15E: some recovery writes are Cloud-Function-mediated per
     // `docs/RECOVERY_PRIVACY.md` §3 — the Admin SDK bypasses rules entirely, so
-    // refusing a direct client write here makes `recordRecoverySetback` the only
-    // writer. `document` under the recursive wildcard is the sub-path after
-    // {collection}; a relapse doc is `.../relapses/{id}`. Firestore ORs every matching
-    // rule, so this guard lives in the wildcard itself, not a separate block.
-    // Coach sessions (15E) and accountability config (15F) will extend this guard.
-    function isServerMediatedRecoveryWrite(document) {
-      return string(document).matches('(^|.*/)relapses/[^/]+$');
+    // refusing a direct client write here makes the Cloud Function the only writer.
+    // `document` under the recursive wildcard is the sub-path after {collection}; a
+    // setback doc is `.../relapses/{id}`, and a Recovery Coach session lives at the
+    // top level `recoveryCoachSessions/{id}` (so it is matched on {collection}).
+    // Firestore ORs every matching rule, so this guard lives in the wildcard itself,
+    // not a separate block. Client READS stay allowed; only writes are blocked.
+    // Accountability config (15F) will extend this guard.
+    function isServerMediatedRecoveryWrite(collection, document) {
+      return collection == 'recoveryCoachSessions'
+        || string(document).matches('(^|.*/)relapses/[^/]+$');
     }
 
     match /users/{uid}/{collection}/{document=**} {
       allow read: if isOwner(uid);
 
       allow create: if isOwner(uid)
-        && !isServerMediatedRecoveryWrite(document)
+        && !isServerMediatedRecoveryWrite(collection, document)
         && request.resource.data.createdBy == uid
         && request.resource.data.updatedBy == uid;
 
       allow update: if isOwner(uid)
-        && !isServerMediatedRecoveryWrite(document)
+        && !isServerMediatedRecoveryWrite(collection, document)
         && request.resource.data.createdBy == resource.data.createdBy
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.updatedBy == uid;
 
       allow delete: if isOwner(uid)
-        && !isServerMediatedRecoveryWrite(document);
+        && !isServerMediatedRecoveryWrite(collection, document);
     }
   }
 }
