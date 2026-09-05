@@ -75,5 +75,29 @@ export {
 } from "./recovery-relapse-schema";
 export { listRecoveryRelapses, recordRecoverySetback } from "./recovery-relapse-client";
 export { useRecoveryRelapses } from "./use-recovery-relapses";
+export {
+  COPING_CATEGORIES,
+  COPING_CATEGORY_LABEL,
+  COPING_SUGGESTIONS,
+  copingCategorySchema,
+  recoveryCopingActionSchema,
+  recoveryCopingActionCreateSchema,
+  recoveryCopingActionUpdateSchema,
+  recoveryCopingActionFormSchema,
+  copingInputFromSuggestion,
+  type CopingCategory,
+  type CopingSuggestion,
+  type RecoveryCopingAction,
+  type RecoveryCopingActionCreate,
+  type RecoveryCopingActionUpdate,
+  type RecoveryCopingActionFormValues,
+} from "./recovery-coping-schema";
+export {
+  listCopingActions,
+  createCopingAction,
+  updateCopingAction,
+  archiveCopingAction,
+} from "./recovery-coping-repository";
+export { useRecoveryCoping } from "./use-recovery-coping";
 export { RecoveryGate } from "./components/RecoveryGate";
 export { RecoveryHomeView } from "./components/RecoveryHomeView";

@@ -72,7 +72,7 @@ users/{uid}/recoveryProfiles/{uid}             singleton, id == uid: lockMethod 
 users/{uid}/recoveryGoals/{goalId}             one per self-identified behavior: behavior, description, motivation, startDate, triggers[]/warningSigns[]/copingStrategies[], supportNotes, faithBasedEncouragement, recoveryStatus (active|going-well|challenging|paused — neutral, no shame framing). Client-written under the generic owner-only rule; archive is reversible, hard delete is a future Cloud Function (Layer 15B)
 users/{uid}/recoveryGoals/{goalId}/checkIns/{checkInId}      one per goal per day: date, stayedOnTrack, urgeIntensity (0-10), halt {hungry,angry,lonely,tired}, triggersToday[]/copingUsed[], reflection — client-written; streak & progress derived, never stored (Layer 15C)
 users/{uid}/recoveryGoals/{goalId}/relapses/{relapseId}      setback record: date, whatHappened, contributingFactors[], lessonsLearned, restartPlan — **Cloud-Function-mediated** (recordRecoverySetback); the Firestore rule refuses a direct client write. Client reads it back (Layer 15C)
-users/{uid}/recoveryGoals/{goalId}/copingActions/{actionId}  reserved — Layer 15D
+users/{uid}/recoveryGoals/{goalId}/copingActions/{actionId}  per-goal coping toolkit: title, category (grounding|physical|social|cognitive|faith|other), howTo — client-written under the generic owner-only rule; reversible archive, added freely or one-tap from a built-in suggestion library (Layer 15D)
 users/{uid}/recoveryAccountabilityPartners/{partnerId}       reserved — Layer 15F
 users/{uid}/recoveryCoachSessions/{sessionId}                reserved — Layer 15E (isolated from general AI)
 ```

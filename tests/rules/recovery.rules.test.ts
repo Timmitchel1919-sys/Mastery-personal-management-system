@@ -236,3 +236,40 @@ describe("recoveryGoals subcollections — Layer 15C", () => {
     await assertFails(getDoc(doc(db, "users", ALICE, "recoveryGoals", "g1", "relapses", "r1")));
   });
 });
+
+describe("recoveryGoals copingActions — Layer 15D", () => {
+  it("lets the owner create, read, and archive a coping action (client-writable)", async () => {
+    const db = testEnv.authenticatedContext(ALICE).firestore();
+    const ref = doc(db, "users", ALICE, "recoveryGoals", "g1", "copingActions", "a1");
+    await assertSucceeds(
+      setDoc(ref, auditedNested(ALICE, { title: "Box breathing", category: "physical" })),
+    );
+    await assertSucceeds(getDoc(ref));
+    await assertSucceeds(
+      updateDoc(ref, {
+        status: "archived",
+        updatedBy: ALICE,
+        updatedAt: "2026-09-05T01:00:00.000Z",
+      }),
+    );
+  });
+
+  it("denies another signed-in user from reading or writing a coping action", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(
+        doc(context.firestore(), "users", ALICE, "recoveryGoals", "g1", "copingActions", "a1"),
+        auditedNested(ALICE, { title: "Box breathing", category: "physical" }),
+      );
+    });
+    const db = testEnv.authenticatedContext(BOB).firestore();
+    await assertFails(
+      getDoc(doc(db, "users", ALICE, "recoveryGoals", "g1", "copingActions", "a1")),
+    );
+    await assertFails(
+      setDoc(
+        doc(db, "users", ALICE, "recoveryGoals", "g1", "copingActions", "a2"),
+        auditedNested(BOB, { title: "sneaky", category: "other" }),
+      ),
+    );
+  });
+});

@@ -662,3 +662,49 @@ progress numbers could be stored or derived.
   user needs streaks longer than 90 days, that becomes a stored-aggregate concern later.
 - `string(document).matches(...)` in `firestore.rules` is only compile-checked at deploy
   time; this layer's deploy re-uploads the rules, so a syntax error surfaces there.
+
+---
+
+## ADR-0022 — Coping toolkit: per-goal client-written subcollection with a built-in suggestion library
+**Date:** 2026-09-05 · **Status:** accepted · **Layer:** 15D — Coping Toolkit
+
+**Context.** `docs/RECOVERY_PRIVACY.md` §4 lists a "coping toolkit (user-selected
+faith-based options + evidence-informed behavioral techniques)"; the data model reserves
+`users/{uid}/recoveryGoals/{goalId}/copingActions/{actionId}`. Questions: is this
+client-written or Cloud-Function-mediated; what fields; how do the "evidence-informed
+techniques" and "faith-based options" get in front of the user without shipping clinical
+content.
+
+**Decision.**
+- **`copingActions` is client-written** under the existing generic owner-only subcollection
+  rule — a coping action is a plain reference note the user writes for themselves, not one
+  of the §3 server-mediated records (relapses / coach sessions / accountability). The 15C
+  `isServerMediatedRecoveryWrite` guard matches `.../relapses/{id}` only, so no
+  `firestore.rules` change was needed; `tests/rules/recovery.rules.test.ts` gained a
+  `copingActions` block as a regression net anyway.
+- **Bespoke nested repository** (`recovery-coping-repository.ts`), same reason as the 15C
+  check-in repo: `createFirestoreRepository` is single-level. Removal is a reversible
+  `status: "archived"` write, consistent with every other recovery record — true deletion
+  is still the deferred cascading Cloud Function (ADR-0020/0021).
+- **Minimal fields: `title`, `category`, `howTo`.** `category` is a small neutral enum
+  (`grounding` / `physical` / `social` / `cognitive` / `faith` / `other`). No usage
+  counters, no "favorite" flag, no scheduling — a toolkit is a list you glance at during an
+  urge, and anything more is speculative.
+- **A built-in `COPING_SUGGESTIONS` library** (urge surfing, 5-4-3-2-1 grounding, box
+  breathing, 10-minute delay, replacement activity, message a support person,
+  self-compassion pause, plus three `faith` entries) rendered as one-tap "Quick add" chips.
+  These are short behavioral prompts, not diagnosis or treatment — the module's standing
+  "not medical or psychological advice" disclaimer covers them. `faith` suggestions are
+  only offered when the goal has `faithBasedEncouragement` enabled (ADR-0020's opt-in
+  flag); a suggestion already saved drops out of the quick-add row.
+- **The toolkit lives in `RecoveryGoalDetailView`** as its own section between check-ins
+  and setbacks — no new route, no nav entry (Recovery is one page). `RecoveryHomeView`'s
+  "Coming next" list drops to 15E–15F.
+
+**Consequences.**
+- The check-in form's free-text `copingUsed` field (15C) is left as-is; wiring the toolkit
+  into that field as selectable chips is a possible later polish, not part of 15D.
+- Because suggestions are a static in-repo array, adding or rewording them is a code change
+  (and a translatable-strings concern when i18n lands in Layer 18) — acceptable for a small
+  curated set.
+- No Cloud Function and no new dependency this layer.

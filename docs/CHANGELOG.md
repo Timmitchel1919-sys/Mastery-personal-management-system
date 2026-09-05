@@ -6,6 +6,35 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 15D — Coping Toolkit — 2026-09-05
+
+**Added**
+- `src/features/recovery/recovery-coping-schema.ts` / `recovery-coping-repository.ts` /
+  `use-recovery-coping.ts` — a per-goal coping toolkit
+  (`users/{uid}/recoveryGoals/{goalId}/copingActions`): coping actions with `title`,
+  `category` (grounding / physical / social / cognitive / faith / other) and a short
+  `howTo`. Client-written under the generic owner-only rule; removal is a reversible
+  archive. Includes `COPING_SUGGESTIONS`, an 11-item starter library of evidence-informed
+  behavioral prompts (3 faith-based).
+- `CopingToolkitSection` in the recovery goal detail view — lists saved coping actions,
+  an "Add your own" dialog (`CopingActionDialog`), and a "Quick add" chip row of unused
+  suggestions; faith-based suggestions appear only when the goal opts in.
+
+**Changed**
+- `RecoveryGoalDetailView` mounts the toolkit between check-ins and setbacks;
+  `RecoveryHomeView`'s "Coming next" list drops to Recovery Coach (15E) and accountability
+  partner (15F).
+- `docs/DATA_MODEL.md` describes `copingActions`; `docs/DECISIONS.md` — ADR-0022;
+  `docs/RECOVERY_PRIVACY.md` — Layer 15D status.
+
+**Tests:** recovery-coping schema tests, `CopingToolkitSection` component tests, a coping
+emulator integration test, and a Layer 15D rules block (owner create/read/archive; cross-user
+denied) — the last two written, not executed in-session (emulator restriction).
+
+**Known limitation:** no Cloud Function and no `firestore.rules` change this layer; hard
+delete of coping actions is still deferred, and the suggestion library is English-only
+until i18n (Layer 18).
+
 ### Layer 15C — Check-ins & Tracking — 2026-09-05
 
 **Added**

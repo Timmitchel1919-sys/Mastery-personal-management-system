@@ -10,6 +10,7 @@ import { recoveryRelapseRequestFromForm } from "../recovery-relapse-schema";
 import { useRecoveryCheckIns } from "../use-recovery-checkins";
 import { useRecoveryRelapses } from "../use-recovery-relapses";
 import { CheckInDialog } from "./CheckInDialog";
+import { CopingToolkitSection } from "./CopingToolkitSection";
 import { RelapseLogDialog } from "./RelapseLogDialog";
 
 function Stat({ label, value }: { label: string; value: string }) {
@@ -124,6 +125,8 @@ export function RecoveryGoalDetailView({
           </ul>
         )}
       </section>
+
+      <CopingToolkitSection goalId={goal.id} faithBased={goal.faithBasedEncouragement} />
 
       <section className="space-y-3">
         <h3 className="font-semibold">Setbacks</h3>

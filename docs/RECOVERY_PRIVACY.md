@@ -129,5 +129,11 @@ Any new access path must be added to this table in the same layer that introduce
 > Function (Admin SDK) is the only writer; the client reads them back directly. That
 > function is written and unit-tested but **not yet deployed** (project is on the Spark
 > plan) — logging a setback will fail in production until Cloud Functions are deployed.
-> The coping toolkit (15D), Recovery Coach (15E), and accountability partner (15F) do not
-> exist yet.
+> **Layer 15D status:** the **coping toolkit** (`recoveryGoals/{goalId}/copingActions`) is
+> implemented — a per-goal list of coping actions (`title`, `category`, `howTo`),
+> client-written under the owner-only rule, with reversible archive and a built-in
+> suggestion library (evidence-informed behavioral prompts; faith-based options offered
+> only when the goal opts in per ADR-0020). The prompts are short and non-clinical — the
+> module still never diagnoses or claims to replace a professional.
+>
+> The Recovery Coach (15E) and accountability partner (15F) do not exist yet.

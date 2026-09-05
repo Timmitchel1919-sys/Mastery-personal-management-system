@@ -13,7 +13,6 @@ import { RecoveryGoalDetailView } from "./RecoveryGoalDetailView";
 import { RecoveryGoalDialog } from "./RecoveryGoalDialog";
 
 const UPCOMING = [
-  { label: "Coping toolkit", layer: "15D" },
   { label: "Recovery Coach", layer: "15E" },
   { label: "Accountability partner", layer: "15F" },
 ] as const;

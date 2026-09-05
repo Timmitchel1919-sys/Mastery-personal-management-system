@@ -8,16 +8,16 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 15C — Check-ins & Tracking (complete) |
-| **Next approved layer** | Layer 15D — Coping Toolkit (not started — awaiting explicit go-ahead) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15A · Layer 15B · **Layer 15C** |
-| **In-progress work** | Layer 15 (Recovery Center) continues with 15D–15F on future "Volgende laag" requests |
-| **Test status** | ✅ app: `vitest run` — 112 files, 615 tests. ✅ rules: `npm run test:rules` — 3 files, ~36 tests (`tests/rules/recovery.rules.test.ts` gained a `recoveryGoals subcollections — Layer 15C` block: owner check-in create/read allowed, direct relapse client write REJECTED, owner relapse READ allowed after Admin seed, cross-user denied — not re-run in-session, emulator restriction). ⚠️ integration: `npm run test:integration` — 29 files, ~74 tests **written**; `tests/integration/recovery-checkins.test.ts` added (create/find-by-date/update/list, user scoping, direct relapse client write rejected) — not executed in-session (Firestore emulator restriction). ✅ functions: `vitest run` — 11 files, 64 tests (`functions/tests/recovery/record-recovery-setback.test.ts` added, +6). |
+| **Current layer** | Layer 15D — Coping Toolkit (complete) |
+| **Next approved layer** | Layer 15E — Recovery Coach (not started — awaiting explicit go-ahead) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15A · Layer 15B · Layer 15C · **Layer 15D** |
+| **In-progress work** | Layer 15 (Recovery Center) continues with 15E–15F on future "Volgende laag" requests |
+| **Test status** | ✅ app: `vitest run` — 114 files, 626 tests (recovery-coping schema + `CopingToolkitSection` component tests added). ✅ rules: `npm run test:rules` — 3 files, ~38 tests (`tests/rules/recovery.rules.test.ts` gained a `recoveryGoals copingActions — Layer 15D` block: owner create/read/archive allowed, cross-user denied — not re-run in-session, emulator restriction). ⚠️ integration: `npm run test:integration` — 30 files **written**; `tests/integration/recovery-coping.test.ts` added (create/update/list/archive, user scoping) — not executed in-session (Firestore emulator restriction). ✅ functions: `vitest run` — 11 files, 64 tests (unchanged — 15D is app-only, no Cloud Function). |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: unchanged. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 15C built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 15C — hosting + `firestore.rules`: the recursive-wildcard owner-only rule now refuses direct client writes to `.../relapses/{id}` via `isServerMediatedRecoveryWrite`). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (Layer 13/14 + 15C's `recordRecoverySetback`) still not deployed — Spark plan, see ADR-0017/0018/0021. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 15D built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 15D — hosting only; `firestore.rules` unchanged this layer — `copingActions` is client-written under the generic owner-only rule, and the 15C relapse guard matches `.../relapses/{id}` only). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (Layer 13/14 + 15C's `recordRecoverySetback`) still not deployed — Spark plan, see ADR-0017/0018/0021. |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · (no new deps in Layer 15A/15B/15C) |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · (no new deps in Layer 15A–15D) |
 
 ---
 
@@ -3040,6 +3040,89 @@ re-uploaded and compiled clean. Redeployed to https://mastery-personal-mgmt-syst
 - **Progress is derived from the last 90 check-ins** — streaks longer than that window are
   not represented; a stored aggregate is a later concern.
 - **No coping toolkit / Recovery Coach / accountability partner** — Layers 15D–15F.
+- **Rules / integration tests written, not executed in-session** — emulator restriction.
+
+---
+
+### Layer 15D — Coping Toolkit — ✅ complete (2026-09-05) — committed + pushed + deployed live
+
+A per-goal **coping toolkit**: a list of coping actions the user keeps ready for when an
+urge shows up, added freely or one-tap from a built-in suggestion library (evidence-informed
+behavioral prompts; faith-based options only when the goal opts in). Surfaces as a section
+in the goal detail view. Client-written under the existing owner-only rule — no Cloud
+Function, no `firestore.rules` change, no new dependency. Full rationale: ADR-0022.
+
+**Created — `src/features/recovery/`:**
+- `recovery-coping-schema.ts` — `COPING_CATEGORIES`
+  (`grounding` / `physical` / `social` / `cognitive` / `faith` / `other`) + label map;
+  `recoveryCopingActionSchema` (`title`, `category`, `howTo`) via `defineRecordSchema`;
+  create / update / form schemas; `COPING_SUGGESTIONS` starter library (11 prompts incl. 3
+  `faith`) + `copingInputFromSuggestion`.
+- `recovery-coping-repository.ts` — bespoke nested repo over
+  `users/{uid}/recoveryGoals/{goalId}/copingActions`: `listCopingActions` (active only,
+  `createdAt asc`), `createCopingAction`, `updateCopingAction`, `archiveCopingAction`
+  (reversible `status: "archived"`).
+- `use-recovery-coping.ts` — `useRecoveryCoping(goalId)`: load + `addCopingAction` /
+  `addSuggestion` / `editCopingAction` / `removeCopingAction` + reload.
+- `components/CopingActionDialog.tsx` — add/edit form (title, category `Select`, howTo
+  `Textarea`).
+- `components/CopingToolkitSection.tsx` — the toolkit section: list of coping cards
+  (category badge, title, howTo, remove), "Add your own" button, and a "Quick add" chip
+  row of unused suggestions (faith entries filtered by the goal's `faithBasedEncouragement`).
+
+**Modified:**
+- `src/features/recovery/components/RecoveryGoalDetailView.tsx` — mounts
+  `<CopingToolkitSection>` between the check-ins and setbacks sections.
+- `src/features/recovery/components/RecoveryGoalDetailView.test.tsx` — mocks
+  `../use-recovery-coping`.
+- `src/features/recovery/components/RecoveryHomeView.tsx` — "Coming next" list drops to
+  15E–15F.
+- `src/features/recovery/index.ts` — barrel extended.
+- `docs/DATA_MODEL.md` — `copingActions` described; `docs/DECISIONS.md` — ADR-0022;
+  `docs/RECOVERY_PRIVACY.md` — Layer 15D status note.
+
+**Tests added:** `recovery-coping-schema.test.ts` (create accept/reject, unknown category,
+empty howTo, stored record, every suggestion is a valid input, a faith option exists);
+`components/CopingToolkitSection.test.tsx` (empty state + quick-add, faith suggestions
+hidden unless opted in, quick-add chip calls the hook, a saved action drops from quick-add
+and removes on click, error + retry); `tests/integration/recovery-coping.test.ts`
+(create / update / list / archive, user scoping — **written, not executed in-session**);
+`tests/rules/recovery.rules.test.ts` gained a `recoveryGoals copingActions — Layer 15D`
+block (owner create/read/archive allowed, cross-user denied — **written, not executed
+in-session**).
+
+**Verification:** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (114 files / 626 tests) ·
+`build` ✅ (static export, no warnings) · `format:check` ✅. functions suite unchanged
+(15D is entirely client-side). `test:rules` / `test:integration` — new tests written, not
+executed (emulator restriction); rules unchanged so no regression risk.
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production NEXT_PUBLIC_APP_URL=https://mastery-personal-mgmt-system.web.app npm run build`
+then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project
+mastery-personal-mgmt-system --non-interactive` — `firestore.rules` unchanged, skipped on
+upload. Redeployed to https://mastery-personal-mgmt-system.web.app/ ; smoke-tested
+`/recovery` in a fresh tab — redirects to sign-in, no new console errors.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Recovery Center**, enter your PIN, **Open** a recovery goal.
+2. Scroll to **Coping toolkit**. Tap a **Quick add** chip (e.g. "Box breathing") → it
+   appears as a card and disappears from the quick-add row.
+3. **Add your own** → name it, pick a type, add a short "how it helps" note → **Add to
+   toolkit**.
+4. Remove a card (the ✕) → it leaves the list; reload → still gone; Firestore shows
+   `status: "archived"` on `users/{uid}/recoveryGoals/{goalId}/copingActions/{id}` (not
+   deleted).
+5. On a goal with faith-based encouragement **on**, the quick-add row includes "Prayer or
+   stillness" / "Gratitude list"; turn it off (edit the goal) and those disappear.
+6. Confirm the toolkit never appears on the dashboard, in search, or in notifications.
+
+**Known limitations:**
+- **No hard delete** — archived coping actions physically persist (same deferred cascading
+  Cloud Function as the rest of Recovery, ADR-0020/0021).
+- **Suggestion library is a static in-repo array** — editing prompts is a code change, and
+  they're English-only until i18n (Layer 18).
+- **Not wired into the check-in form** — the 15C `copingUsed` free-text field is unchanged;
+  selecting toolkit items there is possible future polish, not part of 15D.
+- **No Recovery Coach / accountability partner** — Layers 15E–15F.
 - **Rules / integration tests written, not executed in-session** — emulator restriction.
 
 ---

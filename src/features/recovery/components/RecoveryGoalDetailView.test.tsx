@@ -14,6 +14,19 @@ let relapsesValue: Record<string, unknown>;
 vi.mock("next/navigation", () => ({ usePathname: () => "/recovery" }));
 vi.mock("../use-recovery-checkins", () => ({ useRecoveryCheckIns: () => checkInsValue }));
 vi.mock("../use-recovery-relapses", () => ({ useRecoveryRelapses: () => relapsesValue }));
+vi.mock("../use-recovery-coping", () => ({
+  useRecoveryCoping: () => ({
+    status: "ready",
+    items: [],
+    error: null,
+    reload: vi.fn(),
+    addCopingAction: vi.fn(),
+    addSuggestion: vi.fn(),
+    editCopingAction: vi.fn(),
+    removeCopingAction: vi.fn(),
+    saving: false,
+  }),
+}));
 
 import { RecoveryGoalDetailView } from "./RecoveryGoalDetailView";
 
