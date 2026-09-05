@@ -6,6 +6,30 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 21 — Complete Testing Program — 2026-09-05
+
+**Added**
+- Playwright e2e (`@playwright/test`): `playwright.config.ts` (chromium-desktop +
+  mobile-safari, `webServer` on the dev server with the emulator flag) and `tests/e2e/` —
+  `auth`, `settings`, `goal`, `recovery-gate`, `pwa` specs (22 runs) covering the
+  browser-shaped critical journeys.
+- Accessibility: `src/test/a11y.ts` `expectNoAxeViolations` + `src/test/a11y.test.tsx`
+  (axe-core over the shared states, offline banner, sidebar nav, and a report document) —
+  runs as part of `npm test`.
+- Coverage: `@vitest/coverage-v8`, a `coverage` block in `vitest.config.mts` with
+  thresholds pinned at the current baseline, and a `test:coverage` script.
+- `package.json` — `test:coverage`, `test:e2e`, `test:e2e:ui`, `test:e2e:install`.
+
+**Changed**
+- `docs/TESTING_STRATEGY.md` — the 24-journey table gains a "Covered by" column (every
+  journey has a named automated owner); new e2e / a11y / coverage sections.
+  `docs/DECISIONS.md` — ADR-0030.
+
+**Known limitation:** no runtime change and no deploy. `test:e2e` / `test:rules` /
+`test:integration` run in CI — Playwright browsers and the Firebase emulator can't run in
+the current sandbox (unchanged since Layer 9); all are written and parse-verified. The
+coverage floor (~54%) is a ratchet, not a target.
+
 ### Layer 20 — Security Hardening — 2026-09-05
 
 **Added**

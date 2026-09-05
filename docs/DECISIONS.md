@@ -1066,3 +1066,49 @@ Hosting (Spark), with **no deployed Cloud Functions**.
   CSP tuning gets active).
 - App Check gives *no* protection until the owner completes the console steps; the wiring
   just means it's a config change, not a code change.
+
+---
+
+## ADR-0030 — Testing program: Playwright e2e, axe-in-jsdom a11y, a coverage floor
+**Date:** 2026-09-05 · **Status:** accepted · **Layer:** 21 — Complete Testing Program
+
+**Context.** `docs/TESTING_STRATEGY.md` names eleven test types and 24 critical journeys;
+Layers 1–20 shipped unit / schema / component / rules / integration / function tests as
+they went. Layer 21 consolidates: it must land the **e2e** pillar, an **accessibility**
+pillar, a **coverage** gate, and an honest map of every journey to its test. The sandbox
+can't run the Firebase emulators (JDK loopback restriction, since Layer 9) or install
+Playwright browsers.
+
+**Decision.**
+- **e2e = Playwright** (`@playwright/test`), `tests/e2e/` (5 specs, journeys 1/2/4/6/8/15/16/17/20/24),
+  each run on **chromium-desktop + mobile-safari** — the second project also discharges the
+  *responsive* type. `playwright.config.ts`'s `webServer` starts `npm run dev` with
+  `NEXT_PUBLIC_USE_FIREBASE_EMULATORS=true`; specs use role/label selectors and assert
+  persistence across reloads (so they prove the Firestore round-trip, not just local state).
+  Scripts: `test:e2e`, `test:e2e:ui`, `test:e2e:install`. **Written, not executed
+  in-session** — browsers/emulators aren't available here; they run in CI.
+- **a11y = axe-core in jsdom** (`axe-core`, not `jest-axe`) via `src/test/a11y.ts`
+  `expectNoAxeViolations(container)`, with `color-contrast` + `region` disabled (no layout
+  in jsdom). One dedicated file (`src/test/a11y.test.tsx`) covers the shared states, the
+  offline banner, the sidebar nav, and a report document; **this runs** as part of
+  `npm test`. New views add an entry or an inline assertion.
+- **coverage = `@vitest/coverage-v8`** with `reporter: text-summary/html/json-summary` and
+  **thresholds pinned at the current baseline** (≈ 54% stmts / 57% lines / 60% branches /
+  49% funcs) over `src/features` + `src/lib` + `src/components` + `src/i18n` + `src/config`,
+  excluding `*-repository.ts` / `*-client.ts` / `src/lib/firebase/**` / `src/providers/**` /
+  `src/app/**` (exercised by the emulator + e2e suites, not this one). The gate means
+  "coverage can only hold or rise"; a coverage sprint is out of scope for the *program*
+  layer. Script: `test:coverage`.
+- **The journey matrix in `TESTING_STRATEGY.md` §4 gets a "Covered by" column** — every one
+  of the 24 has a named automated owner (e2e where browser-shaped, otherwise component /
+  schema / rules / function / integration). Journey 3 (real Google popup) stays
+  manual-only; the mocked-provider path is component-tested.
+- **New devDeps:** `@playwright/test`, `axe-core`, `@vitest/coverage-v8` (documented per §8).
+
+**Consequences.**
+- CI must run four suites — `npm test` (+ coverage gate), `functions:test`, `test:rules` +
+  `test:integration` (emulator), `test:e2e` (Playwright + emulator + browsers). Wiring that
+  into an actual pipeline is Layer 22.
+- e2e + rules + integration remain "green in CI, unrun locally in this environment" — the
+  same standing limitation every layer since 9 has carried; it is not new debt from Layer 21.
+- The coverage floor is modest; treat it as a ratchet, not a target.

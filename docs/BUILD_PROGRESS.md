@@ -8,16 +8,16 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 20 — Security Hardening (complete) |
-| **Next approved layer** | Layer 21 — Complete Testing Program (not started — awaiting explicit go-ahead) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15 (15A–15F) — Recovery Center complete · Layer 16 · Layer 17 · Layer 18 · Layer 19 · **Layer 20** |
-| **In-progress work** | — (Layer 21 is next). **i18n string-migration backlog** (ADR-0027) still open. **App Check enforcement + CORS** land with the Blaze/Functions deploy (ADR-0029). |
-| **Test status** | ✅ app: `vitest run` — 138 files, ~723 tests (`security-headers` + `app-check` tests added). ✅ rules: `npm run test:rules` — 3 files, ~45 tests (`firestore.rules.test.ts` gained an "email frozen on update" case — **not re-run in-session**, emulator restriction; the rule is an added `&&` condition, no regression risk). ⚠️ integration: `npm run test:integration` — 34 files **written**; unchanged. ✅ functions: `vitest run` — 16 files, 98 tests (unchanged — Layer 20 has no Cloud Function). |
+| **Current layer** | Layer 21 — Complete Testing Program (complete) |
+| **Next approved layer** | Layer 22 — Deployment & CI/CD (not started — awaiting explicit go-ahead) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15 (15A–15F) — Recovery Center complete · Layer 16 · Layer 17 · Layer 18 · Layer 19 · Layer 20 · **Layer 21** |
+| **In-progress work** | — (Layer 22 is next — wire the four suites into an actual CI pipeline). **i18n string-migration backlog** (ADR-0027) still open. **App Check enforcement + CORS** land with the Blaze/Functions deploy (ADR-0029). |
+| **Test status** | ✅ app: `vitest run` — 137 files, 720 tests (`src/test/a11y.test.tsx` — axe over shared states / offline banner / sidebar nav / a report document — added). ✅ coverage: `npm run test:coverage` — v8, baseline ≈ 54% stmts / 57% lines / 60% branches / 49% funcs; thresholds pinned at that floor (CI ratchet). ✅ e2e: `npm run test:e2e` — `tests/e2e/` (5 specs → 22 runs across chromium-desktop + mobile-safari) — **written; Playwright browsers + emulators not available in-session, runs in CI** (`playwright test --list` verified all 22 resolve). ✅ rules: `npm run test:rules` — 3 files, ~45 tests (unchanged this layer; not re-run in-session — emulator restriction). ⚠️ integration: `npm run test:integration` — 34 files **written**; unchanged. ✅ functions: `vitest run` — 16 files, 98 tests (unchanged — Layer 21 has no Cloud Function). |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (50 routes, static export, no warnings), `format:check`. `npm audit` — 6 moderate advisories, all transitive under the **dev-only** `firebase-admin`, none in a shipped bundle (ADR-0029). ✅ functions: `typecheck`, `lint`, `test`, `build`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 20 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 20 — hosting + a `firebase.json` `"source": "**"` security-header block (CSP, HSTS, `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `COOP: same-origin-allow-popups`, deny-all `Permissions-Policy`, …) + `firestore.rules` (profile `email` frozen on update)). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (13/14 + 15C/15E/15F recovery) still not deployed — Spark plan; App Check *enforcement* + CORS also await that (ADR-0029). Layer 19's service worker is hand-rolled (ADR-0028). |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 21 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 21 adds no runtime change — testing infra only; the last deploy is Layer 20's) (Layer 20 — hosting + a `firebase.json` `"source": "**"` security-header block (CSP, HSTS, `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `COOP: same-origin-allow-popups`, deny-all `Permissions-Policy`, …) + `firestore.rules` (profile `email` frozen on update)). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (13/14 + 15C/15E/15F recovery) still not deployed — Spark plan; App Check *enforcement* + CORS also await that (ADR-0029). Layer 19's service worker is hand-rolled (ADR-0028). |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · **next-intl 4.14** (Layer 18 — ADR-0027) · (no new deps in Layer 15A–17, or Layer 19 — the service worker is hand-rolled) |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · **next-intl 4.14** (Layer 18 — ADR-0027) · **@playwright/test 1.63 · axe-core 4.13 · @vitest/coverage-v8 4.1** (devDeps, Layer 21 — ADR-0030) · (no new deps in Layer 15A–17, or Layer 19–20) |
 
 ---
 
@@ -3799,6 +3799,68 @@ still redirects to sign-in with no new console errors.
   breaking downgrade taken.
 - **Rules test written, not executed in-session** — emulator restriction (as every layer
   this session).
+
+---
+
+### Layer 21 — Complete Testing Program — ✅ complete (2026-09-05) — committed + pushed (no deploy — testing infra only)
+
+Consolidates the test program: the **e2e** pillar (Playwright), the **accessibility**
+pillar (axe-core in jsdom), a **coverage** gate (v8), and a per-journey coverage audit in
+`docs/TESTING_STRATEGY.md`. No runtime code change. New devDeps: `@playwright/test`,
+`axe-core`, `@vitest/coverage-v8` (ADR-0030).
+
+**Created:**
+- `playwright.config.ts` — `testDir: tests/e2e`, projects **chromium-desktop** +
+  **mobile-safari (iPhone 13)** (the pair also covers the *responsive* type), a `webServer`
+  that runs `npm run dev` with `NEXT_PUBLIC_USE_FIREBASE_EMULATORS=true`, retries + traces
+  in CI.
+- `tests/e2e/_helpers.ts` (`registerAndSignIn`, unique emails) + 5 specs:
+  `auth.spec.ts` (journeys 1/2/4/6), `settings.spec.ts` (16/17 — persist + reload),
+  `goal.spec.ts` (8/15 — create, survives reload; dashboard error-free), `recovery-gate.spec.ts`
+  (20 — PIN gate blocks / unlocks / re-gates), `pwa.spec.ts` (24 — manifest + icons + `sw.js`
+  + `/offline`). `playwright test --list` → 22 runs, all resolve.
+- `src/test/a11y.ts` — `expectNoAxeViolations(container)` (axe-core, `color-contrast` +
+  `region` off for jsdom).
+- `src/test/a11y.test.tsx` — axe over `EmptyState` / `ErrorState` / `LoadingState`,
+  `OfflineBanner`, `SidebarNav`, and a rendered `ReportDocument` (6 tests, **runs** in
+  `npm test`).
+
+**Modified:**
+- `vitest.config.mts` — a `coverage` block: v8 provider, `text-summary`/`html`/`json-summary`
+  reporters, `include` = `src/features`+`src/lib`+`src/components`+`src/i18n`+`src/config`,
+  `exclude` = repositories / clients / `src/lib/firebase/**` / `src/providers/**` /
+  `src/app/**` / tests, and `thresholds` pinned at the current baseline (53 lines / 51
+  stmts / 58 branches / 43 funcs) — a CI ratchet.
+- `package.json` — `test:coverage`, `test:e2e`, `test:e2e:ui`, `test:e2e:install` scripts.
+- `docs/TESTING_STRATEGY.md` — §2 command list; a Layer-21 status note; §4 journey table
+  gains a **"Covered by"** column (all 24 have a named automated owner); new §4a (e2e),
+  §4b (a11y), §4c (coverage). `docs/DECISIONS.md` — ADR-0030.
+
+**Verification:** app `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (137 files / 720) ·
+`test:coverage` ✅ (thresholds met) · `build` ✅ (50 routes, no warnings) · `format:check`
+✅. `playwright test --list` ✅ (22 runs). `test:rules` / `test:integration` / `test:e2e`
+run in CI (emulator + browsers unavailable in-session — the standing limitation since
+Layer 9, not new to this layer). functions unchanged.
+
+**No deploy** — Layer 21 changes only test tooling and docs; the live site is unchanged
+from Layer 20. Committed + pushed per §10.
+
+**Manual test instructions (CI / a machine with the emulators + Playwright):**
+1. `npm run test:e2e:install` (once) → downloads the Chromium browser.
+2. `firebase emulators:start --only auth,firestore,storage` in one terminal.
+3. `npm run test:e2e` → the 5 specs run headless on both viewports against the dev server +
+   emulator; `npm run test:e2e:ui` for the Playwright inspector.
+4. `npm run test:coverage` → prints the v8 summary and fails on a threshold regression;
+   `coverage/index.html` for the line-level report.
+
+**Known limitations:**
+- **e2e / rules / integration are CI-only in this environment** — Playwright browsers can't
+  be installed and the Firebase emulator can't bind its loopback selector in the sandbox
+  (since Layer 9). All are written and `--list`/parse-verified.
+- **Coverage floor is modest (~54%)** — deliberately the current baseline; raising it is a
+  follow-up as thin areas (`*View.tsx` branches, error paths) get covered.
+- **Journey 3 (real Google sign-in popup)** stays a manual check; the mocked-provider path
+  is component-tested.
 
 ---
 
