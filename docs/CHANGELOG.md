@@ -6,6 +6,30 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 15B — Recovery Data Model — 2026-09-08
+
+**Added**
+- `src/features/recovery/recovery-goal-schema.ts` / `recovery-goal-repository.ts` /
+  `use-recovery-goals.ts` — the `recoveryGoals` collection: one record per self-identified
+  behavior with `behavior`, `motivation`, `startDate`, `triggers`/`warningSigns`/
+  `copingStrategies` lists, `supportNotes`, `faithBasedEncouragement` (opt-in), and a
+  neutral `recoveryStatus` (`active`/`going-well`/`challenging`/`paused` — no
+  shame-framed state). Client-written under the existing owner-only rule.
+- `RecoveryGoalForm` / `RecoveryGoalDialog` / `RecoveryGoalCard`, and the Recovery Center
+  home now shows the goals list (create / edit / archive) behind the Layer 15A PIN gate,
+  with a calm "not medical or psychological advice" disclaimer.
+- Tests: recovery-goal schema unit tests; `RecoveryHomeView` rewritten for the goals list;
+  a `recoveryGoals` block in the rules regression test; a create/update/archive emulator
+  integration test (written; not executed in-session).
+
+**Changed**
+- `docs/DATA_MODEL.md` annotates `recoveryGoals` and marks the still-reserved
+  subcollections with their planned sublayer.
+- `docs/DECISIONS.md` — ADR-0020.
+
+**Known limitation:** archive only — hard deletion of a recovery goal (cascading its
+future subcollections) is a dedicated Cloud Function to be built with Layer 15C.
+
 ### Layer 15A — Recovery Center Privacy Architecture — 2026-09-08
 
 **Added**

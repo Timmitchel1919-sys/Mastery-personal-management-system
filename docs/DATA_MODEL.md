@@ -68,13 +68,13 @@ users/{uid}/aiUsageMonthly/{month}              one rollup doc per month: reques
 users/{uid}/aiCallLogs/{logId}                  per-call audit record: intent, inputTokens/outputTokens, latencyMs, outcome, costUsd — cost/audit trail, no client UI yet (Layer 13)
 
 # Recovery — separately protected (see RECOVERY_PRIVACY.md)
-users/{uid}/recoveryProfiles/{uid}             singleton, id == uid: lockMethod ("pin", extensible), pinHash/pinSalt (salted SHA-256, client-side only), failedAttempts, lockedUntil — the privacy gate itself, not behavioral data (Layer 15A). recoveryGoals/checkIns/relapses/copingActions/accountability/coach-sessions below are all reserved, not built until 15B+
-users/{uid}/recoveryGoals/{goalId}
-users/{uid}/recoveryGoals/{goalId}/checkIns/{checkInId}
-users/{uid}/recoveryGoals/{goalId}/relapses/{relapseId}
-users/{uid}/recoveryGoals/{goalId}/copingActions/{actionId}
-users/{uid}/recoveryAccountabilityPartners/{partnerId}
-users/{uid}/recoveryCoachSessions/{sessionId}
+users/{uid}/recoveryProfiles/{uid}             singleton, id == uid: lockMethod ("pin", extensible), pinHash/pinSalt (salted SHA-256, client-side only), failedAttempts, lockedUntil — the privacy gate itself, not behavioral data (Layer 15A)
+users/{uid}/recoveryGoals/{goalId}             one per self-identified behavior: behavior, description, motivation, startDate, triggers[]/warningSigns[]/copingStrategies[], supportNotes, faithBasedEncouragement, recoveryStatus (active|going-well|challenging|paused — neutral, no shame framing). Client-written under the generic owner-only rule; archive is reversible, hard delete is a future Cloud Function (Layer 15B)
+users/{uid}/recoveryGoals/{goalId}/checkIns/{checkInId}      reserved — Layer 15C
+users/{uid}/recoveryGoals/{goalId}/relapses/{relapseId}      reserved — Layer 15C (Cloud-Function-mediated writes per RECOVERY_PRIVACY.md §3)
+users/{uid}/recoveryGoals/{goalId}/copingActions/{actionId}  reserved — Layer 15D
+users/{uid}/recoveryAccountabilityPartners/{partnerId}       reserved — Layer 15F
+users/{uid}/recoveryCoachSessions/{sessionId}                reserved — Layer 15E (isolated from general AI)
 ```
 
 ## 2. Common record fields

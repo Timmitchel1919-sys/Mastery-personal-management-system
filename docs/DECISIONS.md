@@ -566,3 +566,51 @@ the PIN actually protects against, where its config lives, and how "unlocked" pe
 - Building the actual behavioral tracking (`recoveryGoals` and everything in §4) is
   entirely deferred to Layer 15B onward, per `CLAUDE.md` §7's "implement only the
   requested sublayer."
+
+---
+
+## ADR-0020 — Recovery goal data model: neutral status vocabulary, archive-only, per-sublayer schema files
+**Date:** 2026-09-08 · **Status:** accepted · **Layer:** 15B — Recovery Data Model
+
+**Context.** `docs/RECOVERY_PRIVACY.md` §2 lists a recovery goal's fields loosely
+("behavior, start date, motivation, triggers, warning signs, coping strategies, support
+preferences, privacy settings, current status") and §4 mandates "growth-oriented and
+neutral" language with "no shame-focused presentation." §8 routes hard data deletion
+through a dedicated Cloud Function. Three calls needed making.
+
+**Decision.**
+- **`recoveryStatus` is a small, neutral, self-report vocabulary:** `active` ("Working on
+  it"), `going-well` ("Going well"), `challenging` ("Challenging right now"), `paused`
+  ("Paused"). No "failed"/"relapsed"/"broken streak" state — a hard stretch is
+  `challenging`, framed as a moment, not a verdict. Setback *events* (with restart flow)
+  are the `relapses` subcollection in 15C, deliberately not a goal status.
+- **"support preferences" → `supportNotes` (free text) + `faithBasedEncouragement`
+  (boolean, opt-in, default off).** The spec's "user-selected faith-based options" (§4) is
+  modelled as this one explicit opt-in flag on the goal, consumed later by the Recovery
+  Coach (15E). "privacy settings" per-goal is **not** modelled here — the whole module is
+  already PIN-gated, and per-goal sharing scope belongs to the accountability-partner
+  config in 15F, not to the goal record.
+- **Archive only in this layer; no client hard delete.** `recoveryGoals` will grow
+  subcollections (check-ins, relapses, coping actions) that Firestore won't cascade-delete,
+  and §8 already assigns "data deletion" to a Cloud Function with confirmation. So 15B's UI
+  offers reversible archive (`status: "archived"`, same as every other domain) and defers
+  true deletion to that function, to be built in the sublayer that first adds a
+  subcollection worth cascading (~15C).
+- **A separate `recovery-goal-schema.ts` / `recovery-goal-repository.ts` alongside 15A's
+  `schema.ts` / `recovery-lock-repository.ts`**, rather than one growing file. Recovery is
+  a six-sublayer feature; keeping each sublayer's model in its own file keeps the lock
+  gate (15A) and the behavioral model (15B+) legible and independently reviewable. The
+  feature barrel re-exports from all of them.
+- **No `firestore.rules` change** — `recoveryGoals` is client-written under the existing
+  generic owner-only subcollection rule, same as any other domain and the same as 15A's
+  `recoveryProfiles`. `tests/rules/recovery.rules.test.ts` gained a `recoveryGoals`
+  describe block anyway (owner create/read, cross-user denied, missing-audit-fields
+  rejected) as a targeted regression net for this sensitive path.
+
+**Consequences.**
+- The status vocabulary is intentionally coarse; if check-ins (15C) prove that users want
+  a finer current-state signal, that's a check-in concern (a richer, time-stamped picture)
+  rather than a reason to expand this enum.
+- Hard delete being deferred means an archived recovery goal (and later its subcollections)
+  physically persists until the deletion function ships — acceptable for now, flagged as a
+  known limitation.

@@ -129,3 +129,50 @@ describe("users/{uid}/recoveryProfiles/{uid} — Recovery Center privacy gate", 
     );
   });
 });
+
+function goalDoc(uid: string, extra: Record<string, unknown> = {}) {
+  return {
+    behavior: "Private goal",
+    description: "",
+    motivation: "",
+    startDate: null,
+    triggers: [],
+    warningSigns: [],
+    copingStrategies: [],
+    supportNotes: "",
+    faithBasedEncouragement: false,
+    recoveryStatus: "active",
+    status: "active",
+    version: 1,
+    createdAt: "2026-09-08T00:00:00.000Z",
+    updatedAt: "2026-09-08T00:00:00.000Z",
+    createdBy: uid,
+    updatedBy: uid,
+    archivedAt: null,
+    ...extra,
+  };
+}
+
+describe("users/{uid}/recoveryGoals/{goalId} — Layer 15B", () => {
+  it("lets the owner create and read their own recovery goal", async () => {
+    const db = testEnv.authenticatedContext(ALICE).firestore();
+    await assertSucceeds(setDoc(doc(db, "users", ALICE, "recoveryGoals", "g1"), goalDoc(ALICE)));
+    await assertSucceeds(getDoc(doc(db, "users", ALICE, "recoveryGoals", "g1")));
+  });
+
+  it("denies another signed-in user from reading or writing a recovery goal", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), "users", ALICE, "recoveryGoals", "g1"), goalDoc(ALICE));
+    });
+    const db = testEnv.authenticatedContext(BOB).firestore();
+    await assertFails(getDoc(doc(db, "users", ALICE, "recoveryGoals", "g1")));
+    await assertFails(setDoc(doc(db, "users", ALICE, "recoveryGoals", "g2"), goalDoc(BOB)));
+  });
+
+  it("rejects a create missing audit fields", async () => {
+    const db = testEnv.authenticatedContext(ALICE).firestore();
+    await assertFails(
+      setDoc(doc(db, "users", ALICE, "recoveryGoals", "g3"), { behavior: "no audit" }),
+    );
+  });
+});

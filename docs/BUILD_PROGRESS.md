@@ -8,16 +8,16 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 15A — Recovery Center Privacy Architecture (complete) |
-| **Next approved layer** | Layer 15B — Recovery Data Model (not started — awaiting explicit go-ahead) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · **Layer 15A** |
-| **In-progress work** | Layer 15 (Recovery Center) continues with 15B–15F on future "Volgende laag" requests |
-| **Test status** | ✅ app: `vitest run` — 107 files, 585 tests. ✅ rules: `npm run test:rules` — 3 files, 29 tests (new `tests/rules/recovery.rules.test.ts`, 7 tests — not re-run in-session, same emulator restriction as integration tests, but the underlying rule is unchanged so no regression risk). ⚠️ integration: `npm run test:integration` — 27 files, 69 tests **written**; the 9D/9E/10A–10C/11A–11D/12/13/14/15A tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`); 10D adds no new integration test. ✅ functions: 10 files, 58 tests (unchanged — 15A is app-only, no Cloud Function). |
+| **Current layer** | Layer 15B — Recovery Data Model (complete) |
+| **Next approved layer** | Layer 15C — Check-ins & Tracking (not started — awaiting explicit go-ahead) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15A · **Layer 15B** |
+| **In-progress work** | Layer 15 (Recovery Center) continues with 15C–15F on future "Volgende laag" requests |
+| **Test status** | ✅ app: `vitest run` — 108 files, 596 tests. ✅ rules: `npm run test:rules` — 3 files, 32 tests (`tests/rules/recovery.rules.test.ts` gained a `recoveryGoals` block, +3 tests — not re-run in-session, emulator restriction; rule unchanged, no regression risk). ⚠️ integration: `npm run test:integration` — 28 files, 71 tests **written**; the 9D/9E/10A–10C/11A–11D/12/13/14/15A/15B tests were not executed in-session (Firestore emulator restriction). ✅ functions: 10 files, 58 tests (unchanged — 15B is app-only, no Cloud Function). |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: unchanged. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 15A built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 15A — hosting + Firestore rules; `firestore.rules` gained an explanatory comment, no behavior change, redeployed). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works) — confirmed present but unrelated to this layer's changes. Cloud Functions (Layer 13/14) still not deployed — unchanged this layer, see ADR-0017/0018. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 15B built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 15B — hosting only; `firestore.rules` unchanged, `recoveryGoals` uses the generic owner-only rule). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (Layer 13/14) still not deployed — unchanged this layer, see ADR-0017/0018. |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · (no new deps in Layer 15A — PIN hashing uses the browser's native Web Crypto) |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · (no new deps in Layer 15A/15B) |
 
 ---
 
@@ -2833,6 +2833,95 @@ a fresh browser tab — loads (title "Recovery Center · Mastery"), redirects to
   toolkit, Recovery Coach, and accountability partner are all Layer 15B onward.
 - **Rules test not executed in-session** — same Firestore-emulator restriction as every
   integration/rules test this session (JDK loopback-selector issue).
+
+---
+
+### Layer 15B — Recovery Data Model — ✅ complete (2026-09-08) — committed + pushed + deployed live
+
+The `recoveryGoals` collection: one record per self-identified behavior the user chooses
+to work on, with full create/list/edit/archive behind the Layer 15A PIN gate. Copy is
+growth-oriented and neutral per `docs/RECOVERY_PRIVACY.md` §4 — a hard stretch is a
+status, not a failure. Check-ins, relapse logs, and the coping toolkit are Layers 15C–15D;
+accountability sharing is 15F. Full rationale: ADR-0020.
+
+**Created — `src/features/recovery/`:**
+- `recovery-goal-schema.ts` — `RECOVERY_GOAL_STATUSES` (`active` / `going-well` /
+  `challenging` / `paused` — deliberately no "failed"/"relapsed" state; setback *events*
+  are the 15C `relapses` subcollection). `recoveryGoalSchema`: `behavior`, `description`,
+  `motivation`, `startDate`, `triggers[]` / `warningSigns[]` / `copingStrategies[]`
+  (each ≤30 items), `supportNotes`, `faithBasedEncouragement` (opt-in boolean, consumed by
+  the Recovery Coach in 15E), `recoveryStatus`. `recoveryGoalFormSchema` (newline-list
+  text fields) + `recoveryGoalInputFromForm`. Kept as its own file alongside 15A's
+  `schema.ts` — recovery is a six-sublayer feature and each sublayer's model stays
+  independently legible.
+- `recovery-goal-repository.ts` — `recoveryGoalRepository` (collection `recoveryGoals`,
+  client-written under the existing generic owner-only rule) + `listActiveRecoveryGoals`.
+- `use-recovery-goals.ts` — `useRecoveryGoals()`: load + create / update / archive + reload.
+- `components/` — `RecoveryGoalForm` (behavior, context, motivation, started date, "Right
+  now" status Select, triggers / warning-signs / coping-strategies newline textareas,
+  support notes, a faith-based-encouragement `Switch`), `RecoveryGoalDialog` (with a calm
+  "not medical or psychological advice" disclaimer), `RecoveryGoalCard` (status badge,
+  optional faith-based badge, motivation shown as a quiet italic line, the three lists,
+  edit + archive-with-confirm).
+- `index.ts` barrel extended.
+
+**Modified:**
+- `src/features/recovery/components/RecoveryHomeView.tsx` — now renders the recovery
+  goals list (loading / empty / error), a "New recovery goal" button, and the calm
+  disclaimer, in addition to the 15A privacy-assurance card. The "coming next" list
+  shrinks to 15C–15F.
+- `docs/DATA_MODEL.md` annotates `recoveryGoals` (and marks the still-reserved
+  subcollections with their planned sublayer).
+- `tests/rules/recovery.rules.test.ts` — gained a `recoveryGoals` describe block (owner
+  create/read, cross-user read/write denied, missing-audit-fields rejected).
+
+**Tests added:** `recovery-goal-schema.test.ts` (create requires a behavior, rejects an
+unknown status, allows empty lists / null start date, partial update, stored record, form
++ `recoveryGoalInputFromForm` list-splitting and blank-date-to-null); `RecoveryHomeView.test.tsx`
+rewritten to also mock `useRecoveryGoals` — empty state opens the dialog, a goal card
+renders its status/motivation/lists, archive-with-confirm calls `archive`, error + retry,
+plus the retained privacy-assurance / disclaimer / Lock-button assertions;
+`tests/integration/recovery-goals.test.ts` (create → status update → archive; user
+scoping; **written, not executed in-session** — emulator restriction). App suite: 108
+files / 596 tests.
+
+**Verification:** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (108/596) · `build` ✅ (47
+routes, static export, no warnings) · `format:check` ✅. `test:rules` / `test:integration`
+— new tests written, not executed (emulator restriction); the underlying rule is unchanged
+so no regression risk. Functions suite unaffected (15B is entirely client-side).
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production NEXT_PUBLIC_APP_URL=https://mastery-personal-mgmt-system.web.app npm run build`
+then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project
+mastery-personal-mgmt-system --non-interactive` — `firestore.rules` unchanged, skipped on
+upload. Redeployed to https://mastery-personal-mgmt-system.web.app/ ; smoke-tested
+`/recovery` in a fresh browser tab — loads (title "Recovery Center · Mastery"), redirects
+to sign-in, no console errors.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Recovery Center**, enter your PIN (from 15A).
+2. **New recovery goal** → name what you're working on, optionally add motivation, a
+   start date, and newline lists of triggers / warning signs / coping strategies, pick a
+   "Right now" status, toggle faith-based encouragement → **Add goal**. It appears as a
+   card with its status badge and lists.
+3. Edit the goal → change the status to "Challenging right now" → the badge updates to a
+   warning colour with neutral wording (no shame framing).
+4. Archive a goal (trash → confirm) → it leaves the active list; reload → still gone;
+   Firestore shows `status: "archived"` (not deleted — hard delete is a future Cloud
+   Function).
+5. Firestore console → `users/{uid}/recoveryGoals/{id}` with `behavior`, the three list
+   arrays, `faithBasedEncouragement`, `recoveryStatus`, and audit fields. Confirm it's
+   still invisible on the dashboard, in search, and in notifications.
+
+**Known limitations:**
+- **Archive only — no hard delete yet.** An archived recovery goal physically persists;
+  true deletion (with confirmation, cascading its future subcollections) is a dedicated
+  Cloud Function to be built with 15C (ADR-0020, `docs/RECOVERY_PRIVACY.md` §8).
+- **`recoveryStatus` is intentionally coarse** — a finer current-state signal, if users
+  want one, is a check-in concern (15C), not a bigger enum here.
+- **No check-ins / relapse logging / coping toolkit / Recovery Coach / accountability
+  partner** — all Layer 15C onward.
+- **Rules/integration tests written, not executed in-session** — same emulator
+  restriction as every prior layer this session.
 
 ---
 
