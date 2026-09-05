@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { ReportsView } from "@/features/reports";
 
-export const metadata = { title: "Reports" };
+export const metadata: Metadata = { title: "Reports" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Reports"
-      description="Weekly, monthly, quarterly, and annual reports with PDF export."
-      plannedLayer={16}
-    />
-  );
+  return <ReportsView />;
 }

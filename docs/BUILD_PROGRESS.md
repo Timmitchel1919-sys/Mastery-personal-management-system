@@ -8,16 +8,16 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 15F — Accountability Partner (complete) — **Layer 15 (Recovery Center) complete: 15A–15F** |
-| **Next approved layer** | Layer 16 — Reports & PDF Export (not started — awaiting explicit go-ahead) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · **Layer 15 (15A–15F) — Recovery Center complete** |
-| **In-progress work** | — (Layer 15 finished; Layer 16 is next) |
-| **Test status** | ✅ app: `vitest run` — 119 files, ~648 tests (recovery-accountability schema + `AccountabilitySection` + `PartnerProjectionView` component tests added). ✅ rules: `npm run test:rules` — 3 files, ~44 tests (`tests/rules/recovery.rules.test.ts` gained a `recoveryAccountabilityPartners — Layer 15F` block: direct client write REJECTED, owner READ allowed after Admin seed, cross-user read denied — not re-run in-session, emulator restriction). ⚠️ integration: `npm run test:integration` — 32 files **written**; `tests/integration/recovery-accountability.test.ts` added (direct client write rejected; owner list resolves) — not executed in-session (Firestore emulator restriction). ✅ functions: `vitest run` — 16 files, 98 tests (`configure-accountability-partner.test.ts` +7, `get-accountability-projection.test.ts` +9, `accountability-projection.test.ts` +3). |
-| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (48 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `test`, `build`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 15F built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 15F — hosting + `firestore.rules`: the recursive-wildcard owner-only rule now also refuses direct client writes to the top-level `recoveryAccountabilityPartners` collection). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (Layer 13/14 + 15C `recordRecoverySetback` + 15E `recoveryCoachQuery` + 15F `configureAccountabilityPartner`/`getAccountabilityProjection`) still not deployed — Spark plan, see ADR-0017/0018/0021/0023/0024. |
+| **Current layer** | Layer 16 — Reports & PDF Export (complete) |
+| **Next approved layer** | Layer 17 — Notifications (not started — awaiting explicit go-ahead) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15 (15A–15F) — Recovery Center complete · **Layer 16** |
+| **In-progress work** | — (Layer 17 is next) |
+| **Test status** | ✅ app: `vitest run` — 123 files, ~669 tests (`report-schema` + `report-data` + `ReportsView` + `ReportDocument` tests added). ✅ rules: `npm run test:rules` — 3 files, ~44 tests (no rules change in Layer 16 — `reports` is client-written under the generic owner-only rule). ⚠️ integration: `npm run test:integration` — 33 files **written**; `tests/integration/reports.test.ts` added (create/list/archive a report metadata record, user scoping) — not executed in-session (Firestore emulator restriction). ✅ functions: `vitest run` — 16 files, 98 tests (unchanged — Layer 16 has no Cloud Function). |
+| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (49 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `test`, `build`. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 16 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 16 — hosting only; `firestore.rules` unchanged — `reports` uses the generic owner-only rule). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (Layer 13/14 + 15C `recordRecoverySetback` + 15E `recoveryCoachQuery` + 15F `configureAccountabilityPartner`/`getAccountabilityProjection`) still not deployed — Spark plan, see ADR-0017/0018/0021/0023/0024. Layer 16 ships **no** Cloud Function (client-composed reports, print-to-PDF — ADR-0025). |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · (no new deps in Layer 15A–15F) |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · (no new deps in Layer 15A–16 — Layer 16 reuses the browser's print-to-PDF, no PDF library) |
 
 ---
 
@@ -3363,6 +3363,97 @@ smoke-tested `/recovery` in a fresh tab — redirects to sign-in, no new console
 - **No hard delete** — a revoked grant persists (revoked, inert) until the deferred
   cascading deletion Cloud Function.
 - **Rules / integration tests written, not executed in-session** — emulator restriction.
+
+---
+
+### Layer 16 — Reports & PDF Export — ✅ complete (2026-09-05) — committed + pushed + deployed live
+
+Compose a report for any period from a chosen set of sections, render it to a branded,
+print-styled page, and save it as a PDF from the browser's print dialog. A metadata record
+per generated report is the history / "downloadable record". No Cloud Function, no PDF
+library, no `firestore.rules` change — the server-PDF path is documented for later
+(ADR-0025). **A report never touches a Recovery Center collection.**
+
+**Created — `src/features/reports/`:**
+- `report-schema.ts` — `REPORT_SECTIONS` (`summary` / `goals` / `habits` / `focus` / `kpis`
+  / `planning`) + labels + descriptions; `REPORT_PERIODS` (`weekly` / `monthly` /
+  `quarterly` / `annual` / `custom`); the stored-metadata `reportSchema` (title, period,
+  periodStart/End, sections[], `format: "pdf"`, generatedAt) via `defineRecordSchema`; the
+  generate form schema with custom-range validation; `resolvePeriodRange` (preset → an
+  inclusive `{start,end}`) and `defaultReportTitle`.
+- `report-data.ts` — `buildReportData(range, sections)`: one `Promise.all` over the goal /
+  milestone / task / habit / habitLog / focusSession (`deepWorkRepository`) / kpi /
+  kpiEntry repositories (only the ones a requested section needs), filtered to the range,
+  returning one `ReportData` — `summary` counts, `goals` (achieved / in-progress /
+  milestones), `habits` (per-habit consistency over the day span), `focus` (total /
+  count / longest / average), `kpis` (first vs last reading), `planning` (on-time / late /
+  cancelled / still-overdue). **Never reads a recovery collection.**
+- `report-repository.ts` — `reportRepository` (`reports`, client-written owner-only) +
+  `listRecentReports`.
+- `use-reports.ts` — `useReports()`: load history, `generate(values)` (build data → save a
+  metadata record → return `ReportData` for rendering), `current` / `clearCurrent`.
+- `components/ReportDocument.tsx` — the branded, fixed-light "paper" document
+  (`data-report-print`): Mastery wordmark + tagline, period + range, each selected section
+  as a titled block (stat grids / tables), an "No data for this period." note per empty
+  section, and a "Recovery Center data is never included" footer.
+- `components/ReportsView.tsx` — the `/analytics/reports` page: a generate form (period
+  `Select`, custom-range dates, section checkboxes), a "Download PDF" action
+  (`window.print()`), and a history list of saved reports.
+
+**Modified:**
+- `src/app/(app)/analytics/reports/page.tsx` — `ModulePlaceholder` → `<ReportsView />`.
+- `src/app/globals.css` — a small `@media print` block isolates `[data-report-print]` and
+  hides `[data-print-hide]` app chrome.
+- `docs/DATA_MODEL.md` describes `reports/{reportId}`; `docs/ARCHITECTURE.md` §1/§5 note
+  the client report path + aggregation service; `docs/DECISIONS.md` — ADR-0025.
+
+**Tests added:** `report-schema.test.ts` (form validation incl. custom-range rules,
+`resolvePeriodRange` for weekly/annual/custom, `defaultReportTitle`, stored record);
+`report-data.test.ts` (8: only requested sections are computed and only their repos read,
+goal/milestone period filtering, per-habit consistency over the span, null habit
+consistency with no habits, focus sum + longest, KPI first-vs-last, task on-time/late/
+cancelled/overdue split); `components/ReportDocument.test.tsx` (3: header + sections + the
+recovery note, empty-section note, unselected section absent);
+`components/ReportsView.test.tsx` (4: form + recovery note + empty history, generate with
+the default selection, history list, print button calls `window.print`);
+`tests/integration/reports.test.ts` (create / list / archive a metadata record, user
+scoping — **written, not executed in-session**).
+
+**Verification:** app `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (123 files / ~669) ·
+`build` ✅ (49 routes, static export, no warnings) · `format:check` ✅. functions
+unchanged. `test:integration` — new test written, not executed (emulator restriction).
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production NEXT_PUBLIC_APP_URL=https://mastery-personal-mgmt-system.web.app npm run build`
+then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project
+mastery-personal-mgmt-system --non-interactive` — `firestore.rules` unchanged, skipped on
+upload. Redeployed to https://mastery-personal-mgmt-system.web.app/ ; smoke-tested
+`/analytics/reports` in a fresh tab — redirects to sign-in, no console errors.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Analytics → Reports**.
+2. Pick a period (e.g. "Last 30 days"), leave all sections ticked → **Generate report**.
+   The branded document renders with a stat grid per section; empty sections say "No data
+   for this period."
+3. **Download PDF** → the browser print dialog opens showing only the report (no sidebar,
+   no buttons); "Save as PDF".
+4. **New report** → choose "Custom range", pick a start after the end → the form blocks it;
+   fix the dates, untick all but "KPIs" → generate → only the KPIs section renders.
+5. The report appears in **History** (title, period badge, section count, date).
+6. Firestore console → `users/{uid}/reports/{id}` holds only metadata (no figures). Confirm
+   no recovery data appears anywhere in the rendered report.
+
+**Known limitations:**
+- **PDF is the browser's "Save as PDF"** — there is no server-rendered PDF. A future
+  `generateReportPdf` Cloud Function is documented (ADR-0025) but not built (no consumer
+  today; needs Blaze / App Hosting).
+- **Reads are capped at one repository page (100 rows) per collection** — the same cap the
+  rest of the app uses; a very long "annual" report on a very active account could
+  undercount.
+- **"Completed in period" is approximated from `updatedAt`** for goals / milestones (no
+  completion-timestamp field) — same approximation as the Execution Tracker (ADR-0016) and
+  the weekly summary.
+- **No i18n yet** — report strings are English until Layer 18.
+- **Integration test written, not executed in-session** — emulator restriction.
 
 ---
 

@@ -817,3 +817,51 @@ how much of a partner-facing UI belongs in 15F.
 - A partner must have a Mastery account with a verified email on the same address the owner
   entered; there is no flow for inviting someone who has not signed up. Acceptable for
   now; revisit if needed.
+
+---
+
+## ADR-0025 — Reports: client-composed, print-to-PDF, metadata-only persistence
+**Date:** 2026-09-05 · **Status:** accepted · **Layer:** 16 — Reports & PDF Export
+
+**Context.** `docs/PRODUCT_REQUIREMENTS.md` §11 asks for weekly / monthly / quarterly /
+annual / goal / habit / focus / KPI / planning-vs-execution reports, "server-controlled PDF
+where practical", Mastery branding, user-chosen sections, missing-data handling, a
+downloadable record, export metadata, and a hard rule that Recovery Center data is never
+included. But the app is a **static export** (ADR-0015 — no SSR, no route handlers) and
+Cloud Functions are **not deployed** (Spark plan, ADR-0017 onward), so there is no server to
+control a PDF today.
+
+**Decision.**
+- **A report is a period + a set of sections, not nine separate report types.** The
+  spec's "weekly/monthly/quarterly/annual" becomes the *period* (a preset that fills a date
+  range, plus "custom"); "goal/habit/focus/KPI/planning-vs-execution" become selectable
+  *sections* (`summary`, `goals`, `habits`, `focus`, `kpis`, `planning`). One flexible
+  report beats nine near-duplicate ones.
+- **The report body is composed on the client.** `report-data.ts` is an aggregation
+  service — one `Promise.all` over the goal / milestone / task / habit / habitLog /
+  focusSession / kpi / kpiEntry repositories, filtered to the range, returning one
+  `ReportData`. It **never reads a recovery collection** (allowlist by construction), which
+  is how §11's "never leak Recovery Center information" is guaranteed — plus a test that
+  asserts it.
+- **PDF = the browser's "Save as PDF".** `ReportDocument` renders a branded, paper-styled
+  page (`data-report-print`); a small `@media print` block in `globals.css` isolates it and
+  hides app chrome (`data-print-hide`); a "Download PDF" button calls `window.print()`.
+  No new dependency (no `jspdf` / `pdfmake` / `@react-pdf/renderer`), no server.
+- **`users/{uid}/reports/{reportId}` stores metadata only** — title, period, range,
+  sections, `format: "pdf"`, `generatedAt`. It is the "downloadable record" / history and
+  the "export metadata" the spec asks for. Client-written under the generic owner-only rule
+  (a metadata row carries nothing sensitive) — no rules change, no Cloud Function.
+- **A future `generateReportPdf` Cloud Function is the documented server path** but is
+  **not stubbed** this layer — unlike the AI/recovery functions it would have no consumer
+  today (the client path is complete), and stubbing it would be speculative. Revisit when
+  the project moves to Blaze / App Hosting.
+
+**Consequences.**
+- Reads are capped at one repository page (100 rows) per collection, the same cap every
+  other feature already lives with — a report over a very long "annual" period on a very
+  active account could undercount. Flagged as a known limitation.
+- "Completed in period" for goals / milestones is approximated from `updatedAt` (no
+  dedicated completion-timestamp field), the same approximation the Execution Tracker
+  (ADR-0016) and the weekly summary (Layer 14) already make.
+- The report renders in a fixed light "paper" palette regardless of the app theme — a
+  deliberate document metaphor, and it prints correctly.

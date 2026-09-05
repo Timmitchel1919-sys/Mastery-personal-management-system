@@ -28,7 +28,10 @@ How the code is organized and the patterns every layer follows. Rules here are b
 - Repositories are the only place that talks to Firestore/Storage. They obtain the
   authenticated UID internally and scope every read/write to `users/{uid}/**`.
 - Cloud Functions hold anything that must be trusted: AI calls, Recovery sensitive access,
-  accountability-partner access, scheduled jobs, server-controlled PDF generation.
+  accountability-partner access, scheduled jobs. Server-controlled PDF generation is the
+  intended long-term path for reports; Layer 16 ships client-composed reports rendered to a
+  print-styled page (PDF via the browser's "Save as PDF") because the app is a static
+  export and Cloud Functions are not deployed (ADR-0015 / ADR-0025).
 
 ## 2. Directory structure
 
@@ -112,7 +115,10 @@ interface GoalRepository {
 - Prefer one-time reads. Use a real-time listener only where the feature requires live
   updates (e.g. active Pomodoro session, calendar day in view) and always unsubscribe.
 - Dashboard and reports read from an **aggregation service** that batches the needed
-  queries once per view; widgets receive already-aggregated props.
+  queries once per view; widgets receive already-aggregated props. Layer 16's
+  `report-data.ts` is one such service: a single `Promise.all` over the domain repositories,
+  filtered to the chosen period, returning one `ReportData` object. It only ever reads
+  non-recovery collections, so a report can never leak Recovery Center data.
 - No global "load everything on login". Fetch per route, on demand, paginated.
 
 ## 6. Error, loading, empty, success states

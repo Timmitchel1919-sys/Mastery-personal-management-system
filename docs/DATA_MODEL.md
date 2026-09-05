@@ -55,7 +55,7 @@ users/{uid}/kpis/{kpiId}                       category (free text), pillarIds, 
 users/{uid}/kpiEntries/{entryId}               kpiId link, date + value + note — append-only time series, user-entered only this layer (Layer 12)
 users/{uid}/lifeScoreEntries/{entryId}         date, score (0-100), frozen factors[] snapshot ({kpiId,title,value,attainment,weight}), note — saved on demand; the live score is always recomputed from current KPIs, this is history (Layer 12)
 users/{uid}/weeklySummaries/{summaryId}        weekStart/weekEnd, computed facts (goals/milestones completed, task completion/cancellation/overdue counts, habitConsistencyPercent, focusMinutes, kpiMovements[]), AI-generated lessons[]/suggestedPriorities[] — written only by the scheduled `generateWeeklySummary` function; client reads/archives/deletes (Layer 14)
-users/{uid}/reports/{reportId}
+users/{uid}/reports/{reportId}                 export metadata only: title, period (weekly|monthly|quarterly|annual|custom), periodStart/periodEnd, sections[] (summary|goals|habits|focus|kpis|planning), format ("pdf"), generatedAt — the report body is composed on the client from the domain repositories and rendered to a branded, print-styled page; the PDF is the browser's "Save as PDF". Client-written under the generic owner-only rule. **Never includes Recovery Center data** (the aggregation only reads non-recovery collections) (Layer 16)
 
 # System
 users/{uid}/notifications/{notificationId}     type, title, body, relatedId, read — first populated by `generateWeeklySummary` (type "weekly-summary", Layer 14); full delivery/consumption UI is Layer 17

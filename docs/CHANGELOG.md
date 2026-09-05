@@ -6,6 +6,41 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 16 — Reports & PDF Export — 2026-09-05
+
+**Added**
+- `src/features/reports/` — compose a report for any period (`weekly` / `monthly` /
+  `quarterly` / `annual` / `custom`) from a chosen set of sections (`summary`, `goals`,
+  `habits`, `focus`, `kpis`, `planning`):
+  - `report-data.ts` — `buildReportData(range, sections)`, an aggregation service: one
+    `Promise.all` over the goal / milestone / task / habit / habitLog / focusSession / kpi /
+    kpiEntry repositories (only those a requested section needs), filtered to the range. It
+    **never reads a Recovery Center collection**, so a report can't leak recovery data.
+  - `report-schema.ts` / `report-repository.ts` / `use-reports.ts` — the stored
+    metadata record (`users/{uid}/reports/{id}` — title, period, range, sections, `format`,
+    `generatedAt`; client-written, owner-only), the generate form, and the hook.
+  - `ReportDocument` — a branded, fixed-light "paper" page with a stat grid / table per
+    section, per-section empty handling, and a "Recovery Center data is never included"
+    footer. `ReportsView` at `/analytics/reports` — the generate form + a "Download PDF"
+    action (`window.print()`) + a history list.
+- `src/app/globals.css` — an `@media print` block isolates `[data-report-print]` and hides
+  `[data-print-hide]` app chrome so "Save as PDF" produces a clean report.
+
+**Changed**
+- `src/app/(app)/analytics/reports/page.tsx` — `ModulePlaceholder` → `<ReportsView />`.
+- `docs/DATA_MODEL.md` describes `reports/{reportId}`; `docs/ARCHITECTURE.md` §1/§5;
+  `docs/DECISIONS.md` — ADR-0025.
+
+**Tests:** `report-schema` (form + `resolvePeriodRange` + title + record), `report-data` (8
+— section/repo selection, period filtering, habit consistency, focus sums, KPI first-vs-last,
+task on-time/late/cancelled/overdue), `ReportDocument` (3), `ReportsView` (4), and a report
+metadata integration test (written, not executed in-session).
+
+**Known limitation:** the PDF is the browser's "Save as PDF" — no server-rendered PDF (a
+`generateReportPdf` Cloud Function is documented but not built; needs Blaze). Reads are
+capped at one repository page per collection, and "completed in period" is approximated
+from `updatedAt`.
+
 ### Layer 15F — Accountability Partner — 2026-09-05
 
 The final Recovery Center sublayer — **Layer 15 (15A–15F) is complete.**
