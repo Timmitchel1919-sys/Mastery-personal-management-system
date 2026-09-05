@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Check, X } from "lucide-react";
 import { BreadcrumbTrail, PageContainer, PageHeader } from "@/components/layout";
 import { EmptyState, ErrorState } from "@/components/shared";
@@ -11,10 +12,12 @@ import { NotificationPreferencesPanel } from "./NotificationPreferences";
 
 function Row({
   notification,
+  labels,
   onRead,
   onDismiss,
 }: {
   notification: AppNotification;
+  labels: { markRead: string; markUnread: string; dismiss: string };
   onRead: (id: string, read: boolean) => void;
   onDismiss: (id: string) => void;
 }) {
@@ -39,13 +42,13 @@ function Row({
       <div className="flex shrink-0 items-center gap-0.5">
         <IconButton
           size="sm"
-          aria-label={notification.read ? "Mark as unread" : "Mark as read"}
+          aria-label={notification.read ? labels.markUnread : labels.markRead}
           icon={<Check />}
           onClick={() => onRead(notification.id, !notification.read)}
         />
         <IconButton
           size="sm"
-          aria-label="Dismiss"
+          aria-label={labels.dismiss}
           icon={<X />}
           onClick={() => onDismiss(notification.id)}
         />
@@ -69,19 +72,26 @@ export function NotificationsView() {
     savingPrefs,
   } = useNotifications();
 
+  const t = useTranslations("notifications");
+  const rowLabels = {
+    markRead: t("markRead"),
+    markUnread: t("markUnread"),
+    dismiss: t("dismiss"),
+  };
+
   const unread = items.filter((n) => !n.read);
   const earlier = items.filter((n) => n.read);
 
   return (
     <PageContainer size="wide" className="space-y-6">
       <PageHeader
-        title="Notifications"
-        description="Reminders and updates. Recovery Center notifications are separate and never shown here."
+        title={t("title")}
+        description={t("description")}
         breadcrumbs={<BreadcrumbTrail />}
         actions={
           unreadCount > 0 ? (
             <Button variant="ghost" onClick={markAllRead}>
-              Mark all read
+              {t("markAllRead")}
             </Button>
           ) : null
         }
@@ -96,34 +106,41 @@ export function NotificationsView() {
               ))}
             </div>
           ) : status === "error" ? (
-            <ErrorState
-              title="We couldn't load your notifications"
-              description={error ?? "Please try again."}
-              onRetry={reload}
-            />
+            <ErrorState title={t("loadError")} description={error ?? undefined} onRetry={reload} />
           ) : items.length === 0 ? (
-            <EmptyState
-              title="You're all caught up"
-              description="Reminders will appear here as tasks, habits, and reviews come due."
-            />
+            <EmptyState title={t("allCaughtTitle")} description={t("allCaughtBody")} />
           ) : (
             <>
               {unread.length > 0 ? (
                 <section className="space-y-2">
-                  <h2 className="text-subtle text-xs font-medium">Unread ({unread.length})</h2>
+                  <h2 className="text-subtle text-xs font-medium">
+                    {t("unread", { count: unread.length })}
+                  </h2>
                   <ul className="space-y-2">
                     {unread.map((n) => (
-                      <Row key={n.id} notification={n} onRead={markRead} onDismiss={dismiss} />
+                      <Row
+                        key={n.id}
+                        notification={n}
+                        labels={rowLabels}
+                        onRead={markRead}
+                        onDismiss={dismiss}
+                      />
                     ))}
                   </ul>
                 </section>
               ) : null}
               {earlier.length > 0 ? (
                 <section className="space-y-2">
-                  <h2 className="text-subtle text-xs font-medium">Earlier</h2>
+                  <h2 className="text-subtle text-xs font-medium">{t("earlier")}</h2>
                   <ul className="space-y-2">
                     {earlier.map((n) => (
-                      <Row key={n.id} notification={n} onRead={markRead} onDismiss={dismiss} />
+                      <Row
+                        key={n.id}
+                        notification={n}
+                        labels={rowLabels}
+                        onRead={markRead}
+                        onDismiss={dismiss}
+                      />
                     ))}
                   </ul>
                 </section>

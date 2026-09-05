@@ -227,6 +227,24 @@ export function navLabelForHref(href: string): string | undefined {
   return LABEL_BY_HREF.get(href);
 }
 
+/**
+ * The `next-intl` key for a nav destination (Layer 18). `nav.dashboard` for the dashboard,
+ * else `nav.items.<slug>` where `slug` is the href with the leading `/` dropped and the
+ * remaining `/` turned into `_` (`/plan/goals` -> `plan_goals`, `/recovery` -> `recovery`)
+ * — `_` not `.` so the flat message keys don't collide with next-intl's `.` nesting.
+ * Callers pair it with `{ default: item.label }` so an un-keyed destination still shows
+ * English.
+ */
+export function navMessageKey(href: string): string {
+  if (href === "/dashboard") return "nav.dashboard";
+  return `nav.items.${href.replace(/^\//, "").replace(/\//g, "_")}`;
+}
+
+/** Message key for a section header by id (`nav.sections.<id>`). */
+export function navSectionMessageKey(id: string): string {
+  return `nav.sections.${id}`;
+}
+
 /** Whether `href` is the active route for `pathname` (exact match or a parent segment). */
 export function isNavItemActive(pathname: string, href: string): boolean {
   if (href === "/dashboard") return pathname === "/dashboard";

@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { SettingsView } from "@/features/settings";
 
-export const metadata = { title: "Settings" };
+export const metadata: Metadata = { title: "Settings" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Settings"
-      description="Profile, language, theme, notifications, and privacy."
-      plannedLayer={18}
-    />
-  );
+  return <SettingsView />;
 }

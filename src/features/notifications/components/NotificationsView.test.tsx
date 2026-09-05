@@ -1,6 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { renderWithIntl as render } from "@/test/intl";
 import type { AppNotification } from "../notification-schema";
 
 const markRead = vi.fn();

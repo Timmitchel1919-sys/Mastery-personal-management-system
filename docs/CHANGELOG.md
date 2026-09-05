@@ -6,6 +6,35 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 18 — Internationalization & Theme — 2026-09-05
+
+**Added**
+- `next-intl@^4` and `src/i18n/` — a **client-side** i18n architecture (static export, no
+  middleware / `[locale]` route / plugin): `locales.ts`, a `useSyncExternalStore`
+  `localeStore` (localStorage + `<html lang>` sync + cross-tab), `messagesFor`,
+  `I18nProvider` (now the outermost provider), `useActiveLocale`. English + Dutch
+  catalogues in `messages/en.json` / `messages/nl.json`.
+- `src/features/settings/` — the `/settings` page: a **Language** picker (en/nl), the
+  existing **Theme** toggle, a read-only profile, and a link to notification preferences.
+- `src/test/intl.tsx` — `renderWithIntl` / `IntlWrapper` test helpers.
+
+**Changed**
+- `src/config/navigation.ts` — `navMessageKey` / `navSectionMessageKey`; sidebar & bottom
+  navigation resolve labels via `useTranslations()` with an English fallback.
+- The **Notifications** feature (`NotificationsView`, `NotificationPreferences`) is fully
+  migrated to `useTranslations`, including the `{count}` plural on "Unread".
+- `src/app/(app)/settings/page.tsx` — `ModulePlaceholder` → `<SettingsView />`.
+- `docs/ARCHITECTURE.md` §9, `docs/PRODUCT_REQUIREMENTS.md` §13; `docs/DECISIONS.md` —
+  ADR-0027.
+
+**Tests:** `i18n/locales` (locale list, storage fallback chain, en/nl key parity),
+`SettingsView` (4). Nav + notifications component tests updated to `renderWithIntl` (no
+assertion changes).
+
+**Known limitation:** only navigation, Settings, and Notifications use `useTranslations` —
+the rest of the app's copy is English literals, tracked as an incremental per-domain
+migration backlog (ADR-0027). Locale persists to `localStorage`, not Firestore.
+
 ### Layer 17 — Notifications — 2026-09-05
 
 **Added**

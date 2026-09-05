@@ -914,3 +914,53 @@ send — none of which have a runtime today.
 - "Planning-review due" is approximated from a goal's `updatedAt` vs its `reviewFrequency`
   cadence (no dedicated last-reviewed field) — same approximation family as Layers 14 / 16.
 - `notificationPreferences` is a new collection; added to `docs/DATA_MODEL.md`.
+
+---
+
+## ADR-0027 — i18n: `next-intl` client-side, English + Dutch, migrate a slice not the whole app
+**Date:** 2026-09-05 · **Status:** accepted · **Layer:** 18 — Internationalization & Theme
+**Builds on:** ADR-0005 (English + Dutch at launch, Spanish architected-for), ADR-0015 (static export)
+
+**Context.** `CLAUDE.md` §3 requires "no hardcoded user-facing strings — everything through
+the i18n layer (`next-intl`)". Layers 1–17 shipped with English string literals throughout
+(~127 test files, dozens of feature views). Layer 18 must add the i18n architecture and
+Dutch. A full string migration across 17 layers of features is not a one-session task and
+retro-fitting `useTranslations` into every component that a feature-view test renders would
+churn ~30 test files at once.
+
+**Decision.**
+- **`next-intl` v4, client-side only.** The app is a static export (ADR-0015) — no
+  middleware, no `[locale]` route segment, no `next-intl/plugin`, no server
+  `getRequestConfig`. `src/i18n/I18nProvider` (outermost in `Providers`) reads the locale
+  from `localStorage` via a `useSyncExternalStore` `localeStore` (mirrors `lib/theme.ts`'s
+  `themeStore`), loads the bundled `messages/<locale>.json`, and feeds
+  `NextIntlClientProvider`. `useTranslations()` works in every client component under it.
+  `localeStore` also keeps `<html lang>` in sync and reacts to cross-tab changes.
+- **English + Dutch catalogues** (`messages/en.json`, `messages/nl.json`), kept
+  structurally identical (a test asserts the key sets match). English mirrors the
+  pre-i18n copy so untouched assertions keep passing.
+- **Migrate a coherent, visible slice this layer, not everything:** the sidebar / bottom
+  navigation, the new **Settings** page (language picker + theme + profile), and the
+  **Notifications** feature (view + preferences). Everything else stays English and is an
+  explicit, tracked **incremental migration backlog** — §3 becomes an *enforced-going-
+  forward* rule (new strings use `useTranslations`; each domain is migrated as it is next
+  touched). Deliberately left for the backlog: breadcrumbs, page headers, and the shared
+  `EmptyState` / `ErrorState` / `LoadingState` defaults — i18n-ing those would force ~30
+  feature-view test files to add the provider in one commit.
+- **Theme was already built** (Layer 2 — `themeStore`, `ThemeProvider`, `ThemeToggle`).
+  Layer 18's "Theme" contribution is surfacing it on the Settings page; locale, like
+  theme, is `localStorage`-only (cross-device sync via a Firestore mirror is a follow-up).
+- **Test helper `src/test/intl.tsx`** (`renderWithIntl` / `IntlWrapper`) wraps
+  `NextIntlClientProvider` with the English catalogue by default, so the four migrated test
+  files opt in with a one-line change.
+- **New dependency:** `next-intl@^4` (documented here per §8).
+
+**Consequences.**
+- Most of the app is still English regardless of the locale toggle until the backlog is
+  worked through. The toggle visibly affects navigation, Settings, Notifications, and
+  `<html lang>` today.
+- A `nav` message key is derived from a destination's href (`/plan/goals` -> `nav.items.plan_goals`,
+  `_` not `.` to avoid next-intl's key nesting); a component pairs `t.has(key) ? t(key) : item.label`
+  so an unkeyed destination still shows English.
+- ICU features (`{count}` plurals, dates/numbers via `useFormatter`) are available now for
+  new strings.

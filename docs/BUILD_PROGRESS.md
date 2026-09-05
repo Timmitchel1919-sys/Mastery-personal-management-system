@@ -8,16 +8,16 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 17 — Notifications (complete) |
-| **Next approved layer** | Layer 18 — Internationalization & Theme (not started — awaiting explicit go-ahead) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15 (15A–15F) — Recovery Center complete · Layer 16 · **Layer 17** |
-| **In-progress work** | — (Layer 18 is next) |
-| **Test status** | ✅ app: `vitest run` — 127 files, ~688 tests (`notification-schema` + `reminder-scan` + `NotificationsView` + `NotificationPreferences` tests added). ✅ rules: `npm run test:rules` — 3 files, ~44 tests (no rules change in Layer 17 — `notifications` / `notificationPreferences` use the generic owner-only rule). ⚠️ integration: `npm run test:integration` — 34 files **written**; `tests/integration/notifications.test.ts` added (create/mark-read/archive, preferences upsert, user scoping) — not executed in-session (Firestore emulator restriction). ✅ functions: `vitest run` — 16 files, 98 tests (unchanged — Layer 17 has no Cloud Function). |
+| **Current layer** | Layer 18 — Internationalization & Theme (complete) |
+| **Next approved layer** | Layer 19 — PWA & Mobile Readiness (not started — awaiting explicit go-ahead) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15 (15A–15F) — Recovery Center complete · Layer 16 · Layer 17 · **Layer 18** |
+| **In-progress work** | — (Layer 19 is next). **i18n string-migration backlog**: all app copy outside navigation / Settings / Notifications is still English literals; migrate per-domain as each is next touched (ADR-0027). |
+| **Test status** | ✅ app: `vitest run` — 129 files, 696 tests (`i18n/locales` + `SettingsView` tests added; nav + notifications component tests wrapped in `renderWithIntl`). ✅ rules: `npm run test:rules` — 3 files, ~44 tests (no rules change in Layer 18). ⚠️ integration: `npm run test:integration` — 34 files **written**; unchanged this layer (i18n/theme is client-only). ✅ functions: `vitest run` — 16 files, 98 tests (unchanged — Layer 18 has no Cloud Function). |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (49 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `test`, `build`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 17 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 17 — hosting only; `firestore.rules` unchanged — `notifications` / `notificationPreferences` use the generic owner-only rule). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (13/14 + 15C/15E/15F recovery) still not deployed — Spark plan, ADR-0017/0018/0021/0023/0024. Layers 16 & 17 ship **no** Cloud Function (client-composed reports + client reminder scan; server PDF / FCM push deferred — ADR-0025/0026). |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 18 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 18 — hosting only; `firestore.rules` unchanged — i18n/theme are client-only). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (13/14 + 15C/15E/15F recovery) still not deployed — Spark plan, ADR-0017/0018/0021/0023/0024. Layers 16 & 17 ship **no** Cloud Function (client-composed reports + client reminder scan; server PDF / FCM push deferred — ADR-0025/0026). |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · (no new deps in Layer 15A–17 — Layer 16 reuses the browser's print-to-PDF; Layer 17 has no FCM/SW yet) |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · **next-intl 4.14** (Layer 18 — ADR-0027) · (no new deps in Layer 15A–17) |
 
 ---
 
@@ -3548,6 +3548,88 @@ upload. Redeployed to https://mastery-personal-mgmt-system.web.app/ ; smoke-test
 - **Scan reads one repository page (100 rows) per collection** — the app-wide cap.
 - **No i18n yet** — notification strings are English until Layer 18.
 - **Integration test written, not executed in-session** — emulator restriction.
+
+---
+
+### Layer 18 — Internationalization & Theme — ✅ complete (2026-09-05) — committed + pushed + deployed live
+
+The `next-intl` architecture (client-side, English + Dutch) plus the **Settings** page and
+a migrated slice of the UI (navigation, Settings, Notifications). Theme was already built
+in Layer 2 — this layer surfaces it in Settings. New dependency: `next-intl@^4` (ADR-0027).
+No Cloud Function, no `firestore.rules` change. **The rest of the app's copy is still
+English literals — an incremental per-domain migration backlog (ADR-0027).**
+
+**Created — `src/i18n/`:**
+- `locales.ts` — `LOCALES` (`en`, `nl`), `DEFAULT_LOCALE`, labels, `isLocale`,
+  `readStoredLocale` (localStorage → browser language → `en`), `writeStoredLocale`.
+- `locale-store.ts` — a `useSyncExternalStore` store mirroring `lib/theme.ts`'s `themeStore`:
+  holds the locale, syncs `<html lang>`, reacts to cross-tab `storage` events.
+- `messages.ts` — bundled `messagesFor(locale)` with English fallback.
+- `I18nProvider.tsx` — reads the store, feeds `NextIntlClientProvider` (locale + messages +
+  the viewer's tz). Client-only — no middleware / `[locale]` route / `next-intl/plugin`
+  (static export).
+- `use-locale.ts` — `useActiveLocale()` → `{ locale, setLocale }`. `index.ts` barrel.
+- `messages/en.json`, `messages/nl.json` — `common` / `states` / `nav` / `settings` /
+  `notifications` namespaces, structurally identical (a test asserts the key sets match).
+
+**Created — `src/features/settings/`:**
+- `components/SettingsView.tsx` — the `/settings` page: a **Language** `Select` (en/nl, via
+  `useActiveLocale`), the existing **Theme** `ThemeToggle`, a read-only **Profile** (name /
+  email from `useAuth`), and a link to `/notifications` for reminder preferences. Fully
+  i18n via `useTranslations("settings")`. `index.ts` barrel.
+
+**Created — `src/test/intl.tsx`:** `renderWithIntl` / `IntlWrapper` — wrap a render in
+`NextIntlClientProvider` with the English catalogue by default.
+
+**Modified:**
+- `src/providers/index.tsx` — `I18nProvider` is now the outermost provider.
+- `src/config/navigation.ts` — `navMessageKey(href)` / `navSectionMessageKey(id)` return
+  the `next-intl` key for a destination (`/plan/goals` → `nav.items.plan_goals`, `_` not
+  `.`); the comment about future i18n is resolved.
+- `src/components/layout/sidebar-nav.tsx` + `bottom-nav.tsx` — resolve labels via
+  `useTranslations()` + `t.has(key) ? t(key) : item.label`; `aria-label` uses `nav.primary`.
+  Their two test files now render through `renderWithIntl`.
+- `src/features/notifications/components/NotificationsView.tsx` + `NotificationPreferences.tsx`
+  — every string via `useTranslations("notifications")` (incl. category labels and the
+  `{count}` plural on "Unread"); their two test files wrap in `renderWithIntl`.
+- `src/app/(app)/settings/page.tsx` — `ModulePlaceholder` → `<SettingsView />`.
+- `package.json` — `next-intl@^4.14`.
+- `docs/ARCHITECTURE.md` §9, `docs/PRODUCT_REQUIREMENTS.md` §13; `docs/DECISIONS.md` —
+  ADR-0027.
+
+**Tests added:** `src/i18n/locales.test.ts` (locale list + default, `readStoredLocale`
+fallback chain, `messagesFor` fallback, en/nl key-set parity);
+`src/features/settings/components/SettingsView.test.tsx` (4 — renders controls + profile,
+switching the language updates `localeStore`, Dutch copy in the `nl` locale, notifications
+link). Nav + notifications component tests updated to `renderWithIntl` (no assertion
+changes — the English catalogue mirrors the old copy).
+
+**Verification:** app `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (129 files / 696) ·
+`build` ✅ (49 routes, static export, no warnings) · `format:check` ✅. functions unchanged.
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production NEXT_PUBLIC_APP_URL=https://mastery-personal-mgmt-system.web.app npm run build`
+then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project
+mastery-personal-mgmt-system --non-interactive` — `firestore.rules` unchanged, skipped on
+upload. Redeployed to https://mastery-personal-mgmt-system.web.app/ ; smoke-tested
+`/settings` in a fresh tab — redirects to sign-in, no console errors.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Settings**. Set **Language** to *Nederlands*.
+2. The sidebar / bottom navigation, breadcrumb section labels, Settings, and the
+   **Notifications** page (`/notifications`) switch to Dutch immediately; `<html lang>`
+   becomes `nl`. The rest of the app stays English (migration backlog).
+3. Reload the page → the choice sticks (localStorage). Open a second tab → it follows.
+4. Toggle **Theme** (light / dark / system) — unchanged from Layer 2, now reachable here.
+
+**Known limitations:**
+- **Partial migration** — only navigation, Settings, and Notifications use `useTranslations`.
+  Every other view, plus breadcrumbs, page headers, form labels, validation messages, and
+  the shared `EmptyState`/`ErrorState`/`LoadingState` defaults, are still English literals.
+  Tracked as an incremental per-domain backlog (ADR-0027); new strings must use i18n.
+- **Locale is `localStorage`-only** — not persisted to Firestore, so a fresh device starts
+  from browser language, not the last choice. A Firestore mirror is a follow-up.
+- **No RTL locale** yet; `messages/` has `en` + `nl` only (Spanish architected-for per
+  ADR-0005).
 
 ---
 

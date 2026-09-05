@@ -154,10 +154,16 @@ interface GoalRepository {
 
 ## 9. Internationalization & theme
 
-- `next-intl` with locale files in `locales/`. No literal user-facing strings in
-  components. `I18nProvider` reads the profile preference, falls back to browser language.
+- `next-intl` **v4, client-side only** (static export — no middleware / `[locale]` segment /
+  plugin). Catalogues live in `messages/<locale>.json` (`en`, `nl`); `src/i18n/I18nProvider`
+  (outermost provider) loads the active catalogue and feeds `NextIntlClientProvider`.
+  `src/i18n/localeStore` (a `useSyncExternalStore` store like `themeStore`) holds the locale
+  in `localStorage`, keeps `<html lang>` in sync, and reacts to browser language on first
+  run. `useTranslations()` in client components; new strings must use it (`CLAUDE.md` §3),
+  and each domain's existing literals are migrated incrementally — see ADR-0027.
 - `ThemeProvider` applies `dark` / `light` / `system`; an inline pre-hydration script sets
-  the initial class to avoid theme flash. Preference stored in `users/{uid}.theme`.
+  the initial class to avoid theme flash. Locale and theme are `localStorage`-only today
+  (a Firestore mirror for cross-device sync is a follow-up).
 
 ## 10. Performance guardrails
 

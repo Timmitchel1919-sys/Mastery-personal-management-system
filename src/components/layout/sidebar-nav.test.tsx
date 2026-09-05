@@ -1,13 +1,14 @@
-import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { renderWithIntl } from "@/test/intl";
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/plan/goals" }));
 
+import { screen } from "@testing-library/react";
 import { SidebarNav } from "./sidebar-nav";
 import { TooltipProvider } from "@/components/ui";
 
 function renderNav() {
-  return render(
+  return renderWithIntl(
     <TooltipProvider>
       <SidebarNav />
     </TooltipProvider>,

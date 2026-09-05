@@ -211,6 +211,15 @@ wrappers. Detect browser language on first login when no preference exists; chan
 settings; persist in Firestore; restore across sessions/devices; locale-aware dates/
 numbers/times; stored domain values language-neutral where possible.
 
+> **Layer 18 status.** The `next-intl` architecture ships (client-side, `en` + `nl`
+> catalogues, `I18nProvider`, `localeStore`, `<html lang>` sync, first-run browser-language
+> detection, `useFormatter` available). Migrated to `useTranslations`: the sidebar / bottom
+> **navigation**, the new **Settings** page (language + theme + profile), and the
+> **Notifications** feature. The rest of the app's copy is English and is an
+> **incremental migration backlog** (ADR-0027) — new strings must use `useTranslations`.
+> Locale (like theme) persists to `localStorage`, not yet Firestore. **Theme** was built in
+> Layer 2 and is surfaced on the Settings page here.
+
 ## 14. Theme (Layer 18)
 
 Dark / light / system. Use the retained Mastery design system (never the Compass palette

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button, Card, CardContent, FormField, Input, Switch } from "@/components/ui";
 import {
   NOTIFICATION_CATEGORIES,
-  NOTIFICATION_CATEGORY_LABEL,
   defaultNotificationPreferences,
   type NotificationCategory,
   type NotificationPreferences,
@@ -32,6 +32,7 @@ export function NotificationPreferencesPanel({
       }
     : defaultNotificationPreferences();
 
+  const t = useTranslations("notifications.prefs");
   const [draft, setDraft] = useState<NotificationPreferencesInput>(initial);
   const [savedFlash, setSavedFlash] = useState(false);
 
@@ -45,13 +46,13 @@ export function NotificationPreferencesPanel({
   return (
     <Card>
       <CardContent className="space-y-4 p-6">
-        <h2 className="font-medium">Preferences</h2>
+        <h2 className="font-medium">{t("title")}</h2>
 
         <div className="space-y-2">
-          <p className="text-subtle text-xs">Which reminders you want</p>
+          <p className="text-subtle text-xs">{t("whichReminders")}</p>
           {NOTIFICATION_CATEGORIES.map((category: NotificationCategory) => (
             <label key={category} className="flex items-center justify-between gap-3 text-sm">
-              <span>{NOTIFICATION_CATEGORY_LABEL[category]}</span>
+              <span>{t(`categories.${category}`)}</span>
               <Switch
                 checked={draft.categories[category] !== false}
                 onCheckedChange={(next) =>
@@ -63,7 +64,7 @@ export function NotificationPreferencesPanel({
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <FormField label="Quiet hours from" optional htmlFor="qh-start">
+          <FormField label={t("quietFrom")} optional htmlFor="qh-start">
             <Input
               id="qh-start"
               type="time"
@@ -71,7 +72,7 @@ export function NotificationPreferencesPanel({
               onChange={(e) => set("quietHoursStart", e.target.value || null)}
             />
           </FormField>
-          <FormField label="Quiet hours to" optional htmlFor="qh-end">
+          <FormField label={t("quietTo")} optional htmlFor="qh-end">
             <Input
               id="qh-end"
               type="time"
@@ -81,11 +82,7 @@ export function NotificationPreferencesPanel({
           </FormField>
         </div>
 
-        <FormField
-          label="Time zone"
-          htmlFor="notif-tz"
-          description="Used to decide what counts as “today”."
-        >
+        <FormField label={t("timeZone")} htmlFor="notif-tz" description={t("timeZoneHelp")}>
           <Input
             id="notif-tz"
             value={draft.timeZone}
@@ -94,7 +91,7 @@ export function NotificationPreferencesPanel({
         </FormField>
 
         <div className="grid grid-cols-2 gap-3">
-          <FormField label="Milestone lead (days)" htmlFor="lead-days">
+          <FormField label={t("milestoneLead")} htmlFor="lead-days">
             <Input
               id="lead-days"
               type="number"
@@ -104,7 +101,7 @@ export function NotificationPreferencesPanel({
               onChange={(e) => set("milestoneLeadDays", Number(e.target.value) || 0)}
             />
           </FormField>
-          <FormField label="KPI stale after (days)" htmlFor="stale-days">
+          <FormField label={t("kpiStale")} htmlFor="stale-days">
             <Input
               id="stale-days"
               type="number"
@@ -116,11 +113,7 @@ export function NotificationPreferencesPanel({
           </FormField>
         </div>
 
-        <FormField
-          label="Push notifications"
-          htmlFor="push-toggle"
-          description="Not available in this build yet — reminders show here in the app."
-        >
+        <FormField label={t("push")} htmlFor="push-toggle" description={t("pushHelp")}>
           <Switch
             id="push-toggle"
             checked={draft.pushEnabled}
@@ -139,9 +132,9 @@ export function NotificationPreferencesPanel({
               }
             }}
           >
-            Save preferences
+            {t("save")}
           </Button>
-          {savedFlash ? <span className="text-subtle text-xs">Saved.</span> : null}
+          {savedFlash ? <span className="text-subtle text-xs">{t("saved")}</span> : null}
         </div>
       </CardContent>
     </Card>
