@@ -8,16 +8,16 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 14 — Weekly AI Summary (complete — scheduled Cloud Function written + tested, **not deployed**) |
-| **Next approved layer** | Layer 15 — Recovery Center (15A–15F) (not started — awaiting explicit go-ahead) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · **Layer 14** |
-| **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 103 files, 566 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D–14; rules untouched — the generic owner-only subcollection rule already covers `weeklySummaries`/`notifications`). ⚠️ integration: `npm run test:integration` — 26 files, 64 tests **written**; the 9D/9E/10A–10C/11A–11D/12/13/14 tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`); 10D adds no new integration test. ✅ functions: 10 files, 58 tests (5 new scheduled/weekly-summary test files added this layer, 25 new tests; all against in-memory fakes, no real Firestore/AI network call — see Layer 14 log entry). |
-| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`, `format:check`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 14 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 14 — hosting only). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works) — confirmed present but unrelated to this layer's changes. **Cloud Functions still not deployed** — the Layer 13 AI callables and this layer's `generateWeeklySummary` scheduled function are all written and unit-tested but require a Blaze-plan upgrade the owner explicitly chose to defer (ADR-0017/0018); the AI Coach page (with its new Weekly Summaries tab) is live but coach calls will show a normalized error until functions are deployed, and no summaries will be generated until then either. |
+| **Current layer** | Layer 15A — Recovery Center Privacy Architecture (complete) |
+| **Next approved layer** | Layer 15B — Recovery Data Model (not started — awaiting explicit go-ahead) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · **Layer 15A** |
+| **In-progress work** | Layer 15 (Recovery Center) continues with 15B–15F on future "Volgende laag" requests |
+| **Test status** | ✅ app: `vitest run` — 107 files, 585 tests. ✅ rules: `npm run test:rules` — 3 files, 29 tests (new `tests/rules/recovery.rules.test.ts`, 7 tests — not re-run in-session, same emulator restriction as integration tests, but the underlying rule is unchanged so no regression risk). ⚠️ integration: `npm run test:integration` — 27 files, 69 tests **written**; the 9D/9E/10A–10C/11A–11D/12/13/14/15A tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`); 10D adds no new integration test. ✅ functions: 10 files, 58 tests (unchanged — 15A is app-only, no Cloud Function). |
+| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: unchanged. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 15A built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 15A — hosting + Firestore rules; `firestore.rules` gained an explanatory comment, no behavior change, redeployed). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works) — confirmed present but unrelated to this layer's changes. Cloud Functions (Layer 13/14) still not deployed — unchanged this layer, see ADR-0017/0018. |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · (no new deps in Layer 15A — PIN hashing uses the browser's native Web Crypto) |
 
 ---
 
@@ -2728,6 +2728,111 @@ links was confirmed present but predates this layer).
   with no reference to prior weeks' lessons or priorities.
 - **`notifications` has no delivery/consumption UI** — the collection now has real
   documents in it, but no bell icon, list, or read/unread UI exists until Layer 17.
+
+---
+
+### Layer 15A — Recovery Center Privacy Architecture — ✅ complete (2026-09-08) — committed + pushed + deployed live
+
+The Recovery Center's "additional privacy gate" per `docs/RECOVERY_PRIVACY.md` §1: a PIN
+set up and entered before anything else in the module renders, architected so a future
+WebAuthn/biometric method is a data change, not a schema rewrite. No behavioral tracking
+data exists yet — `recoveryGoals` and everything else in the spec's §4 feature list is
+15B onward. Full rationale: ADR-0019.
+
+**Created — `src/features/recovery/`:**
+- `schema.ts` — `LOCK_METHODS` (currently just `"pin"`). `recoveryProfileSchema` — a
+  **singleton** keyed by the user's own uid (`recoveryProfiles/{uid}`, not an auto-id):
+  `lockMethod`, `pinHash`, `pinSalt`, `failedAttempts`, `lockedUntil`. Deliberately holds
+  **no** behavioral fields — those belong to `recoveryGoals` (15B) per the spec's actual
+  field list. `pinFormSchema` (setup: pin + confirmPin match) / `pinEntrySchema` (unlock:
+  pin only), both requiring a 4–6 digit numeric PIN.
+- `pin-crypto.ts` — client-only salted SHA-256 via Web Crypto `SubtleCrypto` (no new
+  dependency): `generateSalt`, `hashPin`, `verifyPin`. Documented as a **privacy shield,
+  not a security boundary** — the account owner already has full access via Firebase Auth
+  regardless of the PIN; there is no server secret this protects.
+- `recovery-lock-repository.ts` — `getRecoveryLock` (`null` = no PIN set up yet, using the
+  existing owner-only Firestore rule, no rule change needed), `setRecoveryPin`,
+  `verifyRecoveryPin` (client-tracked lockout: 5 wrong PINs in a row → 30s lockout, tracked
+  in the same doc via normal owner-writes), `resetRecoveryPin` ("forgot PIN" — deletes the
+  doc entirely, safe today since it holds nothing else).
+- `use-recovery-lock.ts` — `useRecoveryLock()`: loads lock state; "unlocked" is tracked in
+  `sessionStorage` (not `localStorage`), keyed by uid, with a 15-minute TTL — a new tab or
+  a restarted browser always re-prompts, the more privacy-conservative default.
+- `components/` — `PinSetupForm`, `PinEntryForm` (with a "Forgot your PIN?" reset-confirm
+  dialog), `RecoveryGate` (the orchestrator: loading/error/setup/entry/unlocked, nothing
+  behind it renders until unlocked), `RecoveryHomeView` (shown once unlocked — the
+  privacy assurances made human-readable, a "Lock" button, and an honest "coming in
+  15B–15F" list rather than fabricated feature content).
+- `index.ts` barrel.
+
+**Modified:**
+- `src/app/(app)/recovery/page.tsx` renders `<RecoveryGate><RecoveryHomeView /></RecoveryGate>`
+  (was a `ModulePlaceholder`).
+- `firestore.rules` — no behavior change; added a comment flagging that a later sublayer
+  adding a Cloud-Function-only-write recovery collection (relapses ~15C, coach sessions
+  ~15E, accountability config ~15F) must restructure the generic owner-only wildcard to
+  exclude it by name, since Firestore ORs every matching rule together — a narrower
+  `match` block cannot override a broader one that's still present.
+
+**Tests added:** `pin-crypto.test.ts` (salt uniqueness, deterministic hash for the same
+salt+pin, different hash for a different salt or pin, verify accepts/rejects correctly),
+`schema.test.ts` (pin form match/length/digit validation, stored record validation, unknown
+lock method rejected), `components/RecoveryGate.test.tsx` (setup shown with no PIN;
+submits a matching pair; entry shown with a PIN; submits to unlock; forgot-PIN reset flow;
+renders children only once unlocked; error state — hook mocked),
+`components/RecoveryHomeView.test.tsx` (privacy assurances + upcoming list render; Lock
+button calls `lock`); `tests/rules/recovery.rules.test.ts` (a dedicated regression suite
+for `recoveryProfiles` specifically, mirroring the generic subcollection tests — owner
+create/read/update, cross-user read/write denied, unauthenticated denied, spoofed
+`createdBy` rejected; **written, not executed in-session**); `tests/integration/
+recovery-lock.test.ts` (no lock before setup; set + verify + reject wrong PIN; 5-failure
+lockout then `rate-limited`; reset clears the doc and re-throws `not-found`; user scoping;
+**written, not executed in-session** — same emulator restriction as prior layers). App
+suite: 107 files / 585 tests.
+
+**Verification:** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (107/585) · `build` ✅ (47
+routes, static export, no warnings) · `format:check` ✅. `test:rules` — new file written,
+not executed (emulator restriction); the underlying rule is unchanged so no regression
+risk from this layer. `test:integration` — see above. Functions suite unaffected (15A is
+entirely client-side).
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production NEXT_PUBLIC_APP_URL=https://mastery-personal-mgmt-system.web.app npm run build`
+then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project
+mastery-personal-mgmt-system --non-interactive` — `firestore.rules` was actually
+re-uploaded this time (its content changed, comment-only) though behavior is identical.
+Redeployed to https://mastery-personal-mgmt-system.web.app/ ; smoke-tested `/recovery` in
+a fresh browser tab — loads (title "Recovery Center · Mastery"), redirects to sign-in
+(auth guard), no new console errors.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Recovery Center** (bottom of the sidebar, marked private).
+2. First visit: **Protect the Recovery Center** setup form appears. Enter a 4–6 digit PIN
+   twice (mismatched → inline error) → **Set PIN**. The module unlocks immediately and
+   shows the Recovery Center home with privacy assurances and a "coming next" list.
+3. Click **Lock** → back to the gate. Reload the page within 15 minutes → **still
+   unlocked** (sessionStorage). Close and reopen the tab (or wait past 15 minutes) → PIN
+   entry appears again.
+4. Enter the wrong PIN 5 times in a row → a "too many attempts" message with a ~30s
+   cooldown; entering the correct PIN after that succeeds and clears the counter.
+5. On the entry screen, click **Forgot your PIN?** → confirm reset → immediately taken to
+   the setup form again to choose a new PIN.
+6. Firestore console → `users/{uid}/recoveryProfiles/{uid}` (note: id equals your own
+   uid) with `pinHash`/`pinSalt` (never the PIN itself) and audit fields. Confirm no other
+   recovery collection exists yet.
+7. Confirm the Recovery Center never appears on the Dashboard, is not reachable from any
+   search/command-palette content lookup, and generates no notification.
+
+**Known limitations:**
+- **PIN is a privacy shield, not encryption** — by design (ADR-0019); documented plainly
+  so it's never mistaken for a stronger guarantee later.
+- **No biometric/WebAuthn method yet** — `LOCK_METHODS` has one value; the schema is
+  extensible but nothing beyond PIN is implemented.
+- **"Forgot PIN" deletes the whole profile doc** — safe today (no other data lives there);
+  must be revisited once 15B+ potentially extends this document.
+- **No behavioral tracking data yet** — `recoveryGoals`, check-ins, relapses, coping
+  toolkit, Recovery Coach, and accountability partner are all Layer 15B onward.
+- **Rules test not executed in-session** — same Firestore-emulator restriction as every
+  integration/rules test this session (JDK loopback-selector issue).
 
 ---
 

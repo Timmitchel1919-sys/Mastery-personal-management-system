@@ -1,13 +1,12 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { RecoveryGate, RecoveryHomeView } from "@/features/recovery";
 
-export const metadata = { title: "Recovery Center" };
+export const metadata: Metadata = { title: "Recovery Center" };
 
 export default function Page() {
   return (
-    <ModulePlaceholder
-      title="Recovery Center"
-      description="A separate, private module for self-identified behavioral patterns. Opens behind a privacy gate."
-      plannedLayer={15}
-    />
+    <RecoveryGate>
+      <RecoveryHomeView />
+    </RecoveryGate>
   );
 }

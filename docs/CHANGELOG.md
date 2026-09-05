@@ -6,6 +6,37 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 15A — Recovery Center Privacy Architecture — 2026-09-08
+
+**Added**
+- `src/features/recovery/` — the Recovery Center's privacy gate: a client-side salted
+  SHA-256 PIN (`pin-crypto.ts`, Web Crypto, no new dependency), a singleton
+  `recoveryProfiles/{uid}` lock config (`lockMethod` extensible for a future WebAuthn
+  method, `pinHash`/`pinSalt`, client-tracked failed-attempt lockout), session-scoped
+  "unlocked" state (`sessionStorage`, 15-minute TTL, cleared on tab close), and a
+  "forgot PIN" reset flow. `RecoveryGate` wraps the entire `/recovery` route so nothing
+  behind it renders until unlocked; `RecoveryHomeView` shows the privacy assurances and an
+  honest "coming in 15B–15F" list rather than fabricated feature content.
+- `/recovery` renders the real gate + home (was a placeholder).
+- Tests: pin-crypto/schema unit tests; `RecoveryGate`/`RecoveryHomeView` component tests;
+  a dedicated `tests/rules/recovery.rules.test.ts` regression suite for `recoveryProfiles`
+  specifically; a lock-flow emulator integration test (written; not executed in-session).
+
+**Changed**
+- `firestore.rules` — comment-only: flags that a later sublayer adding a
+  Cloud-Function-only-write recovery collection must restructure the generic owner-only
+  wildcard rule to exclude it (Firestore ORs every matching rule together, so a narrower
+  block alongside it cannot restrict anything on its own).
+- `docs/RECOVERY_PRIVACY.md` — added the PIN gate's own access-path row to §8's table and
+  a Layer 15A status note.
+- `docs/DATA_MODEL.md` annotates `recoveryProfiles`.
+- `docs/DECISIONS.md` — ADR-0019.
+
+**Known limitation:** the PIN protects against casual access, not the account owner —
+documented explicitly as a privacy shield, not encryption. No behavioral tracking data
+(`recoveryGoals`, check-ins, coping toolkit, Recovery Coach, accountability partner)
+exists yet — that's Layer 15B onward.
+
 ### Layer 14 — Weekly AI Summary — 2026-09-04 — scheduled Cloud Function written and unit-tested, not yet deployed
 
 **Added**

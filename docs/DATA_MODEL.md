@@ -68,7 +68,7 @@ users/{uid}/aiUsageMonthly/{month}              one rollup doc per month: reques
 users/{uid}/aiCallLogs/{logId}                  per-call audit record: intent, inputTokens/outputTokens, latencyMs, outcome, costUsd — cost/audit trail, no client UI yet (Layer 13)
 
 # Recovery — separately protected (see RECOVERY_PRIVACY.md)
-users/{uid}/recoveryProfiles/{profileId}
+users/{uid}/recoveryProfiles/{uid}             singleton, id == uid: lockMethod ("pin", extensible), pinHash/pinSalt (salted SHA-256, client-side only), failedAttempts, lockedUntil — the privacy gate itself, not behavioral data (Layer 15A). recoveryGoals/checkIns/relapses/copingActions/accountability/coach-sessions below are all reserved, not built until 15B+
 users/{uid}/recoveryGoals/{goalId}
 users/{uid}/recoveryGoals/{goalId}/checkIns/{checkInId}
 users/{uid}/recoveryGoals/{goalId}/relapses/{relapseId}

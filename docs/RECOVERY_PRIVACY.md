@@ -103,6 +103,7 @@ details, sensitive notes, unapproved records.
 
 | Path | Mechanism | Auth |
 |---|---|---|
+| User sets up / verifies / resets the Recovery Center PIN | client SDK read/write, `recoveryProfiles/{uid}` | auth + owner rule — **this is** the privacy gate, not behind it |
 | User views own recovery data | client SDK read | auth + owner rule + privacy gate |
 | User logs relapse / edits coach session / configures partner | Cloud Function | auth + owner check |
 | Accountability partner views shared projection | Cloud Function | auth + active grant + scope filter |
@@ -110,3 +111,9 @@ details, sensitive notes, unapproved records.
 | Data deletion | Cloud Function | auth + owner + confirmation |
 
 Any new access path must be added to this table in the same layer that introduces it.
+
+> **Layer 15A status:** the privacy gate above (PIN setup/entry/reset,
+> `src/features/recovery/`) is implemented and unit-tested. The PIN is a shield against
+> casual/shoulder-surf access, not a security boundary against the account owner — real
+> security is Firebase Auth + the owner-only rule on `recoveryProfiles`, same as any other
+> collection. `recoveryGoals` and everything else in §2 (15B onward) does not exist yet.

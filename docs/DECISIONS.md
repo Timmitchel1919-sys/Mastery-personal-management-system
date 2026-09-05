@@ -496,3 +496,73 @@ its delivery/consumption UI).
 - `listActiveUserIds` reads every active user's profile once per run; fine at today's
   scale, revisit (batching, a materialized "due today" index) if the user base grows large
   enough to make a full daily scan expensive.
+
+---
+
+## ADR-0019 — Recovery Center privacy gate: a client-side PIN, a singleton profile keyed by uid, session-scoped unlock
+**Date:** 2026-09-08 · **Status:** accepted · **Layer:** 15A — Recovery Center Privacy Architecture
+
+**Context.** `docs/RECOVERY_PRIVACY.md` §1 requires "an additional privacy gate... before
+opening the module — PIN protection first, architected for future biometric/WebAuthn" on
+top of the owner-only Firestore rules every collection already has. §2 reserves
+`users/{uid}/recoveryProfiles/{profileId}` without describing its fields (§2's field list
+— "behavior, start date, motivation, triggers..." — describes `recoveryGoals`, a different
+collection, not yet built). Three design questions needed answering before any code: what
+the PIN actually protects against, where its config lives, and how "unlocked" persists.
+
+**Decision.**
+- **The PIN is a privacy shield, not a security boundary.** It protects against a
+  shoulder-surfer or someone picking up an already-signed-in device casually opening the
+  module — not against the account owner, who already has full Firebase Auth access to
+  their own data regardless. This framing (stated explicitly in `schema.ts`'s doc comment)
+  is why a client-side salted-SHA-256 hash-and-compare (`pin-crypto.ts`, Web Crypto
+  `SubtleCrypto`, no new dependency) is an appropriate implementation: there is no
+  server-side secret to protect, so there is nothing a server-mediated check would add
+  here that the owner-only Firestore rule doesn't already provide.
+- **`recoveryProfiles/{uid}`** — a singleton keyed by the user's own uid (not an
+  auto-generated id), holding only lock-gate fields (`lockMethod`, `pinHash`, `pinSalt`,
+  `failedAttempts`, `lockedUntil`). `lockMethod` is an enum with a single value today
+  (`"pin"`) specifically so a future WebAuthn method is a data/logic change, not a schema
+  rewrite. This collection intentionally carries **no** behavioral data — `recoveryGoals`
+  (15B) is where "behavior, triggers, motivation..." lives, per §2's actual description.
+- **Client-tracked lockout, not a Cloud Function.** 5 wrong PINs in a row locks further
+  attempts out for 30 seconds, tracked entirely in the `recoveryProfiles` doc via normal
+  client writes (owner-only rule already sufficient — no relapse/coach/accountability data
+  exists in this collection to require Cloud-Function mediation per §3). A determined
+  attacker with Firestore write access already has the user's Firebase Auth session, at
+  which point the PIN was never the security boundary anyway.
+- **Unlocked state lives in `sessionStorage`, keyed by uid, with a 15-minute TTL** —
+  cleared when the tab closes, so a new tab or a restarted browser always re-prompts. This
+  is more privacy-conservative than `localStorage` (which would stay unlocked across
+  browser restarts) at the cost of re-prompting slightly more often than some users might
+  want; revisit only if that trade-off proves wrong in practice.
+- **"Forgot your PIN" deletes the whole `recoveryProfiles` doc**, forcing setup again.
+  Safe today because the collection holds nothing but lock config; this must be
+  reconsidered before Layer 15B adds real data to a `recoveryProfiles` document if that
+  document's shape ever grows beyond pure lock-gate fields.
+- **`firestore.rules` unchanged** — the existing generic owner-only subcollection rule
+  already covers `recoveryProfiles` correctly for this layer's fully-client-writable
+  lock config. A code comment now flags that a later sublayer adding a
+  Cloud-Function-only-write collection (relapses ~15C, coach sessions ~15E, accountability
+  config ~15F) must restructure that generic match to exclude the new collection by name,
+  since Firestore ORs every matching rule together — a narrower `match` block placed
+  alongside the wildcard cannot make anything *more* restrictive on its own. A dedicated
+  `tests/rules/recovery.rules.test.ts` regression test was added anyway (mirroring the
+  generic subcollection tests but specific to `recoveryProfiles`), so a future rules
+  change to this exact path is caught immediately rather than relying on the generic
+  suite alone.
+- **Module shell:** `RecoveryGate` wraps the entire `/recovery` route; nothing behind it
+  (including the honest "coming in 15B–15F" home screen) mounts before `unlocked` is true.
+  No dashboard, search, or notification code references Recovery Center — true before this
+  layer and unchanged by it (allowlist, not denylist, per §1/§3).
+
+**Consequences.**
+- The PIN adds real friction against casual access without pretending to be encryption —
+  documented plainly so a future contributor doesn't mistake it for a stronger guarantee
+  than it is.
+- If `recoveryProfiles` later needs to hold more than lock config, "forgot PIN deletes the
+  doc" must be revisited (e.g. split lock fields into a nested map so a reset can clear
+  just those) — flagged above, not solved here since no such data exists yet.
+- Building the actual behavioral tracking (`recoveryGoals` and everything in §4) is
+  entirely deferred to Layer 15B onward, per `CLAUDE.md` §7's "implement only the
+  requested sublayer."
