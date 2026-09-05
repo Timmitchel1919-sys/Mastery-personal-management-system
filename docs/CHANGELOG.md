@@ -6,6 +6,37 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 12 — KPI, Analytics & Life Score — 2026-09-04
+
+**Added**
+- `src/features/kpis/` — KPI definitions over `users/{uid}/kpis` with a free-text category,
+  0–3 pillars, unit, `direction` (higher/lower-is-better), nullable target, a
+  user-configurable `weight` (1–5) for the Life Score, and goal link; pure
+  `kpiAttainment(kpi, value)` (0–100 toward the target, `null` with no target set); a
+  separate append-only `kpiEntries` time series (the KPI never stores a "current value");
+  `kpiRepository`/`listActiveKpis`, `kpiEntryRepository`/`listRecentKpiEntries`;
+  `summarizeKpis`; `useKpis`; UI (`KpisView`, `KpiForm`, `KpiDialog`, `AddKpiEntryDialog`,
+  `KpiCard` with an attainment badge, progress bar, and a sparkline of recent entries).
+- `src/features/life-score/` — a documented, configurable Life Score: `computeLifeScore`
+  (pure) is the weight-average of every scorable KPI's attainment, excluding KPIs with no
+  target or no entry rather than scoring them 0, and always returning the contributing
+  `factors` so the score is never unexplained; `lifeScoreEntries` preserves saved snapshots
+  as history (`saveToday` upserts by date); UI (`LifeScoreView` with the score, its
+  contributing factors, and a history sparkline; `SaveScoreDialog`).
+- `src/features/trends/` — a metric picker (Life Score or any KPI) over a `Sparkline` with
+  min/max/average/latest/change stats (`summarizeTrend`, pure).
+- `src/components/shared/Sparkline.tsx` — a small dependency-free SVG line chart (optional
+  dashed target line, accessible `role="img"`) — no charting library existed yet, and this
+  covers every "trend over time" need this layer introduces.
+- `/analytics/kpis`, `/analytics/life-score`, `/analytics/trends` render the real features
+  (were placeholders). `/analytics/reports` stays a placeholder (Layer 16).
+- Tests: schema/stats/pure-formula unit tests across all three features; `KpisView`,
+  `LifeScoreView`, `TrendsView`, `Sparkline` (mocked hooks / direct render); KPI and Life
+  Score emulator integration tests (written; not executed in-session — Firestore emulator).
+
+**Changed**
+- `docs/DATA_MODEL.md` annotation for `kpis`, `kpiEntries`, `lifeScoreEntries`.
+
 ### Layer 11D — Skills — 2026-09-04 — closes the Grow domain (11A–11D)
 
 **Added**

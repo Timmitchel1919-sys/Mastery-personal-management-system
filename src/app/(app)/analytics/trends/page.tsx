@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { TrendsView } from "@/features/trends";
 
-export const metadata = { title: "Trends" };
+export const metadata: Metadata = { title: "Trends" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Trends"
-      description="Time-series views and comparisons across your metrics."
-      plannedLayer={12}
-    />
-  );
+  return <TrendsView />;
 }

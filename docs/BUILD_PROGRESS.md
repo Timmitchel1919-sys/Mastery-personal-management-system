@@ -8,14 +8,14 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 11D — Skills (complete) — **closes the Grow domain** |
-| **Next approved layer** | Layer 12 — KPI, Analytics & Life Score (not started — awaiting explicit go-ahead) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · **Layer 11 (11A–11D) — Grow domain complete** |
+| **Current layer** | Layer 12 — KPI, Analytics & Life Score (complete) |
+| **Next approved layer** | Layer 13 — General AI Architecture (not started — awaiting explicit go-ahead) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · **Layer 12** |
 | **In-progress work** | none |
-| **Test status** | ✅ app: `vitest run` — 90 files, 507 tests (2 files timed out once mid-run on unrelated pre-existing tests — `PomodoroView.test.tsx`, `sidebar-nav.test.tsx` — confirmed flaky by re-running in isolation, both pass; not caused by this layer). ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D–11D; rules untouched). ⚠️ integration: `npm run test:integration` — 22 files, 54 tests **written**; the 9D/9E/10A–10C/11A–11D tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`); 10D adds no new integration test — see its layer log entry. ✅ functions: 1 file, 5 tests. |
+| **Test status** | ✅ app: `vitest run` — 99 files, 550 tests. ✅ rules: `npm run test:rules` — 2 files, 22 tests (not re-run in 9D–12; rules untouched). ⚠️ integration: `npm run test:integration` — 24 files, 58 tests **written**; the 9D/9E/10A–10C/11A–11D/12 tests were not executed in-session (the Firestore emulator fails to boot here — JDK loopback-selector restriction, see `firestore-debug.log`); 10D adds no new integration test — see its layer log entry. ✅ functions: 1 file, 5 tests. |
 | **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (47 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `build`, `test`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 11D built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 11D). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions not deployed (needs Blaze). |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 12 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 12). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions not deployed (needs Blaze). |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
 | **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · (no new deps in Layer 6) |
 
@@ -2309,6 +2309,152 @@ browser tab — redirects to sign-in (auth guard working), no console errors.
   trade-off as habits/routines/learning) — no realtime, no pagination UI.
 - This closes the Grow domain (11A–11D); Layer 12 (KPI, Analytics & Life Score) has not been
   started and awaits the owner's explicit go-ahead per `CLAUDE.md` §7.
+
+---
+
+### Layer 12 — KPI, Analytics & Life Score — ✅ complete (2026-09-04) — committed + pushed + deployed live
+
+KPI definitions and entries over `users/{uid}/kpis` + `users/{uid}/kpiEntries`, a
+documented and configurable Life Score over `users/{uid}/lifeScoreEntries`, and a Trends
+view comparing any KPI or the Life Score over time. Turns on the three `/analytics/*`
+routes reserved for this layer (`kpis`, `life-score`, `trends`); `/analytics/reports` stays
+a placeholder (Layer 16). The dashboard's `lifeScore`/`kpiOverview` fields
+(`dashboard-aggregate.ts`) are left unwired, matching this codebase's established
+precedent — every prior domain layer (8/9/10/11) also left its reserved dashboard slot
+untouched; wiring the dashboard has never been bundled into the layer that introduces the
+underlying data.
+
+**Created — `src/features/kpis/`:**
+- `schema.ts` — `KPI_DIRECTIONS` (higher-is-better / lower-is-better). `kpiSchema` (stored:
+  title, description, free-text `category`, 0–3 pillars, `unit`, `direction`,
+  `targetValue` nullable, `weight` 1–5 — its configurable influence on the Life Score —
+  goal link, notes). `kpiCreateSchema`, `kpiUpdateSchema` (`.partial()`). `kpiFormSchema` +
+  `kpiInputFromForm`. **Pure** `kpiAttainment(kpi, value)`: 0–100 toward the target, `null`
+  with no target set (never silently scored as 0); a target of exactly 0 is a pass/fail
+  threshold in both directions. Separate `kpiEntrySchema` family (stored: `kpiId`, `date`,
+  `value`, `note`) — an append-only time series; **the KPI record never stores a "current
+  value"**, every reading is derived from the entry log, the same pattern as habit streaks
+  (10B) and skill proficiency (11D). System-calculated entries (auto-derived from other
+  domains) are a documented known limitation, not built this layer.
+- `kpi-repository.ts` — `kpiRepository` (collection `kpis`) + `listActiveKpis`.
+- `kpi-entry-repository.ts` — `kpiEntryRepository` (collection `kpiEntries`, date desc) +
+  `listRecentKpiEntries` (bounded 500, client-grouped by `kpiId`).
+- `kpi-stats.ts` — **pure** `latestEntry` (most recent by date) and `summarizeKpis` (total,
+  with-entries count, average attainment across scorable KPIs).
+- `use-kpis.ts` — `useKpis()`: loads KPIs + entries in parallel; create/update/archive for
+  KPIs; `addEntry`/`removeEntry` for entries; memoized `entriesByKpi` and `stats`.
+- `components/` — `KpiForm` (title, category, unit, direction Select, target number input,
+  weight Select with a "higher weight = more influence" hint, goal Select, `PillarSelect`,
+  notes), `KpiDialog`, `AddKpiEntryDialog` (date, value, note — keyed by KPI id),
+  `KpiCard` (category/direction/attainment badges, a progress bar, latest value vs. target,
+  goal link, a `Sparkline` of its last 30 entries with a dashed target line, pillar badges,
+  "Add entry", edit + archive with confirm), `KpisStats` tiles, `KpisView`.
+- `index.ts` barrel.
+
+**Created — `src/features/life-score/`:**
+- `schema.ts` — `lifeScoreEntrySchema` (stored: `date`, `score` 0–100, a frozen `factors[]`
+  snapshot — `{kpiId, title, value, attainment, weight}` — and a `note`). Entries are saved
+  on demand, not on a schedule; the live score is always recomputed fresh, this is history.
+  `saveScoreFormSchema` (an optional note) + `lifeScoreEntryInputFromResult`.
+- `life-score.ts` — **pure** `computeLifeScore(kpis, latestValueByKpi)`: the documented
+  formula required by the spec — the weighted average of every scorable KPI's attainment
+  (each KPI's own `weight`), excluding KPIs with no target or no entry entirely (missing
+  data never drags the score down), returning `null` with nothing to score and always
+  returning the exact `factors` that contributed, so the UI can show how the number was
+  reached and never present an unexplained score.
+- `life-score-entry-repository.ts` — `lifeScoreEntryRepository` (collection
+  `lifeScoreEntries`, date desc) + `listRecentLifeScoreEntries` (bounded 180).
+- `use-life-score.ts` — `useLifeScore()`: composes `useKpis()` for the live inputs, loads
+  saved history separately; `saveToday(note)` upserts (by date) rather than duplicating a
+  same-day snapshot, so re-saving corrects the day's entry instead of piling up.
+- `components/` — `SaveScoreDialog` (an optional note), `LifeScoreView` (big score + `/100`,
+  a progress bar, the contributing-factors list with each KPI's value/attainment/weight, a
+  `Sparkline` of saved score history, loading/empty/error).
+- `index.ts` barrel.
+
+**Created — `src/features/trends/`:**
+- `trend-stats.ts` — **pure** `summarizeTrend(values)`: min/max/average/first/last/change
+  over a chronological series, `null` for an empty one.
+- `components/TrendsView.tsx` — a metric picker (Life Score or any KPI) backed by
+  `useKpis()` + `useLifeScore()`, a `Sparkline` of the chosen series, and the trend stats
+  tiles; loading/empty/error.
+- `index.ts` barrel.
+
+**Created — `src/components/shared/Sparkline.tsx`:** a small dependency-free SVG line
+chart (points, optional dashed target line, accessible `role="img"` + `aria-label`) — the
+app has no charting library, and this covers every "trend over time" need this layer
+introduces (a KPI's entries, Life Score history, the Trends picker) without adding one.
+
+**Modified:**
+- `src/app/(app)/analytics/kpis/page.tsx`, `.../life-score/page.tsx`, `.../trends/page.tsx`
+  render the real features (were `ModulePlaceholder`s). `.../analytics/reports/page.tsx`
+  untouched (Layer 16).
+- `docs/DATA_MODEL.md` annotates `kpis`, `kpiEntries`, `lifeScoreEntries`.
+
+**Tests added:** `src/features/kpis/schema.test.ts` (create requires a title, rejects an
+unknown direction and out-of-1–5 weight, allows a null target, partial update, stored
+record, form + `kpiInputFromForm`, `kpiAttainment` for both directions including the
+target-of-0 pass/fail case, entry form + `kpiEntryInputFromForm`), `kpi-stats.test.ts`
+(`latestEntry` by date regardless of array order; `summarizeKpis` counts and averages only
+scorable KPIs), `components/KpisView.test.tsx` (empty state; a KPI card with
+category/attainment/target/goal-link; opening the add-entry dialog for a specific KPI;
+opening the new-KPI dialog; error + retry — hook mocked); `src/features/life-score/
+schema.test.ts` (entry validation, `lifeScoreEntryInputFromResult` mapping),
+`life-score.test.ts` (empty input; excludes no-target/no-entry KPIs rather than scoring
+them 0; weighted-average math), `components/LifeScoreView.test.tsx` (not-enough-data state
+with Save disabled; score + factors rendered and Save flow calls `saveToday`; history
+section appears with 2+ saved entries; error + retry); `src/features/trends/
+trend-stats.test.ts` (empty series, multi-point stats, single-point zero-change),
+`components/TrendsView.test.tsx` (Life-Score no-data state; trend + stats once history
+exists; error + retry); `src/components/shared/Sparkline.test.tsx` (empty renders nothing,
+accessible image + path, dashed target line); `tests/integration/kpis.test.ts` (KPI linked
+to a goal, two entries logged, archive, user scoping — emulators), `tests/integration/
+life-score.test.ts` (score computed from real KPI entries, same-day save overwrites rather
+than duplicates, user scoping — emulators; **written, not executed in-session** — same
+emulator restriction as prior layers this session). App suite: 99 files / 550 tests.
+
+**Verification:** `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (99/550) · `build` ✅ (47
+routes, static export, no warnings) · `format:check` ✅ · functions suite unchanged ✅ (5).
+`test:rules` not run — rules untouched. `test:integration` — see above.
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production NEXT_PUBLIC_APP_URL=https://mastery-personal-mgmt-system.web.app npm run build`
+then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project
+mastery-personal-mgmt-system --non-interactive`. Redeployed to
+https://mastery-personal-mgmt-system.web.app/.
+
+**Manual test instructions:**
+1. `npm run dev`, sign in → **Analytics → KPIs**. Empty state → "Add your first KPI".
+2. **New KPI**: title "Sleep hours", unit "hours", direction **Higher is better**, target
+   **8**, weight **3** → **Add KPI**.
+3. Click **Add entry** → date today, value **4** → **Add entry**. The card shows a `50%`
+   attainment badge and a progress bar at half.
+4. Add a second entry a few days later with a higher value → a small trend line (with a
+   dashed target line) appears on the card once there are 2+ entries.
+5. Go to **Analytics → Life Score**. With one scorable KPI at 50% attainment and weight 3,
+   the score shows **50**, with "Sleep hours" listed under Contributing factors
+   (value/attainment/weight visible). Click **Save today's score** → confirm; a **Score
+   history** section appears after a second day's save.
+6. Go to **Analytics → Trends**, pick "Sleep hours" from the metric dropdown → its entries
+   render as a trend with Latest/Change/Average/Min/Max tiles; switch to "Life Score" to
+   see the saved-score history instead.
+7. Archive the KPI (trash → confirm) → gone from the KPI list and excluded from the Life
+   Score; its logged entries are not deleted.
+8. Firestore console → `users/{uid}/kpis/{id}`, `users/{uid}/kpiEntries/{id}`,
+   `users/{uid}/lifeScoreEntries/{id}` with audit fields.
+
+**Known limitations:**
+- **No system-calculated KPI entries** — every entry is user-entered this layer; auto-
+  deriving entries from Habits/Deep Work/Tasks/etc. is deferred rather than half-built.
+- **Life Score weighting is per-KPI only** — there's no separate per-pillar weighting on
+  top of it; a KPI's own `weight` is its full influence on the score.
+- **No editing of a logged KPI entry** — entries can be added and archived (via the
+  repository) but not edited from the UI.
+- Trends shows whatever is already loaded (bounded reads: 500 KPI entries, 180 Life Score
+  entries) — no custom date-range picker, no comparison of two series side by side.
+- `listActiveKpis`/`listRecentKpiEntries`/`listRecentLifeScoreEntries` are bounded reads
+  (same trade-off as every prior domain this session) — no realtime, no pagination UI.
+- The dashboard's Layer-12-reserved `lifeScore`/`kpiOverview` fields remain unwired — see
+  the note above; this matches every prior layer's precedent, not an oversight.
 
 ---
 

@@ -51,9 +51,9 @@ users/{uid}/skills/{skillId}                   category, startingProficiency/tar
 users/{uid}/skillReviews/{reviewId}            skillId link, date + proficiency (1-5) + notes — append-only progress-history log (Layer 11D)
 
 # Analytics
-users/{uid}/kpis/{kpiId}
-users/{uid}/kpiEntries/{entryId}
-users/{uid}/lifeScoreEntries/{entryId}
+users/{uid}/kpis/{kpiId}                       category (free text), pillarIds, unit, direction (higher-is-better|lower-is-better), targetValue, weight (1-5, its Life Score influence), goal link — no "current value" here, it's derived from kpiEntries (Layer 12)
+users/{uid}/kpiEntries/{entryId}               kpiId link, date + value + note — append-only time series, user-entered only this layer (Layer 12)
+users/{uid}/lifeScoreEntries/{entryId}         date, score (0-100), frozen factors[] snapshot ({kpiId,title,value,attainment,weight}), note — saved on demand; the live score is always recomputed from current KPIs, this is history (Layer 12)
 users/{uid}/weeklySummaries/{summaryId}
 users/{uid}/reports/{reportId}
 

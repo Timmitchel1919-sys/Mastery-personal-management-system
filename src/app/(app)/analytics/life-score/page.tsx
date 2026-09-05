@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { LifeScoreView } from "@/features/life-score";
 
-export const metadata = { title: "Life Score" };
+export const metadata: Metadata = { title: "Life Score" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Life Score"
-      description="A transparent, configurable score with visible contributing factors."
-      plannedLayer={12}
-    />
-  );
+  return <LifeScoreView />;
 }

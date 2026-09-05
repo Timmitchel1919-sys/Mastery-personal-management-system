@@ -1,13 +1,8 @@
-import { ModulePlaceholder } from "@/components/layout";
+import type { Metadata } from "next";
+import { KpisView } from "@/features/kpis";
 
-export const metadata = { title: "KPIs" };
+export const metadata: Metadata = { title: "KPIs" };
 
 export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="KPIs"
-      description="KPI definitions and entries across the three life pillars."
-      plannedLayer={12}
-    />
-  );
+  return <KpisView />;
 }
