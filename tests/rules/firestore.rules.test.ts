@@ -121,6 +121,14 @@ describe("users/{uid} — updates", () => {
     await assertFails(updateDoc(doc(db, "users", ALICE), { createdBy: BOB, updatedBy: ALICE }));
   });
 
+  it("rejects rewriting the email out of sync with Firebase Auth (Layer 20)", async () => {
+    await seedProfile(ALICE);
+    const db = testEnv.authenticatedContext(ALICE).firestore();
+    await assertFails(
+      updateDoc(doc(db, "users", ALICE), { email: "someone-else@example.com", updatedBy: ALICE }),
+    );
+  });
+
   it("denies deleting a profile", async () => {
     await seedProfile(ALICE);
     const db = testEnv.authenticatedContext(ALICE).firestore();

@@ -4,6 +4,7 @@ import { connectFirestoreEmulator, getFirestore, type Firestore } from "firebase
 import { connectFunctionsEmulator, getFunctions, type Functions } from "firebase/functions";
 import { connectStorageEmulator, getStorage, type FirebaseStorage } from "firebase/storage";
 import { EMULATOR_CONFIG, getFirebaseClientConfig, useFirebaseEmulators } from "./config";
+import { ensureAppCheck } from "./app-check";
 
 /** Must match `DEFAULT_REGION` in `functions/src/config/region.ts`. */
 const FUNCTIONS_REGION = "europe-west1";
@@ -32,6 +33,8 @@ export function getFirebaseClient(): FirebaseClient {
   if (cached) return cached;
 
   const app = getApps()[0] ?? initializeApp(getFirebaseClientConfig());
+  // App Check must be set up before any other SDK call (Layer 20). No-op without a key.
+  ensureAppCheck(app);
   const auth = getAuth(app);
   const db = getFirestore(app);
   const storage = getStorage(app);

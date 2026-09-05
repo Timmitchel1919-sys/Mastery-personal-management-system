@@ -22,6 +22,9 @@ const firebaseClientShape = {
   NEXT_PUBLIC_FIREBASE_APP_ID: z.string().trim().min(1).optional(),
   NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: z.string().trim().min(1).optional(),
   NEXT_PUBLIC_USE_FIREBASE_EMULATORS: boolStringSchema.default("false"),
+  /** reCAPTCHA v3 site key for Firebase App Check. When unset, App Check is not
+   * initialized (Layer 20) — the owner enables enforcement in the Firebase console. */
+  NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY: z.string().trim().min(1).optional(),
 } as const;
 
 /** Variables available in both the browser and on the server (`NEXT_PUBLIC_*`). */

@@ -43,6 +43,9 @@ service cloud.firestore {
       allow update: if isOwner(uid)
         && request.resource.data.id == resource.data.id
         && request.resource.data.role == resource.data.role
+        // Layer 20: the email is owned by Firebase Auth — the client may not rewrite the
+        // profile copy out of sync with it.
+        && request.resource.data.email == resource.data.email
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.createdBy == resource.data.createdBy
         && request.resource.data.updatedBy == uid;

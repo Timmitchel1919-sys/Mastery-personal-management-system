@@ -8,14 +8,14 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 19 — PWA & Mobile Readiness (complete) |
-| **Next approved layer** | Layer 20 — Security Hardening (not started — awaiting explicit go-ahead) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15 (15A–15F) — Recovery Center complete · Layer 16 · Layer 17 · Layer 18 · **Layer 19** |
-| **In-progress work** | — (Layer 20 is next). **i18n string-migration backlog** (ADR-0027) still open — most app copy is English literals outside nav / Settings / Notifications. |
-| **Test status** | ✅ app: `vitest run` — 135 files, ~715 tests (`components/pwa/*` — online status, install prompt, offline banner, install button — + `tests/unit/manifest.test.ts` added). ✅ rules: `npm run test:rules` — 3 files, ~44 tests (no rules change in Layer 19). ⚠️ integration: `npm run test:integration` — 34 files **written**; unchanged (PWA is client-only). ✅ functions: `vitest run` — 16 files, 98 tests (unchanged — Layer 19 has no Cloud Function). |
-| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (50 routes, static export, no warnings — `/offline` added), `format:check`. `out/` contains `sw.js`, `manifest.webmanifest`, the icons. ✅ functions: `typecheck`, `lint`, `test`, `build`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 19 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 19 — hosting + `firebase.json` headers for `/sw.js` (`no-store` + `Service-Worker-Allowed`) and `/manifest.webmanifest`; `firestore.rules` unchanged). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (13/14 + 15C/15E/15F recovery) still not deployed — Spark plan, ADR-0017/0018/0021/0023/0024. Layers 16 & 17 ship **no** Cloud Function; Layer 19's service worker is hand-rolled, no PWA plugin (ADR-0028). |
+| **Current layer** | Layer 20 — Security Hardening (complete) |
+| **Next approved layer** | Layer 21 — Complete Testing Program (not started — awaiting explicit go-ahead) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15 (15A–15F) — Recovery Center complete · Layer 16 · Layer 17 · Layer 18 · Layer 19 · **Layer 20** |
+| **In-progress work** | — (Layer 21 is next). **i18n string-migration backlog** (ADR-0027) still open. **App Check enforcement + CORS** land with the Blaze/Functions deploy (ADR-0029). |
+| **Test status** | ✅ app: `vitest run` — 138 files, ~723 tests (`security-headers` + `app-check` tests added). ✅ rules: `npm run test:rules` — 3 files, ~45 tests (`firestore.rules.test.ts` gained an "email frozen on update" case — **not re-run in-session**, emulator restriction; the rule is an added `&&` condition, no regression risk). ⚠️ integration: `npm run test:integration` — 34 files **written**; unchanged. ✅ functions: `vitest run` — 16 files, 98 tests (unchanged — Layer 20 has no Cloud Function). |
+| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (50 routes, static export, no warnings), `format:check`. `npm audit` — 6 moderate advisories, all transitive under the **dev-only** `firebase-admin`, none in a shipped bundle (ADR-0029). ✅ functions: `typecheck`, `lint`, `test`, `build`. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 20 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 20 — hosting + a `firebase.json` `"source": "**"` security-header block (CSP, HSTS, `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `COOP: same-origin-allow-popups`, deny-all `Permissions-Policy`, …) + `firestore.rules` (profile `email` frozen on update)). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (13/14 + 15C/15E/15F recovery) still not deployed — Spark plan; App Check *enforcement* + CORS also await that (ADR-0029). Layer 19's service worker is hand-rolled (ADR-0028). |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
 | **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · **next-intl 4.14** (Layer 18 — ADR-0027) · (no new deps in Layer 15A–17, or Layer 19 — the service worker is hand-rolled) |
 
@@ -3711,6 +3711,94 @@ smoke-tested `/manifest.webmanifest` and `/sw.js` (200) and `/offline` in a fres
 - **iOS install is manual** (Add to Home Screen) — `beforeinstallprompt` is Chromium-only,
   so `InstallButton` renders nothing on iOS Safari / Firefox.
 - **Offline page is English** — part of the i18n backlog (ADR-0027).
+
+---
+
+### Layer 20 — Security Hardening — ✅ complete (2026-09-05) — committed + pushed + deployed live
+
+A CSP + full security-header set on every Hosting response, the App Check client wiring
+(off until the owner configures it), one `firestore.rules` tightening, a storage-rules
+review, and a `npm audit` review. No Cloud Function. Full rationale: ADR-0029.
+
+**Modified — `firebase.json`:**
+- New `"source": "**"` header block: **`Content-Security-Policy`** (`default-src 'self'`;
+  `object-src`/`frame-ancestors` `'none'`; `base-uri`/`form-action` `'self'`;
+  `script-src 'self' 'unsafe-inline'` + `apis.google.com` / `gstatic.com` / `google.com`;
+  `style-src 'self' 'unsafe-inline'`; `connect-src 'self'` + `*.googleapis.com` /
+  `*.firebaseio.com` / `firebase.googleapis.com` / `*.cloudfunctions.net` / `*.run.app`;
+  `frame-src 'self'` + `*.firebaseapp.com` / `accounts.google.com` / `apis.google.com` /
+  `www.google.com`; `worker-src`/`manifest-src`/`media-src` `'self'`;
+  `upgrade-insecure-requests`), **`Strict-Transport-Security`** (2y, `includeSubDomains;
+  preload`), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`,
+  `Referrer-Policy: strict-origin-when-cross-origin`, `Cross-Origin-Opener-Policy:
+  same-origin-allow-popups` (Google `signInWithPopup`), `Cross-Origin-Resource-Policy:
+  same-origin`, a deny-all `Permissions-Policy`, `X-DNS-Prefetch-Control: off`. The
+  existing `/sw.js`, `/manifest.webmanifest`, `/_next/static/**` blocks are unchanged.
+
+**Created — `src/lib/firebase/`:**
+- `app-check.ts` — `ensureAppCheck(app)`: after `initializeApp`, browser only, never on the
+  emulator, and **only when `NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY` is set** — then a
+  dynamic-imported `ReCaptchaV3Provider` with auto token refresh. Init failures swallowed.
+  Called from `getFirebaseClient()` immediately after `initializeApp`.
+
+**Modified — `src/`:**
+- `src/lib/env.ts` + `.env.example` — the optional `NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY`.
+- `firestore.rules` — profile `allow update` now also requires
+  `request.resource.data.email == resource.data.email` (the email is owned by Firebase
+  Auth; a client may not rewrite the Firestore copy out of sync).
+- `storage.rules` — comment updated after review: owner-only + image/PDF + 10 MB is the
+  whole surface (no feature stores user files in Storage yet).
+- `docs/SECURITY.md` §5 (App Check status), §6 (the header table + the `'unsafe-inline'`
+  deviation), §10 checkpoint; `docs/DECISIONS.md` — ADR-0029.
+
+**Tests added:** `tests/unit/security-headers.test.ts` (6 — the `**` block exists; the CSP
+carries `default-src`/`object-src`/`base-uri`/`frame-ancestors`/`form-action` +
+`upgrade-insecure-requests` + `worker-src`, and reachable `connect-src`/`frame-src` for
+Firebase + Google sign-in; HSTS/nosniff/`X-Frame-Options`/`Referrer-Policy`; `COOP`
+allow-popups; deny-all `Permissions-Policy`); `src/lib/firebase/app-check.test.ts` (3 —
+no-op without a key, no-op on the emulator, initializes once with a reCAPTCHA v3 provider
+when a key is set); `tests/rules/firestore.rules.test.ts` gained an "email frozen on update"
+case (**written, not executed in-session** — emulator restriction).
+
+**`npm audit`:** 6 moderate advisories, every one transitive under `firebase-admin` →
+`@google-cloud/storage` → `teeny-request` / `retry-request`. `firebase-admin` at the repo
+root is dev-only (server helper + rules-testing) and never in a shipped bundle; `functions/`
+pins its own `firebase-admin@14`. No forced breaking downgrade.
+
+**Verification:** app `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (138 files / ~723) ·
+`build` ✅ (50 routes, static export, no warnings) · `format:check` ✅. functions unchanged.
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production NEXT_PUBLIC_APP_URL=https://mastery-personal-mgmt-system.web.app npm run build`
+then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project
+mastery-personal-mgmt-system --non-interactive` — `firestore.rules` **changed** this layer,
+re-uploaded and compiled clean. Redeployed to https://mastery-personal-mgmt-system.web.app/ ;
+verified the security headers on the live response (`curl -I`) — CSP, HSTS, `nosniff`,
+`X-Frame-Options`, `Referrer-Policy`, COOP, `Permissions-Policy` all present. `/recovery`
+still redirects to sign-in with no new console errors.
+
+**Manual test instructions:**
+1. `curl -sI https://mastery-personal-mgmt-system.web.app/ | grep -iE "content-security|strict-transport|x-frame|x-content|referrer|opener|permissions"`
+   → every header present.
+2. Open the app in Chrome, DevTools **Console** → no CSP violation errors on load, sign-in
+   (Google popup opens), dashboard, or navigating between sections.
+3. DevTools **Network** → a Firestore request succeeds (CSP `connect-src` allows it).
+4. `securityheaders.com` / an observatory scan → A-range, no missing critical header.
+5. App Check: with `NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY` unset the app behaves exactly as
+   before (no App Check network calls). Set a real reCAPTCHA v3 key + rebuild → App Check
+   tokens attach to requests; enforcement is a console toggle.
+
+**Known limitations:**
+- **`script-src 'unsafe-inline'`** — a static export can't mint a per-request nonce and
+  Next's inline hydration scripts can't be hashed; risk bounded by `object-src 'none'` +
+  `base-uri 'self'` + strict `connect-src` + React escaping (ADR-0029). Nonce +
+  `strict-dynamic` needs an SSR/App Hosting move.
+- **App Check does nothing yet** — the wiring is a no-op until the owner adds a reCAPTCHA v3
+  site key and enables enforcement in the Firebase console. CORS for HTTPS functions lands
+  with the Blaze deploy.
+- **6 moderate `npm audit` advisories** — dev-only transitive deps, not shipped; no
+  breaking downgrade taken.
+- **Rules test written, not executed in-session** — emulator restriction (as every layer
+  this session).
 
 ---
 

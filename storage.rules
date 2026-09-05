@@ -6,7 +6,9 @@ rules_version = '2';
 // * Read/write only your own path.
 // * Uploads limited to images and PDFs, max 10 MB.
 // * Everything outside users/{uid}/** is denied.
-// Tighter per-feature validation follows in Layer 20.
+// Layer 20 review: no feature stores user files in Storage yet, so this owner-only +
+// type + size gate is the whole surface. When an upload feature lands it must scope to a
+// known prefix (e.g. users/{uid}/uploads/**) and validate per-feature there.
 // ─────────────────────────────────────────────────────────────
 service firebase.storage {
   match /b/{bucket}/o {

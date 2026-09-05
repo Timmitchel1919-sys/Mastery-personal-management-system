@@ -52,7 +52,37 @@ touch rules, auth, functions, or storage must satisfy it and add emulator tests.
 - Enforce App Check on Firestore, Storage, and Functions in test/staging/production.
 - Debug provider only in local development.
 
+> **Layer 20 status.** The client wiring is in place (`src/lib/firebase/app-check.ts`):
+> `ensureAppCheck(app)` runs immediately after `initializeApp`, in the browser only, and
+> **only when `NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY` is set** (reCAPTCHA v3), never against
+> the Emulator Suite. It is a no-op today — the app ships unchanged until the owner adds the
+> site key and turns on **enforcement** in the Firebase console (Firestore / Storage /
+> Functions). Init failures are swallowed so a reCAPTCHA outage can't break the app.
+
 ## 6. Transport & browser security
+
+> **Layer 20 status.** Enforced on every Hosting response via a `"source": "**"` header
+> block in `firebase.json`:
+>
+> | Header | Value (summary) |
+> |---|---|
+> | `Content-Security-Policy` | `default-src 'self'`; `object-src 'none'`; `base-uri 'self'`; `frame-ancestors 'none'`; `form-action 'self'`; `script-src 'self' 'unsafe-inline' https://apis.google.com https://www.gstatic.com https://www.google.com`; `style-src 'self' 'unsafe-inline'`; `img-src 'self' data: blob: *.googleusercontent.com www.gstatic.com`; `connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://firebase.googleapis.com https://*.cloudfunctions.net https://*.run.app`; `frame-src 'self' https://*.firebaseapp.com https://accounts.google.com https://apis.google.com https://www.google.com`; `worker-src 'self'`; `manifest-src 'self'`; `media-src 'self'`; `upgrade-insecure-requests` |
+> | `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload` |
+> | `X-Content-Type-Options` | `nosniff` |
+> | `X-Frame-Options` | `DENY` |
+> | `Referrer-Policy` | `strict-origin-when-cross-origin` |
+> | `Cross-Origin-Opener-Policy` | `same-origin-allow-popups` (Google sign-in uses `signInWithPopup`) |
+> | `Cross-Origin-Resource-Policy` | `same-origin` |
+> | `Permissions-Policy` | every powerful feature `=()` (camera, mic, geolocation, payment, usb, …); `fullscreen=(self)` |
+> | `X-DNS-Prefetch-Control` | `off` |
+>
+> **`script-src 'unsafe-inline'` deviation.** The app is a static export (ADR-0015) with no
+> server, so a per-request CSP nonce isn't possible and Next's inline `__next_f` hydration
+> scripts can't be hashed. `'unsafe-inline'` is the pragmatic choice; the risk is bounded by
+> `object-src 'none'`, `base-uri 'self'`, the strict `connect-src`, React's auto-escaping,
+> and the single audited `dangerouslySetInnerHTML` (the constant pre-hydration theme script).
+> Moving to Firebase App Hosting / SSR later enables nonce + `strict-dynamic` (a future ADR).
+> `Content-Security-Policy` is verified by `tests/unit/security-headers.test.ts`.
 
 - Content-Security-Policy: restrict `script-src`, `connect-src` (Firebase + AI function
   origin only), `img-src`, `style-src`; no inline script except the pre-hydration theme
@@ -95,5 +125,5 @@ touch rules, auth, functions, or storage must satisfy it and add emulator tests.
 | 6 | ✅ generic audit-field enforcement on every `users/{uid}/{collection}/**` write (`createdBy`/`updatedBy` = caller on create; `createdBy`/`createdAt` immutable, `updatedBy` = caller on update). Per-field domain-value validation in *rules* is deferred to Layer 20 (it requires restructuring the catch-all subcollection rule so per-collection blocks can be stricter — Firestore OR-combines matching rules). Until then, write shape is validated by each feature's Zod `createSchema`/`updateSchema` in the repository (ADR-0013). |
 | 13 | AI endpoint auth + input/output validation + rate limits + audit |
 | 15 | Recovery rules, privacy gate, function-mediated sensitive access, partner permission model |
-| 20 | App Check enforcement, CSP, CORS, headers, secret audit, full rules-test sweep |
+| 20 | ✅ CSP + full security-header set on every Hosting response (`firebase.json` `**` block); App Check **client wiring** (env-gated, no-op until the owner sets the key + enforces in console); `firestore.rules` — profile `email` frozen on update (owned by Auth), rules test added; storage-rules review (owner-only + type + size is the whole surface, no upload feature yet); `npm audit` — 6 moderate advisories, all transitive under the **dev-only** `firebase-admin` → `@google-cloud/storage` → `teeny-request`, never in a shipped bundle (functions run their own `firebase-admin@14`); no forced breaking downgrade. CORS + App Check *enforcement* land with the Blaze/Functions deploy. |
 | 22 | environment isolation verified in CI/CD; no prod secrets in previews |

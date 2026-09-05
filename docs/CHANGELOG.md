@@ -6,6 +6,39 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 20 — Security Hardening — 2026-09-05
+
+**Added**
+- `firebase.json` — a `"source": "**"` header block on every Hosting response:
+  **`Content-Security-Policy`** (`default-src 'self'`, `object-src`/`frame-ancestors`
+  `'none'`, `base-uri`/`form-action` `'self'`, a Firebase- and Google-sign-in-shaped
+  `script-src` / `connect-src` / `frame-src` allowlist, `upgrade-insecure-requests`),
+  **`Strict-Transport-Security`** (2y, `includeSubDomains; preload`),
+  `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`,
+  `Referrer-Policy: strict-origin-when-cross-origin`,
+  `Cross-Origin-Opener-Policy: same-origin-allow-popups`,
+  `Cross-Origin-Resource-Policy: same-origin`, a deny-all `Permissions-Policy`,
+  `X-DNS-Prefetch-Control: off`.
+- `src/lib/firebase/app-check.ts` — `ensureAppCheck(app)`, called right after
+  `initializeApp`: initializes Firebase App Check (`ReCaptchaV3Provider`, dynamic import)
+  **only when `NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY` is set**, never on the emulator.
+  A no-op today; the owner adds the key and enables enforcement in the Firebase console.
+- `src/lib/env.ts` + `.env.example` — the optional `NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY`.
+
+**Changed**
+- `firestore.rules` — the profile `email` is now frozen on update (owned by Firebase Auth).
+- `storage.rules` — comment updated after review (no change to the rule — owner-only +
+  image/PDF + 10 MB is the whole surface).
+- `docs/SECURITY.md` §5 / §6 / §10; `docs/DECISIONS.md` — ADR-0029.
+
+**Tests:** `tests/unit/security-headers.test.ts` (6), `src/lib/firebase/app-check.test.ts`
+(3), and an "email frozen on update" rules case (written, not executed in-session).
+
+**Known limitation:** `script-src` uses `'unsafe-inline'` — a static export can't mint a
+per-request nonce and Next's inline hydration scripts can't be hashed (ADR-0029). App Check
+does nothing until the owner configures the key + enforcement; `npm audit` reports 6
+moderate advisories, all in the dev-only `firebase-admin` dependency tree (not shipped).
+
 ### Layer 19 — PWA & Mobile Readiness — 2026-09-05
 
 **Added**

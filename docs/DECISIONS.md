@@ -1012,3 +1012,57 @@ fragile.
 - No new npm dependency.
 - iOS install is manual (Add to Home Screen) — `beforeinstallprompt` is Chromium-only;
   `InstallButton` simply renders nothing there.
+
+---
+
+## ADR-0029 — Security hardening: CSP with `'unsafe-inline'`, App Check wired-not-enforced
+**Date:** 2026-09-05 · **Status:** accepted · **Layer:** 20 — Security Hardening
+
+**Context.** `CLAUDE.md` §5 and `docs/SECURITY.md` §5–6 require App Check on Firestore /
+Storage / Functions, a Content-Security-Policy that restricts `script-src` / `connect-src` /
+etc. with "no inline script except the pre-hydration theme setter with a nonce/hash", and
+the standard transport headers. The app is a **static export** (ADR-0015) on Firebase
+Hosting (Spark), with **no deployed Cloud Functions**.
+
+**Decision.**
+- **All security headers ship as a `firebase.json` `"source": "**"` header block** — CSP,
+  HSTS (2y, `includeSubDomains; preload`), `nosniff`, `X-Frame-Options: DENY`,
+  `Referrer-Policy: strict-origin-when-cross-origin`, `Cross-Origin-Opener-Policy:
+  same-origin-allow-popups`, `Cross-Origin-Resource-Policy: same-origin`, a deny-all
+  `Permissions-Policy`, `X-DNS-Prefetch-Control: off`. Verified by
+  `tests/unit/security-headers.test.ts`.
+- **`script-src` uses `'unsafe-inline'`, not a nonce/hash — accepted deviation from
+  SECURITY.md §6.** A static export has no server to mint a per-request nonce, and Next's
+  inline `__next_f` hydration scripts have no stable hash. The residual risk is bounded by
+  `object-src 'none'`, `base-uri 'self'`, `frame-ancestors 'none'`, a tight `connect-src`
+  (only `'self'` + Firebase / Google endpoints), React auto-escaping, and the single
+  audited `dangerouslySetInnerHTML` (the constant theme script). A move to Firebase App
+  Hosting / SSR later unlocks nonce + `strict-dynamic` — its own ADR then.
+- **CSP allowlist is Firebase- and Google-sign-in-shaped:** `connect-src` covers
+  `*.googleapis.com` / `*.firebaseio.com` / `firebase.googleapis.com` / `*.cloudfunctions.net`
+  / `*.run.app`; `frame-src` covers `*.firebaseapp.com` (auth handler) + `accounts.google.com`
+  + `apis.google.com` + `www.google.com` (reCAPTCHA for App Check); `script-src` adds
+  `apis.google.com` + `gstatic.com` + `google.com`. `COOP: same-origin-allow-popups` because
+  Google auth uses `signInWithPopup`.
+- **App Check is wired but a no-op.** `src/lib/firebase/app-check.ts` `ensureAppCheck(app)`
+  runs right after `initializeApp` (browser only, never on the emulator) and initializes
+  `ReCaptchaV3Provider` **only when `NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY` is set** —
+  loaded via dynamic import so the App Check bundle is absent otherwise. The owner sets the
+  key and turns on **enforcement** in the Firebase console; init failures are swallowed.
+- **One `firestore.rules` tightening:** the profile `email` is frozen on update (it is
+  owned by Firebase Auth; a client rewriting the Firestore copy just desyncs it). Rules
+  test added (`tests/rules/firestore.rules.test.ts`); the mandatory emulator run is
+  deferred as it has been all session (sandbox JDK restriction). No `storage.rules` change
+  — owner-only + image/PDF + 10 MB is the entire surface until an upload feature exists.
+- **`npm audit`:** 6 moderate advisories, all transitive under `firebase-admin` →
+  `@google-cloud/storage` → `teeny-request` / `retry-request`. `firebase-admin` at the repo
+  root is **dev-only** (server helper + rules-testing) and is never in a shipped bundle
+  (the export has no server; `functions/` pins its own `firebase-admin@14`). No forced
+  breaking downgrade; revisit when upstream ships a patched line.
+
+**Consequences.**
+- If a future third-party embed (analytics, a widget) is added, its origin must be added to
+  the CSP explicitly — a silent failure otherwise (no report-uri is configured; add one if
+  CSP tuning gets active).
+- App Check gives *no* protection until the owner completes the console steps; the wiring
+  just means it's a config change, not a code change.
