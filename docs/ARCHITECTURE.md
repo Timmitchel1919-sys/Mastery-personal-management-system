@@ -165,6 +165,22 @@ interface GoalRepository {
   the initial class to avoid theme flash. Locale and theme are `localStorage`-only today
   (a Firestore mirror for cross-device sync is a follow-up).
 
+## 9a. PWA (Layer 19)
+
+- `public/manifest.webmanifest` + generated icons (`icon-192/512`, `icon-maskable-512`,
+  `apple-touch-icon`) linked from root `metadata`. `display: standalone`, `start_url:
+  /dashboard`.
+- `public/sw.js` — a hand-written service worker (no Workbox / no build plugin, ADR-0028).
+  Navigations: network-first → cached URL → `/offline`. `/_next/static/**` + icons +
+  manifest: cache-first. Cross-origin never intercepted. **Recovery Center navigations are
+  never cached and never served from cache** (`RECOVERY_PRIVACY.md` §7). Registered by
+  `components/pwa/ServiceWorkerRegister` (skipped on `localhost`), auto-updates via
+  `SKIP_WAITING` + `controllerchange` reload.
+- `components/pwa/`: `useOnlineStatus` → `OfflineBanner` (in `Providers`, every route);
+  `useInstallPrompt` → `InstallButton` (Settings only, no banner).
+- Offline support is **app-shell + static assets only** — it does not make Firestore data
+  available offline, and the offline page/banner say so.
+
 ## 10. Performance guardrails
 
 Route-level and feature-level code splitting; lazy-load heavy features (calendar, charts,

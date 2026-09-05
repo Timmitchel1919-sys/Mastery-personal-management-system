@@ -76,7 +76,11 @@
     "name": "Naam",
     "email": "E-mail",
     "moreInSection": "Herinneringen en stille uren staan op de pagina Meldingen.",
-    "goToNotifications": "Naar Meldingen"
+    "goToNotifications": "Naar Meldingen",
+    "install": "Installeren",
+    "installHelp": "Voeg Mastery toe aan je startscherm of bureaublad.",
+    "installLabel": "Mastery installeren",
+    "installed": "Geïnstalleerd op dit apparaat."
   },
   "notifications": {
     "title": "Meldingen",

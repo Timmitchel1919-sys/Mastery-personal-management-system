@@ -8,16 +8,16 @@ Living build tracker. Updated at the end of every layer.
 
 | Field | Value |
 |---|---|
-| **Current layer** | Layer 18 — Internationalization & Theme (complete) |
-| **Next approved layer** | Layer 19 — PWA & Mobile Readiness (not started — awaiting explicit go-ahead) |
-| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15 (15A–15F) — Recovery Center complete · Layer 16 · Layer 17 · **Layer 18** |
-| **In-progress work** | — (Layer 19 is next). **i18n string-migration backlog**: all app copy outside navigation / Settings / Notifications is still English literals; migrate per-domain as each is next touched (ADR-0027). |
-| **Test status** | ✅ app: `vitest run` — 129 files, 696 tests (`i18n/locales` + `SettingsView` tests added; nav + notifications component tests wrapped in `renderWithIntl`). ✅ rules: `npm run test:rules` — 3 files, ~44 tests (no rules change in Layer 18). ⚠️ integration: `npm run test:integration` — 34 files **written**; unchanged this layer (i18n/theme is client-only). ✅ functions: `vitest run` — 16 files, 98 tests (unchanged — Layer 18 has no Cloud Function). |
-| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (49 routes, static export, no warnings), `format:check`. ✅ functions: `typecheck`, `lint`, `test`, `build`. |
-| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 18 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
-| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 18 — hosting only; `firestore.rules` unchanged — i18n/theme are client-only). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (13/14 + 15C/15E/15F recovery) still not deployed — Spark plan, ADR-0017/0018/0021/0023/0024. Layers 16 & 17 ship **no** Cloud Function (client-composed reports + client reminder scan; server PDF / FCM push deferred — ADR-0025/0026). |
+| **Current layer** | Layer 19 — PWA & Mobile Readiness (complete) |
+| **Next approved layer** | Layer 20 — Security Hardening (not started — awaiting explicit go-ahead) |
+| **Completed layers** | Layers 0–7 · Layer 8 (8A–8H) · Layer 9 (9A–9E) · Layer 10 (10A–10D) · Layer 11 (11A–11D) — Grow domain complete · Layer 12 · Layer 13 · Layer 14 · Layer 15 (15A–15F) — Recovery Center complete · Layer 16 · Layer 17 · Layer 18 · **Layer 19** |
+| **In-progress work** | — (Layer 20 is next). **i18n string-migration backlog** (ADR-0027) still open — most app copy is English literals outside nav / Settings / Notifications. |
+| **Test status** | ✅ app: `vitest run` — 135 files, ~715 tests (`components/pwa/*` — online status, install prompt, offline banner, install button — + `tests/unit/manifest.test.ts` added). ✅ rules: `npm run test:rules` — 3 files, ~44 tests (no rules change in Layer 19). ⚠️ integration: `npm run test:integration` — 34 files **written**; unchanged (PWA is client-only). ✅ functions: `vitest run` — 16 files, 98 tests (unchanged — Layer 19 has no Cloud Function). |
+| **Build status** | ✅ app: `typecheck`, `lint` (0/0), `test`, `build` (50 routes, static export, no warnings — `/offline` added), `format:check`. `out/` contains `sw.js`, `manifest.webmanifest`, the icons. ✅ functions: `typecheck`, `lint`, `test`, `build`. |
+| **Git status** | Commit-and-push per layer (`CLAUDE.md` §10); §10.1 — mandatory end-of-session commit + push + deploy. Layers 9D → 19 built on branch `claude/project-analyse-vervolgstappen-66bc86` (worktree), not yet merged to `main`. |
+| **Deployment status** | ✅ **LIVE** at **https://mastery-personal-mgmt-system.web.app/** (Layer 19 — hosting + `firebase.json` headers for `/sw.js` (`no-store` + `Service-Worker-Allowed`) and `/manifest.webmanifest`; `firestore.rules` unchanged). Static export (`output: "export"`) → Firebase Hosting on the Spark/free plan — ADR-0015. **Post-9E hotfix (carried forward):** the worktree had no `.env.local`, so the first deploys shipped a bundle that threw `Missing Firebase configuration`; fixed by copying `.env.local` in and rebuilding with `NEXT_PUBLIC_APP_ENV=production`. `_next/static` cache header dropped from `immutable` to `max-age=3600, must-revalidate` (Turbopack export chunk names aren't reliably content-hashed). Known cosmetic: route-group `<Link>` prefetch 404s an RSC `.txt` payload (navigation works). Cloud Functions (13/14 + 15C/15E/15F recovery) still not deployed — Spark plan, ADR-0017/0018/0021/0023/0024. Layers 16 & 17 ship **no** Cloud Function; Layer 19's service worker is hand-rolled, no PWA plugin (ADR-0028). |
 | **Repository** | `origin` → github.com/Timmitchel1919-sys/Mastery-personal-management-system.git · single `main` branch |
-| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · **next-intl 4.14** (Layer 18 — ADR-0027) · (no new deps in Layer 15A–17) |
+| **Stack (installed)** | Next 16.3.3 · React 19.2.8 · TypeScript 5.9 (strict) · Tailwind CSS 4.1 · ESLint 9.39 · Zod 4.1 · Vitest 4.1 + Testing Library + user-event · Prettier 3.9 · Radix UI · class-variance-authority · lucide-react · cmdk 1.1 · react-hook-form 7.86 · @hookform/resolvers 5.9 · firebase 12.18 · firebase-admin 14.3 · firebase-functions 7.3 · firebase-tools 15.28 · @firebase/rules-unit-testing 5 · @anthropic-ai/sdk 0.68 (functions/, Layer 13 — ADR-0017) · **next-intl 4.14** (Layer 18 — ADR-0027) · (no new deps in Layer 15A–17, or Layer 19 — the service worker is hand-rolled) |
 
 ---
 
@@ -3630,6 +3630,87 @@ upload. Redeployed to https://mastery-personal-mgmt-system.web.app/ ; smoke-test
   from browser language, not the last choice. A Firestore mirror is a follow-up.
 - **No RTL locale** yet; `messages/` has `en` + `nl` only (Spanish architected-for per
   ADR-0005).
+
+---
+
+### Layer 19 — PWA & Mobile Readiness — ✅ complete (2026-09-05) — committed + pushed + deployed live
+
+An installable PWA: a web app manifest, generated icons, a hand-rolled service worker with
+an offline app-shell cache, an offline page + banner, and an install button in Settings.
+No new dependency, no PWA build plugin (ADR-0028), no `firestore.rules` change.
+
+**Created — `public/`:**
+- `manifest.webmanifest` — `name`/`short_name` "Mastery", `start_url: /dashboard`,
+  `display: standalone`, `theme_color #4f46e5`, three `icons` (192 / 512 / maskable-512),
+  three `shortcuts` (Dashboard / Tasks / Notifications).
+- `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` (extra safe-zone padding),
+  `apple-touch-icon.png` (180) — an indigo "M" monogram rasterised by a one-off Node
+  script (built-in `zlib`, no `sharp`); replaceable without code changes.
+- `sw.js` — hand-written service worker (versioned by a `VERSION` const): precache
+  `/offline` + manifest + icons; navigations network-first → cached URL → `/offline`;
+  `/_next/static/**` + icons + manifest cache-first; cross-origin never intercepted.
+  **`/recovery*` navigations are never cached and never served from cache** (fail-closed
+  offline, `RECOVERY_PRIVACY.md` §7). Handles `SKIP_WAITING`.
+
+**Created — `src/`:**
+- `app/offline/page.tsx` — the SW's navigation fallback. Plain, and explicit that cloud
+  data is not available offline.
+- `components/pwa/` — `ServiceWorkerRegister` (registers `/sw.js` after `load`, **not on
+  `localhost`**, auto-activates a new worker and reloads on `controllerchange`),
+  `useOnlineStatus` (`useSyncExternalStore` over `online`/`offline`), `OfflineBanner` (thin
+  fixed status bar), `useInstallPrompt` (captures `beforeinstallprompt`, detects
+  `display-mode: standalone`), `InstallButton` (renders only where installable), `index.ts`.
+
+**Modified:**
+- `src/providers/index.tsx` — mounts `<ServiceWorkerRegister />` + `<OfflineBanner />` on
+  every route.
+- `src/app/layout.tsx` — `metadata.manifest`, `metadata.appleWebApp`, `metadata.icons`.
+- `src/features/settings/components/SettingsView.tsx` — an "Install" section with
+  `<InstallButton>` (i18n keys `settings.install*`, en + nl).
+- `firebase.json` — `headers` for `/sw.js` (`no-store` + `Service-Worker-Allowed: /`) and
+  `/manifest.webmanifest` (`application/manifest+json`).
+- `docs/ARCHITECTURE.md` §9a; `docs/DECISIONS.md` — ADR-0028.
+
+**Tests added:** `components/pwa/use-online-status.test.ts` (online/offline events),
+`use-install-prompt.test.ts` (3 — not installable until `beforeinstallprompt`, captures it +
+drives `prompt()`, `unavailable` with no deferred prompt), `offline-banner.test.tsx`
+(hidden online / shown offline), `install-button.test.tsx` (2 — null until prompt, calls
+`prompt()` on click); `tests/unit/manifest.test.ts` (required manifest fields, 192/512/
+maskable icons, same-origin shortcut targets); `SettingsView.test.tsx` gained an Install
+assertion.
+
+**Verification:** app `typecheck` ✅ · `lint` ✅ (0/0) · `test` ✅ (135 files / ~715) ·
+`build` ✅ (50 routes incl. `/offline`, static export, no warnings; `out/` has `sw.js` +
+`manifest.webmanifest` + icons) · `format:check` ✅. functions unchanged.
+
+**Deploy:** `NEXT_PUBLIC_APP_ENV=production NEXT_PUBLIC_APP_URL=https://mastery-personal-mgmt-system.web.app npm run build`
+then `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project
+mastery-personal-mgmt-system --non-interactive` — hosting + the new headers; `firestore.rules`
+unchanged, skipped on upload. Redeployed to https://mastery-personal-mgmt-system.web.app/ ;
+smoke-tested `/manifest.webmanifest` and `/sw.js` (200) and `/offline` in a fresh tab.
+
+**Manual test instructions:**
+1. Build + serve the export (or use the live site). DevTools → **Application → Manifest**:
+   name, icons, `start_url`, `standalone` all present, no errors. **Service Workers**: `sw.js`
+   activated.
+2. Chrome address bar shows an **install** icon; or **Settings → Install → Install Mastery**.
+   Install → the app opens standalone with the "M" icon.
+3. DevTools → **Network → Offline**, reload a page you've visited → it still renders from the
+   cache; a page you haven't → the **/offline** page. The top **offline banner** appears.
+   Go back online → banner clears.
+4. While offline, navigate to **/recovery** → you get the offline page, never a cached
+   Recovery view.
+5. Ship a change, redeploy → reopening the app picks up the new worker and reloads once.
+
+**Known limitations:**
+- **App-shell cache only** — offline gets you already-visited pages + static assets, **not**
+  Firestore data. The offline page and banner say so; true offline data (IndexedDB +
+  Firestore persistence) is a later decision.
+- **Generated placeholder icons** — a solid indigo "M", not a designed brand mark; swap the
+  `public/icon-*.png` files any time.
+- **iOS install is manual** (Add to Home Screen) — `beforeinstallprompt` is Chromium-only,
+  so `InstallButton` renders nothing on iOS Safari / Firefox.
+- **Offline page is English** — part of the i18n backlog (ADR-0027).
 
 ---
 

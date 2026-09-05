@@ -6,6 +6,35 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer 19 — PWA & Mobile Readiness — 2026-09-05
+
+**Added**
+- `public/manifest.webmanifest` + generated icons (`icon-192/512`, `icon-maskable-512`,
+  `apple-touch-icon` — an indigo "M" monogram) linked from root `metadata`.
+- `public/sw.js` — a hand-rolled service worker (no Workbox / no PWA plugin, ADR-0028):
+  navigations network-first → cached URL → `/offline`; `/_next/static/**` + icons +
+  manifest cache-first; cross-origin never intercepted; **`/recovery*` navigations never
+  cached and never served from cache** (fail-closed offline).
+- `src/app/offline/page.tsx` — the SW navigation fallback (explicit that cloud data isn't
+  available offline).
+- `src/components/pwa/` — `ServiceWorkerRegister` (registers `/sw.js`, not on `localhost`,
+  auto-updates), `useOnlineStatus` + `OfflineBanner` (mounted in `Providers`),
+  `useInstallPrompt` + `InstallButton` (in Settings — no banner).
+
+**Changed**
+- `src/app/layout.tsx` — `manifest` / `appleWebApp` / `icons` metadata.
+- `firebase.json` — headers for `/sw.js` (`no-store`, `Service-Worker-Allowed: /`) and
+  `/manifest.webmanifest` (`application/manifest+json`).
+- `SettingsView` gains an "Install" section (i18n `settings.install*`, en + nl).
+- `docs/ARCHITECTURE.md` §9a; `docs/DECISIONS.md` — ADR-0028.
+
+**Tests:** `components/pwa/*` (online status, install prompt, offline banner, install
+button) and `tests/unit/manifest.test.ts`.
+
+**Known limitation:** offline support is an **app-shell + static-asset cache only** — not
+Firestore data; the offline page/banner say so. Icons are generated placeholders; iOS
+install is manual (`beforeinstallprompt` is Chromium-only).
+
 ### Layer 18 — Internationalization & Theme — 2026-09-05
 
 **Added**

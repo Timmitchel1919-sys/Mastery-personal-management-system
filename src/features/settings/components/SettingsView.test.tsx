@@ -31,6 +31,7 @@ describe("SettingsView", () => {
     expect(screen.getByRole("heading", { name: "Settings" })).toBeInTheDocument();
     expect(screen.getByText("Language")).toBeInTheDocument();
     expect(screen.getByText("Theme")).toBeInTheDocument();
+    expect(screen.getByText("Install")).toBeInTheDocument();
     expect(screen.getByText("Sam Rivera")).toBeInTheDocument();
     expect(screen.getByText("sam@example.com")).toBeInTheDocument();
   });

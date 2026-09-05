@@ -76,7 +76,11 @@
     "name": "Name",
     "email": "Email",
     "moreInSection": "Notification reminders and quiet hours live on the Notifications page.",
-    "goToNotifications": "Open Notifications"
+    "goToNotifications": "Open Notifications",
+    "install": "Install",
+    "installHelp": "Add Mastery to your home screen or desktop.",
+    "installLabel": "Install Mastery",
+    "installed": "Installed on this device."
   },
   "notifications": {
     "title": "Notifications",

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui";
 import { useAuth } from "@/providers/auth-provider";
 import { LOCALES, LOCALE_LABEL, useActiveLocale } from "@/i18n";
+import { InstallButton } from "@/components/pwa";
 
 export function SettingsView() {
   const t = useTranslations("settings");
@@ -60,6 +61,12 @@ export function SettingsView() {
           <FormField label={t("theme")} description={t("themeHelp")}>
             <ThemeToggle />
           </FormField>
+
+          <div className="space-y-1.5">
+            <p className="text-sm font-medium">{t("install")}</p>
+            <p className="text-subtle text-xs">{t("installHelp")}</p>
+            <InstallButton label={t("installLabel")} installedLabel={t("installed")} />
+          </div>
         </CardContent>
       </Card>
 

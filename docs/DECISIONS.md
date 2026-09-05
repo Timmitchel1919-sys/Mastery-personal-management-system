@@ -964,3 +964,51 @@ churn ~30 test files at once.
   so an unkeyed destination still shows English.
 - ICU features (`{count}` plurals, dates/numbers via `useFormatter`) are available now for
   new strings.
+
+---
+
+## ADR-0028 — PWA: hand-rolled service worker, no build-time PWA plugin
+**Date:** 2026-09-05 · **Status:** accepted · **Layer:** 19 — PWA & Mobile Readiness
+
+**Context.** `docs/PRODUCT_REQUIREMENTS.md` §15 asks for an installable PWA: manifest,
+icons, theme metadata, a service worker, an offline app shell, safe static-asset caching,
+update handling, and explicit offline behaviour that never implies uncached cloud data is
+available. `RECOVERY_PRIVACY.md` §7 adds: the Recovery Center gets extra scrutiny before
+*any* offline storage. The app is a static export (ADR-0015) on Firebase Hosting; Turbopack
++ Next 16 + `output: "export"` make `next-pwa` / `@ducanh2912/next-pwa` integration
+fragile.
+
+**Decision.**
+- **No PWA build plugin.** `public/sw.js` is a small hand-written service worker (no
+  Workbox) — legible, no coupling to the export pipeline, versioned by a `VERSION` const.
+  Registered by `src/components/pwa/ServiceWorkerRegister` after `load`, **skipped on
+  `localhost`** (a stale dev SW is pure friction), and it auto-activates a new worker
+  (`SKIP_WAITING` on `updatefound` → reload on `controllerchange`).
+- **Caching strategy:** navigations are network-first → cached copy of that URL → `/offline`;
+  `/_next/static/**` + icons + manifest are cache-first; everything else is network with a
+  cache fallback. Cross-origin (Firestore / Auth / Google APIs) is never intercepted.
+- **Recovery Center is fail-closed offline.** `sw.js` never writes a `/recovery*` navigation
+  to the cache and never serves one from cache — offline, it returns `/offline` rather than
+  a stale private page. Satisfies §7 without needing a separate storage policy (there is no
+  offline recovery data — all recovery reads are the Firestore client SDK, which is
+  offline-aware on its own).
+- **Icons are generated, not hand-drawn assets.** A one-off Node script (built-in `zlib`,
+  no `sharp`) rasterised an indigo "M" monogram to `icon-192/512`, a padded
+  `icon-maskable-512`, and a 180px `apple-touch-icon`. Plain but valid; a designed icon set
+  can replace the files without any code change.
+- **Install affordance in Settings, not a banner.** `useInstallPrompt` captures
+  `beforeinstallprompt`; `InstallButton` (Settings) shows only where the browser supports it
+  and the app isn't already installed. No intrusive install prompt.
+- **Offline indicator:** `useOnlineStatus` (`useSyncExternalStore` over `online`/`offline`)
+  drives a thin fixed `OfflineBanner` in `Providers`, on every route.
+- **Hosting headers** (`firebase.json`): `/sw.js` is `no-store` + `Service-Worker-Allowed: /`;
+  `/manifest.webmanifest` gets `application/manifest+json`.
+
+**Consequences.**
+- Offline support is an **app-shell cache only** — it lets already-visited pages and static
+  assets load without a connection; it does **not** make Firestore data available offline
+  (the offline page and banner say so). Full offline data would need IndexedDB persistence
+  + the Firestore offline cache, a later decision.
+- No new npm dependency.
+- iOS install is manual (Add to Home Screen) — `beforeinstallprompt` is Chromium-only;
+  `InstallButton` simply renders nothing there.
