@@ -6,6 +6,38 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Branding — 2026-09-06
+
+**Added**
+- `public/brand/mastery-mark.png` (512×199) and `public/brand/mastery-logo.png`
+  (960×332) — the gold "M" mark and the full "MASTERY" wordmark lockup, cropped and
+  downscaled with `sharp` from the owner-supplied 4K source (originals not committed;
+  transparent PNG, palette-optimized, 25–44 KiB each).
+- `.mastery-glass-card` / `.mastery-auth-backdrop` utilities in `globals.css` — a
+  frosted-glass card look (`color-mix` over `--color-surface-raised` + `backdrop-filter:
+  blur`) and a soft two-blob radial-gradient backdrop (`color-mix` over
+  `--color-primary`), both theme-aware.
+
+**Changed**
+- `Sidebar` — the mark now sits to the left of the "Mastery" wordmark at the top of the
+  expanded sidebar (`next/image`, decorative — `alt=""`, the adjacent text is the
+  accessible name).
+- `AuthCard` — new optional `logo` slot (centered above the title) and `variant:
+  "default" | "glass"` prop; existing callers (register, forgot-password) are
+  unaffected (default variant, no logo).
+- `/login` — passes the full lockup as `logo` and `variant="glass"`; `(auth)/layout.tsx`
+  gets the decorative backdrop (applies to all three auth pages, purely decorative).
+- `tests/unit/bundle-budget.test.ts` — the build-verification case gets an explicit
+  15s timeout (gzip-ing a full static export is real I/O; it occasionally exceeded
+  vitest's 5s default under load — a pre-existing flake, not a budget regression).
+
+**Verified:** live-rendered via a headless Chromium screenshot against `next dev`
+(light + dark) — glass card, gradient backdrop, and both logos render correctly with no
+console errors. `next/image` (first use in the app; `images.unoptimized` per ADR-0015
+makes it a zero-cost swap for a plain `<img>` that also satisfies
+`@next/next/no-img-element`). Bundle budget still comfortably clear (~818 KiB / 900 KiB
+total JS gzip).
+
 ### Post-build-order — 2026-09-06
 
 **Changed**

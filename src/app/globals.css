@@ -278,6 +278,28 @@
   }
 }
 
+/* Auth pages — a frosted "glass" card over a soft decorative backdrop. Both are
+   theme-aware (color-mix over the existing surface/primary tokens, no hardcoded
+   white), so they hold up in light, dark, and system mode. */
+.mastery-glass-card {
+  background-color: color-mix(in oklab, var(--color-surface-raised) 72%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.mastery-auth-backdrop {
+  background-image:
+    radial-gradient(
+      ellipse 60% 50% at 15% 10%,
+      color-mix(in oklab, var(--color-primary) 22%, transparent),
+      transparent
+    ),
+    radial-gradient(
+      ellipse 55% 45% at 85% 90%,
+      color-mix(in oklab, var(--color-primary) 16%, transparent),
+      transparent
+    );
+}
+
 /* Layer 16 — print-to-PDF: isolate the report document, hide app chrome. */
 @media print {
   body * {

@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { AuthCard, SignInForm } from "@/features/auth";
 import { LoadingState } from "@/components/shared";
 
@@ -11,6 +12,17 @@ export default function LoginPage() {
     <AuthCard
       title="Sign in"
       description="Welcome back."
+      variant="glass"
+      logo={
+        <Image
+          src="/brand/mastery-logo.png"
+          alt="Mastery"
+          width={960}
+          height={332}
+          className="h-8 w-auto"
+          priority
+        />
+      }
       footer={
         <>
           New to Mastery?{" "}

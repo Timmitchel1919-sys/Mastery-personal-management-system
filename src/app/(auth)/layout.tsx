@@ -26,7 +26,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center gap-6 px-4 py-10">
+    <main className="mastery-auth-backdrop flex min-h-dvh flex-col items-center justify-center gap-6 px-4 py-10">
       <p className="text-muted text-xs font-medium tracking-[0.2em] uppercase">
         Plan · Focus · Act · Grow
       </p>

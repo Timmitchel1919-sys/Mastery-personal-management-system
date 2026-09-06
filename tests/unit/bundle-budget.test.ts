@@ -27,10 +27,15 @@ describe("scripts/analyze-bundle.mjs", () => {
   });
 
   // When a build is present (CI runs `analyze` after `build`; locally after `npm run build`)
-  // assert the real bundle is within budget. Skipped on a bare checkout.
+  // assert the real bundle is within budget. Skipped on a bare checkout. Gzip-ing every
+  // asset is real I/O work — give it more room than the 5s default on a loaded runner.
   const built = existsSync("out/_next/static");
-  it.skipIf(!built)("the current build is within every budget", () => {
-    const breaches = checkBudgets(summarize(collectAssets()));
-    expect(breaches).toEqual([]);
-  });
+  it.skipIf(!built)(
+    "the current build is within every budget",
+    () => {
+      const breaches = checkBudgets(summarize(collectAssets()));
+      expect(breaches).toEqual([]);
+    },
+    15000,
+  );
 });
