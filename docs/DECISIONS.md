@@ -965,6 +965,30 @@ churn ~30 test files at once.
 - ICU features (`{count}` plurals, dates/numbers via `useFormatter`) are available now for
   new strings.
 
+**Follow-up (2026-09-06) — shared page chrome migrated (the safe subset).** `SearchTrigger`,
+`ModulePlaceholder`, and `SectionLanding` now use `useTranslations`; new `chrome.*`
+namespace in both catalogues (`SectionLanding` also picks up the nav-section /
+nav-item labels via the existing `t.has(navMessageKey(href)) ? …` pattern). None of the
+three is rendered by any test, so **zero test files changed**.
+
+**Deliberately left English (bigger churn than expected):**
+- **`BreadcrumbTrail` / `Breadcrumbs`.** A first attempt to translate the trail via
+  `useTranslations` broke **28 test files / 128 tests**: 30 feature-view components render
+  `<BreadcrumbTrail />` inside their `<PageHeader>`, and their `render(<XxxView />)` tests
+  have no `NextIntlClientProvider`. Reverted — `buildBreadcrumbs` stays a pure
+  English-fallback function and the labels come from the (English) nav config. Same
+  blast-radius class as the state components below.
+- **`EmptyState` / `ErrorState` / `LoadingState` default strings** — making them consume
+  `states.*` needs the ~31 view-test files that exercise a loading/error branch switched
+  to `renderWithIntl`.
+- **Per-domain feature-view copy** (Plan / Focus / Act / Grow / Analytics / Recovery) —
+  migrated as each domain is next touched.
+
+The common thread: any string in a component that a `render(<XxxView />)` test mounts
+transitively needs those ~30 test files put on `renderWithIntl` in one commit. That
+conversion is the real remaining i18n task and is still deferred by the owner
+(2026-09-06).
+
 ---
 
 ## ADR-0028 — PWA: hand-rolled service worker, no build-time PWA plugin

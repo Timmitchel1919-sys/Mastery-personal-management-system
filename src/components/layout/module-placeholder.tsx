@@ -1,4 +1,7 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { PageContainer } from "./page-container";
 import { PageHeader } from "./page-header";
 import { BreadcrumbTrail } from "./breadcrumb-trail";
@@ -23,6 +26,7 @@ export function ModulePlaceholder({
   plannedLayer,
   children,
 }: ModulePlaceholderProps) {
+  const t = useTranslations("chrome");
   return (
     <PageContainer>
       <PageHeader title={title} description={description} breadcrumbs={<BreadcrumbTrail />} />
@@ -30,9 +34,9 @@ export function ModulePlaceholder({
         <CardContent className="text-muted p-6 text-sm">
           {children ?? (
             <p>
-              This screen is part of the Mastery build plan
-              {plannedLayer ? ` and is implemented in Layer ${plannedLayer}` : ""}. Navigation,
-              routing, and layout are in place now.
+              {plannedLayer
+                ? t("modulePlaceholderWithLayer", { layer: plannedLayer })
+                : t("modulePlaceholder")}
             </p>
           )}
         </CardContent>

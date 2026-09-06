@@ -6,6 +6,23 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Post-build-order — 2026-09-06
+
+**Changed**
+- Merged the worktree branch (Layers 9D→23, 29 commits) to `main` via fast-forward — the
+  build order now lives on `main`.
+- **i18n backlog — shared page chrome** (ADR-0027 follow-up): `SearchTrigger`,
+  `ModulePlaceholder`, and `SectionLanding` now go through `next-intl` (new `chrome.*`
+  keys in `messages/en.json` + `messages/nl.json`; section/module labels reuse the
+  `navMessageKey` `t.has()` fallback pattern). None is rendered by a test — no test files
+  changed.
+
+**Still on the i18n backlog:** breadcrumbs (`BreadcrumbTrail` is rendered by 30
+feature-view tests with no intl provider), the `EmptyState` / `ErrorState` /
+`LoadingState` default strings, and the per-domain feature-view copy. All three share the
+same blocker — ~30 view-test files would need `renderWithIntl` in one commit — deferred by
+the owner.
+
 ### Layer 23 — Performance, Cost & Accessibility — 2026-09-05
 
 **Added**

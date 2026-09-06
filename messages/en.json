@@ -12,6 +12,14 @@
     "errorTitle": "Something went wrong",
     "retry": "Try again"
   },
+  "chrome": {
+    "searchLabel": "Search",
+    "searchPlaceholder": "Search…",
+    "sectionOverview": "Jump into any {section} area.",
+    "plannedLayer": "Layer {layer}",
+    "modulePlaceholder": "This screen is part of the Mastery build plan. Navigation, routing, and layout are in place now.",
+    "modulePlaceholderWithLayer": "This screen is part of the Mastery build plan and is implemented in Layer {layer}. Navigation, routing, and layout are in place now."
+  },
   "nav": {
     "primary": "Primary",
     "dashboard": "Dashboard",

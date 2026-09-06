@@ -12,6 +12,14 @@
     "errorTitle": "Er ging iets mis",
     "retry": "Opnieuw proberen"
   },
+  "chrome": {
+    "searchLabel": "Zoeken",
+    "searchPlaceholder": "Zoeken…",
+    "sectionOverview": "Spring naar een onderdeel van {section}.",
+    "plannedLayer": "Laag {layer}",
+    "modulePlaceholder": "Dit scherm hoort bij het bouwplan van Mastery. Navigatie, routing en lay-out staan al klaar.",
+    "modulePlaceholderWithLayer": "Dit scherm hoort bij het bouwplan van Mastery en wordt gebouwd in Laag {layer}. Navigatie, routing en lay-out staan al klaar."
+  },
   "nav": {
     "primary": "Primair",
     "dashboard": "Dashboard",
