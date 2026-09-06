@@ -1,14 +1,17 @@
 "use client";
 
 import { Menu } from "lucide-react";
-import { IconButton, ThemeToggle } from "@/components/ui";
+import { IconButton } from "@/components/ui";
 import { UserMenu } from "@/features/auth";
 import { NotificationBell } from "@/features/notifications/components/NotificationBell";
 import { BreadcrumbTrail } from "./breadcrumb-trail";
 import { SearchTrigger } from "./search-trigger";
 import { useShell } from "./shell-context";
 
-/** Sticky top bar: mobile nav toggle, breadcrumbs, search, notifications, theme, account. */
+/**
+ * Sticky top bar: mobile nav toggle, breadcrumbs, search, notifications, account.
+ * Theme is set from Settings, not from here (removed from the bar on request).
+ */
 export function Topbar() {
   const { setDrawerOpen } = useShell();
 
@@ -30,7 +33,6 @@ export function Topbar() {
 
       <NotificationBell />
 
-      <ThemeToggle className="hidden md:inline-flex" />
       <UserMenu />
     </header>
   );

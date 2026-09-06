@@ -6,6 +6,28 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Sidebar navigation — 2026-09-06
+
+**Changed**
+- `SidebarNav` — Plan / Focus / Act / Grow / Analytics are now collapsible dropdowns: a
+  header button (icon + label + chevron, `aria-expanded`/`aria-controls`) toggles a
+  tree-style list of that section's routes (a connecting vertical line + a short tick per
+  item, no per-item icons). A section opens by default when the current route is inside
+  it; any explicit click overrides that default for the rest of the session. Recovery
+  Center stays a single direct link — intentionally not tucked behind a toggle
+  (`docs/RECOVERY_PRIVACY.md`: visible, never an extra click deeper than necessary). The
+  collapsed icon-rail sidebar is unchanged (no room for a tree; still a flat icon list).
+- `Topbar` — removed the light/dark theme toggle from the bar. Theme still lives on
+  **Settings** (`ThemeToggle`, unchanged) and in the command palette (⌘K).
+
+**Tests:** `sidebar-nav.test.tsx` gained 3 cases (active section open by default / others
+collapsed, click-to-toggle open and closed, Recovery Center never gets a toggle button);
+the 3 existing cases needed no changes (the mocked active route already exercises the new
+default-open behavior).
+
+**Verified:** live-rendered via a headless-Chromium screenshot of the real app shell
+(light + dark, collapsed and expanded) — no console errors.
+
 ### Branding — 2026-09-06
 
 **Added**
