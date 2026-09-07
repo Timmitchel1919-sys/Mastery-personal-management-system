@@ -11,7 +11,7 @@ export default function ForgotPasswordPage() {
       title="Reset your password"
       description="We'll email you a link to set a new one."
       variant="glass"
-      logo={<Logo variant="full" height={30} />}
+      logo={<Logo variant="app" height={52} />}
       footer={
         <Link className="text-primary underline underline-offset-4" href="/login">
           Back to sign in

@@ -13,7 +13,7 @@ export default function LoginPage() {
       title="Welcome back."
       description="Continue your journey."
       variant="glass"
-      logo={<Logo variant="full" height={30} />}
+      logo={<Logo variant="app" height={52} />}
       footer={
         <>
           New to Mastery?{" "}

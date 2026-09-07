@@ -11,7 +11,7 @@ export default function RegisterPage() {
       title="Create your MASTERY."
       description="Build a system around the life you want to live."
       variant="glass"
-      logo={<Logo variant="full" height={30} />}
+      logo={<Logo variant="app" height={52} />}
       footer={
         <>
           Already have an account?{" "}
