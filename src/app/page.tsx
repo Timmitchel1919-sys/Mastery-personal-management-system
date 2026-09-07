@@ -1,34 +1,34 @@
-import Link from "next/link";
-import { Button } from "@/components/ui";
+import type { Metadata } from "next";
+import { MarketingNav } from "@/components/marketing/MarketingNav";
+import { Hero } from "@/components/marketing/Hero";
+import { ProductPreview } from "@/components/marketing/ProductPreview";
+import { ValueProps } from "@/components/marketing/ValueProps";
+import { HowItWorks } from "@/components/marketing/HowItWorks";
+import { Framework } from "@/components/marketing/Framework";
+import { AiSection } from "@/components/marketing/AiSection";
+import { CtaSection } from "@/components/marketing/CtaSection";
+import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 
-/**
- * Placeholder root route. Replaced by the authenticated application shell and entry
- * routing in Layer 5. User-facing copy moves into the i18n layer in Layer 18.
- */
-export default function HomePage() {
+export const metadata: Metadata = {
+  title: "Mastery — Master Your Life",
+  description:
+    "Mastery is a personal operating system: plan with intention, focus on what matters, act with discipline, and grow with purpose across every dimension of life.",
+};
+
+export default function LandingPage() {
   return (
-    <main className="mx-auto flex min-h-dvh max-w-2xl flex-col justify-center gap-4 px-6 py-16">
-      <p className="text-muted text-xs font-medium tracking-[0.2em] uppercase">
-        Plan · Focus · Act · Grow
-      </p>
-      <h1 className="text-3xl font-semibold tracking-tight text-balance">Mastery</h1>
-      <p className="text-muted max-w-prose">
-        The project foundation is in place. Authentication, navigation, and the module surface are
-        added in later build layers.
-      </p>
-      <div className="mt-2 flex flex-wrap items-center gap-3">
-        <Button asChild>
-          <Link href="/login">Sign in</Link>
-        </Button>
-        <Button asChild variant="outline">
-          <Link href="/register">Create an account</Link>
-        </Button>
+    <main className="bg-background min-h-dvh overflow-x-hidden">
+      <MarketingNav />
+      <div className="mastery-ambient">
+        <Hero />
+        <ProductPreview />
       </div>
-      <p className="text-subtle text-xs">
-        <Link href="/api/health" className="underline underline-offset-4 hover:opacity-80">
-          Health check
-        </Link>
-      </p>
+      <ValueProps />
+      <HowItWorks />
+      <Framework />
+      <AiSection />
+      <CtaSection />
+      <MarketingFooter />
     </main>
   );
 }

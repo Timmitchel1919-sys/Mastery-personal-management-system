@@ -25,10 +25,14 @@ export {
   DropdownMenuTrigger,
 } from "./dropdown-menu";
 export { FormField, type FormFieldProps } from "./field";
+export { GlassCard, GlassPanel, type GlassPanelProps } from "./glass-panel";
 export { IconButton, type IconButtonProps } from "./icon-button";
 export { Input, inputClassName, type InputProps } from "./input";
 export { Kbd } from "./kbd";
 export { Label } from "./label";
+export { Logo, type LogoProps } from "./logo";
+export { PasswordInput } from "./password-input";
+export { ProgressRing, type ProgressRingProps } from "./progress-ring";
 export { RadioGroup, RadioGroupItem } from "./radio-group";
 export {
   Select,
@@ -40,6 +44,7 @@ export {
   SelectValue,
 } from "./select";
 export { SegmentedControl, SegmentedControlItem } from "./segmented-control";
+export { SectionHeader, type SectionHeaderProps } from "./section-header";
 export { Progress, type ProgressProps } from "./progress";
 export { Separator } from "./separator";
 export {

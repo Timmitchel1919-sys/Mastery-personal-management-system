@@ -19,39 +19,43 @@
   --font-mono:
     ui-monospace, "SF Mono", "Cascadia Code", "Segoe UI Mono", Menlo, Consolas, monospace;
 
-  --background: #ffffff;
-  --surface: #fafafa;
+  --background: #f6f7f9;
+  --surface: #eef1f4;
   --surface-raised: #ffffff;
-  --overlay: rgb(9 9 11 / 0.5);
+  --overlay: rgb(13 15 18 / 0.5);
 
-  --foreground: #18181b;
-  --muted: #52525b;
-  --subtle: #71717a;
+  --foreground: #15171a;
+  --muted: #5f6670;
+  --subtle: #8b929c;
 
-  --border: #e4e4e7;
-  --border-strong: #d4d4d8;
+  --border: #e2e5e9;
+  --border-strong: #7a828d;
 
-  --primary: #4f46e5;
-  --primary-foreground: #ffffff;
-  --primary-hover: #4338ca;
+  --primary: #c9972b;
+  --primary-foreground: #0d0f12;
+  --primary-hover: #b8860b;
 
-  --accent: #0d9488;
-  --accent-foreground: #ffffff;
+  --accent: #b8860b;
+  --accent-foreground: #0d0f12;
 
-  --success: #16a34a;
+  --success: #15803d;
   --success-foreground: #ffffff;
-  --success-subtle: #dcfce7;
-  --warning: #b45309;
-  --warning-foreground: #ffffff;
-  --warning-subtle: #fef3c7;
-  --danger: #dc2626;
+  --success-subtle: #e3f3e8;
+  --warning: #b7791f;
+  --warning-foreground: #0d0f12;
+  --warning-subtle: #fbf0dc;
+  --danger: #c53030;
   --danger-foreground: #ffffff;
-  --danger-subtle: #fee2e2;
+  --danger-subtle: #fbe3e3;
   --info: #2563eb;
   --info-foreground: #ffffff;
-  --info-subtle: #dbeafe;
+  --info-subtle: #e1eafb;
 
-  --ring: #4f46e5;
+  --ring: #8a6500;
+
+  --gold-subtle: #fbf6e8;
+  --glass-fill: rgb(255 255 255 / 0.62);
+  --glass-border-color: rgb(255 255 255 / 0.7);
 
   --pillar-spiritual: #7c3aed;
   --pillar-personal: #0d9488;
@@ -60,39 +64,43 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #09090b;
-    --surface: #18181b;
-    --surface-raised: #1f1f23;
+    --background: #0d0f12;
+    --surface: #15181c;
+    --surface-raised: #20242a;
     --overlay: rgb(0 0 0 / 0.6);
 
-    --foreground: #fafafa;
-    --muted: #a1a1aa;
-    --subtle: #8b8b93;
+    --foreground: #edeff2;
+    --muted: #9aa1ab;
+    --subtle: #6b7280;
 
-    --border: #27272a;
-    --border-strong: #3f3f46;
+    --border: #343a42;
+    --border-strong: #6b7480;
 
-    --primary: #6366f1;
-    --primary-foreground: #0b1120;
-    --primary-hover: #818cf8;
+    --primary: #c9972b;
+    --primary-foreground: #0d0f12;
+    --primary-hover: #e7c76a;
 
-    --accent: #2dd4bf;
-    --accent-foreground: #042f2e;
+    --accent: #e7c76a;
+    --accent-foreground: #0d0f12;
 
-    --success: #22c55e;
-    --success-foreground: #052e16;
-    --success-subtle: #14532d;
-    --warning: #f59e0b;
-    --warning-foreground: #422006;
-    --warning-subtle: #713f12;
-    --danger: #ef4444;
-    --danger-foreground: #450a0a;
-    --danger-subtle: #7f1d1d;
-    --info: #3b82f6;
-    --info-foreground: #0b1120;
-    --info-subtle: #1e3a8a;
+    --success: #2fa35a;
+    --success-foreground: #0d0f12;
+    --success-subtle: #123420;
+    --warning: #d2a03d;
+    --warning-foreground: #0d0f12;
+    --warning-subtle: #3a2c10;
+    --danger: #e2635f;
+    --danger-foreground: #0d0f12;
+    --danger-subtle: #3a1613;
+    --info: #5b8def;
+    --info-foreground: #0d0f12;
+    --info-subtle: #16223d;
 
-    --ring: #818cf8;
+    --ring: #e7c76a;
+
+    --gold-subtle: #241c0e;
+    --glass-fill: rgb(32 36 42 / 0.62);
+    --glass-border-color: rgb(255 255 255 / 0.08);
 
     --pillar-spiritual: #a78bfa;
     --pillar-personal: #2dd4bf;
@@ -102,66 +110,72 @@
 
 /* Explicit choice wins over the OS media query in both directions. */
 :root[data-theme="light"] {
-  --background: #ffffff;
-  --surface: #fafafa;
+  --background: #f6f7f9;
+  --surface: #eef1f4;
   --surface-raised: #ffffff;
-  --overlay: rgb(9 9 11 / 0.5);
-  --foreground: #18181b;
-  --muted: #52525b;
-  --subtle: #71717a;
-  --border: #e4e4e7;
-  --border-strong: #d4d4d8;
-  --primary: #4f46e5;
-  --primary-foreground: #ffffff;
-  --primary-hover: #4338ca;
-  --accent: #0d9488;
-  --accent-foreground: #ffffff;
-  --success: #16a34a;
+  --overlay: rgb(13 15 18 / 0.5);
+  --foreground: #15171a;
+  --muted: #5f6670;
+  --subtle: #8b929c;
+  --border: #e2e5e9;
+  --border-strong: #7a828d;
+  --primary: #c9972b;
+  --primary-foreground: #0d0f12;
+  --primary-hover: #b8860b;
+  --accent: #b8860b;
+  --accent-foreground: #0d0f12;
+  --success: #15803d;
   --success-foreground: #ffffff;
-  --success-subtle: #dcfce7;
-  --warning: #b45309;
-  --warning-foreground: #ffffff;
-  --warning-subtle: #fef3c7;
-  --danger: #dc2626;
+  --success-subtle: #e3f3e8;
+  --warning: #b7791f;
+  --warning-foreground: #0d0f12;
+  --warning-subtle: #fbf0dc;
+  --danger: #c53030;
   --danger-foreground: #ffffff;
-  --danger-subtle: #fee2e2;
+  --danger-subtle: #fbe3e3;
   --info: #2563eb;
   --info-foreground: #ffffff;
-  --info-subtle: #dbeafe;
-  --ring: #4f46e5;
+  --info-subtle: #e1eafb;
+  --ring: #8a6500;
+  --gold-subtle: #fbf6e8;
+  --glass-fill: rgb(255 255 255 / 0.62);
+  --glass-border-color: rgb(255 255 255 / 0.7);
   --pillar-spiritual: #7c3aed;
   --pillar-personal: #0d9488;
   --pillar-societal: #ea580c;
 }
 
 :root[data-theme="dark"] {
-  --background: #09090b;
-  --surface: #18181b;
-  --surface-raised: #1f1f23;
+  --background: #0d0f12;
+  --surface: #15181c;
+  --surface-raised: #20242a;
   --overlay: rgb(0 0 0 / 0.6);
-  --foreground: #fafafa;
-  --muted: #a1a1aa;
-  --subtle: #8b8b93;
-  --border: #27272a;
-  --border-strong: #3f3f46;
-  --primary: #6366f1;
-  --primary-foreground: #0b1120;
-  --primary-hover: #818cf8;
-  --accent: #2dd4bf;
-  --accent-foreground: #042f2e;
-  --success: #22c55e;
-  --success-foreground: #052e16;
-  --success-subtle: #14532d;
-  --warning: #f59e0b;
-  --warning-foreground: #422006;
-  --warning-subtle: #713f12;
-  --danger: #ef4444;
-  --danger-foreground: #450a0a;
-  --danger-subtle: #7f1d1d;
-  --info: #3b82f6;
-  --info-foreground: #0b1120;
-  --info-subtle: #1e3a8a;
-  --ring: #818cf8;
+  --foreground: #edeff2;
+  --muted: #9aa1ab;
+  --subtle: #6b7280;
+  --border: #343a42;
+  --border-strong: #6b7480;
+  --primary: #c9972b;
+  --primary-foreground: #0d0f12;
+  --primary-hover: #e7c76a;
+  --accent: #e7c76a;
+  --accent-foreground: #0d0f12;
+  --success: #2fa35a;
+  --success-foreground: #0d0f12;
+  --success-subtle: #123420;
+  --warning: #d2a03d;
+  --warning-foreground: #0d0f12;
+  --warning-subtle: #3a2c10;
+  --danger: #e2635f;
+  --danger-foreground: #0d0f12;
+  --danger-subtle: #3a1613;
+  --info: #5b8def;
+  --info-foreground: #0d0f12;
+  --info-subtle: #16223d;
+  --ring: #e7c76a;
+  --gold-subtle: #241c0e;
+  --glass-fill: rgb(32 36 42 / 0.62);
+  --glass-border-color: rgb(255 255 255 / 0.08);
   --pillar-spiritual: #a78bfa;
   --pillar-personal: #2dd4bf;
   --pillar-societal: #fb923c;
@@ -206,6 +220,8 @@
   --color-info-subtle: var(--info-subtle);
 
   --color-ring: var(--ring);
+
+  --color-gold-subtle: var(--gold-subtle);
 
   --color-pillar-spiritual: var(--pillar-spiritual);
   --color-pillar-personal: var(--pillar-personal);
@@ -278,24 +294,55 @@
   }
 }
 
-/* Auth pages — a frosted "glass" card over a soft decorative backdrop. Both are
-   theme-aware (color-mix over the existing surface/primary tokens, no hardcoded
-   white), so they hold up in light, dark, and system mode. */
+/* Restrained glassmorphism — navigation, auth cards, floating panels, modals,
+   toasts, feature cards. Not every surface: flat --color-surface-raised stays the
+   default for dense, scannable content (tables, forms, dashboard cards). Both
+   themes share one recipe via the --glass-* tokens; a non-blur browser gets the
+   opaque --color-surface-raised fallback instead of a broken transparent panel. */
+.mastery-glass,
 .mastery-glass-card {
-  background-color: color-mix(in oklab, var(--color-surface-raised) 72%, transparent);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background-color: var(--glass-fill);
+  border: 1px solid var(--glass-border-color);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.04),
+    0 24px 60px rgb(15 23 42 / 0.1);
 }
-.mastery-auth-backdrop {
+@supports not (backdrop-filter: blur(1px)) {
+  .mastery-glass,
+  .mastery-glass-card {
+    background-color: var(--color-surface-raised);
+  }
+}
+
+/* Ambient, near-subliminal lighting behind glass — never a loud gradient. The
+   default reads warm/gold; .mastery-ambient--cool swaps in a slate-toned glow
+   (e.g. for a secondary or Recovery-adjacent section). */
+.mastery-auth-backdrop,
+.mastery-ambient {
   background-image:
     radial-gradient(
       ellipse 60% 50% at 15% 10%,
-      color-mix(in oklab, var(--color-primary) 22%, transparent),
+      color-mix(in oklab, var(--color-primary) 12%, transparent),
       transparent
     ),
     radial-gradient(
       ellipse 55% 45% at 85% 90%,
-      color-mix(in oklab, var(--color-primary) 16%, transparent),
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      transparent
+    );
+}
+.mastery-ambient--cool {
+  background-image:
+    radial-gradient(
+      ellipse 60% 50% at 15% 10%,
+      color-mix(in oklab, #64748b 8%, transparent),
+      transparent
+    ),
+    radial-gradient(
+      ellipse 55% 45% at 85% 90%,
+      color-mix(in oklab, var(--color-primary) 6%, transparent),
       transparent
     );
 }

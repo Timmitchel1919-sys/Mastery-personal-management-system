@@ -1,28 +1,19 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { AuthCard, SignInForm } from "@/features/auth";
 import { LoadingState } from "@/components/shared";
+import { Logo } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Sign in" };
 
 export default function LoginPage() {
   return (
     <AuthCard
-      title="Sign in"
-      description="Welcome back."
+      title="Welcome back."
+      description="Continue your journey."
       variant="glass"
-      logo={
-        <Image
-          src="/brand/mastery-logo.png"
-          alt="Mastery"
-          width={960}
-          height={332}
-          className="h-8 w-auto"
-          priority
-        />
-      }
+      logo={<Logo variant="full" height={30} />}
       footer={
         <>
           New to Mastery?{" "}

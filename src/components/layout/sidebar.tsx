@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { PanelLeft, PanelLeftClose } from "lucide-react";
-import { IconButton } from "@/components/ui";
+import { IconButton, Logo } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { SidebarNav } from "./sidebar-nav";
 import { useShell } from "./shell-context";
@@ -26,21 +25,14 @@ export function Sidebar() {
         )}
       >
         {!sidebarCollapsed ? (
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 px-1 text-sm font-semibold tracking-tight"
-          >
-            <Image
-              src="/brand/mastery-mark.png"
-              alt=""
-              width={512}
-              height={199}
-              className="h-5 w-auto shrink-0"
-              priority
-            />
-            Mastery
+          <Link href="/dashboard" className="flex items-center px-1" aria-label="Mastery">
+            <Logo variant="full" height={20} withLabel={false} />
           </Link>
-        ) : null}
+        ) : (
+          <Link href="/dashboard" aria-label="Mastery" className="mr-1 flex items-center">
+            <Logo variant="mark" height={20} withLabel={false} />
+          </Link>
+        )}
         <IconButton
           size="sm"
           aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}

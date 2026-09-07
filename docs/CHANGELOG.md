@@ -6,6 +6,40 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Brand pivot — Gold/Obsidian/Ivory/Slate design system — 2026-09-06
+
+**Added**
+- Full owner-specified color token system in `globals.css` (light primary, dark
+  counterpart) replacing the Layer 2 indigo palette — Mastery Gold `#C9972B` as the sole
+  brand accent, obsidian/ivory/slate neutrals, restrained glassmorphism. Two tokens were
+  raised for WCAG contrast (`--border-strong`, `--ring`); every accent/semantic fill pairs
+  with dark obsidian text, never white. New `--gold-subtle` and `--glass-fill`/
+  `--glass-border-color` tokens; `.mastery-glass` (generalized `.mastery-glass-card`) with
+  an opaque no-`backdrop-filter` fallback.
+- New shared components: `Logo` (the real `public/brand/` PNG assets, never redrawn),
+  `GlassPanel`/`GlassCard`, `PasswordInput`, `ProgressRing`, `SectionHeader`.
+- A real public landing page at `/` (`src/components/marketing/`) — nav, hero, product
+  preview, value props, the Plan→Focus→Act→Grow loop, the Spiritual/Personal/Societal
+  framework diagram, an AI section, a CTA band, footer. Fully static, no data dependency.
+
+**Changed**
+- `AuthCard`/login/register/forgot-password — glass variant, real logo, owner-specified
+  copy, generous radius/spacing.
+- `Sidebar` — the real logo asset (mark when collapsed, full lockup when expanded)
+  replaces the text wordmark.
+- `public/manifest.webmanifest`, `layout.tsx`'s `themeColor` — updated to the new palette.
+
+**Verified:** live-rendered via headless Chromium — landing (desktop + mobile), login,
+register, and the authenticated dashboard/sidebar (temporary local auth bypass, reverted
+before commit) — no console errors, no leftover indigo. `typecheck`/`lint`/`test`
+(139 files, 735 passed + 1 skipped)/`build`/`analyze`/`format` all green.
+
+**Known limitation:** `docs/DESIGN_SYSTEM.md` still documents the old indigo palette; a
+docs catch-up is owed (ADR-0033). Sign-up keeps a single `Name` field (not First/Last —
+a data-model change, out of scope for a UI rebuild). See ADR-0033 for the full rationale,
+including its relationship to the separate green dark-theme design canvas from earlier
+the same day (not implemented; reference only).
+
 ### Sidebar navigation — 2026-09-06
 
 **Changed**

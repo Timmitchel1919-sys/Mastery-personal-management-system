@@ -1230,3 +1230,76 @@ record.
   within budget when `out/` exists; `ci-workflow.test.ts` asserts the CI `analyze` step.
 - `web-vitals` wiring, colour-contrast in CI, and the Firebase-SDK deferral are carried
   forward in `docs/PERFORMANCE.md` §3/§6.
+
+---
+
+## ADR-0033 — Brand pivot: Gold/Obsidian/Ivory/Slate design system, light as primary theme
+
+**Status:** accepted (2026-09-06) · **Owner request:** full UI foundation rebuild
+
+**Context.** The owner requested a full visual-identity rebuild around the real Mastery
+logo assets (`public/brand/mastery-mark.png`, `mastery-logo.png`) — a premium
+"gold/obsidian/ivory/slate" system replacing the Layer 2 indigo palette, LIGHT as the
+primary theme (not dark), restrained glassmorphism, and a new public marketing landing
+page (the root route was a Layer-1 placeholder; no such page existed in the 24-layer
+plan). This explicitly supersedes both the Layer 2 indigo tokens and the gold/obsidian
+direction is unrelated to — and replaces as the shipped brand — the separate green
+"performance instrument" dark-theme exploration published as a design canvas earlier the
+same day (that canvas is not implemented; it stays a reference artifact only).
+
+**Decision.**
+- **Token values are the owner's exact hex spec**, contrast-checked and adjusted only
+  where the raw values failed WCAG for their role: `--border-strong` (light `#7A828D`,
+  dark `#6B7480` — the requested tones were 1.5–2.9:1 against the surfaces they outline;
+  raised to clear 3:1 non-text contrast), `--ring` (light `#8A6500`, the brief's own "Dark
+  Gold" — raw Mastery Gold is only ~2.5:1, too low for a focus indicator), `--subtle`
+  (kept verbatim per the owner's spec — a tertiary/placeholder role, not required to hit
+  body-text contrast), and every semantic/accent fill (`primary`, `accent`, `warning`)
+  pairs with **dark obsidian text**, never white, per the owner's own instruction extended
+  consistently to every gold-family fill. Full numbers: `docs/DESIGN_SYSTEM.md` is not yet
+  updated to match (tracked below).
+- **One token layer, both themes.** Same `--color-*` names in `globals.css` (`:root`,
+  `@media (prefers-color-scheme: dark)`, `[data-theme="light"]`, `[data-theme="dark"]`) —
+  every existing component (`Button`, `Input`, `Card`, …) re-themes with zero code changes
+  because they already consumed semantic tokens, never raw hex (Layer 2 discipline paying
+  off). Pillar accents (`--pillar-*`) are untouched — out of scope, not mentioned in the
+  brief.
+- **New tokens**: `--gold-subtle` (light `#FBF6E8`, dark a deep gold-tinted charcoal) and
+  `--glass-fill` / `--glass-border-color` (rgba pairs consumed by `.mastery-glass`, the
+  generalized version of Layer-18's `.mastery-glass-card` — blur 24px, an
+  `@supports not (backdrop-filter)` opaque fallback, restrained to nav / auth cards /
+  floating panels / modals / feature cards, never dashboard tables or forms).
+- **New shared components** (`src/components/ui/`): `Logo` (wraps the two real PNG assets
+  — `variant="mark"` for the sidebar/compact nav, `variant="full"` for auth/landing;
+  intrinsic width/height hardcoded from the real asset dimensions, never redrawn),
+  `GlassPanel`/`GlassCard`, `PasswordInput` (show/hide toggle), `ProgressRing`,
+  `SectionHeader`. `Button`'s existing `primary`/`outline`/`ghost` variants already satisfy
+  Primary/Secondary/Ghost — no new button components.
+- **New `src/components/marketing/` tree** + a rebuilt `src/app/page.tsx`: nav (glass,
+  scroll-aware opacity, mobile `Sheet` menu), hero, a conceptual (not literal) product
+  preview in a glass panel, 3 value-prop cards, the Plan→Focus→Act→Grow loop as 4 steps,
+  the Spiritual/Personal/Societal framework as a connected glass-node diagram, an AI
+  section, a CTA band, and a footer. Copy is grounded in the app's real, already-shipped
+  feature set (Recovery Center isolation, the actual pillar/loop model) — nothing
+  fabricated.
+- **Auth screens** (`AuthCard`, login/register/forgot-password) now default to the glass
+  variant with the full logo and the owner's exact copy ("Welcome back." / "Continue your
+  journey.", "Create your MASTERY." / "Build a system around the life you want to live.").
+  The sign-up form's fields stay `Name` (not split First/Last) — changing the data model
+  is out of scope for a UI-only rebuild.
+- **Sidebar** now renders the real logo (`Logo variant="mark"`/`"full"`) instead of a text
+  wordmark, in both the expanded and collapsed rail states.
+
+**Consequences.**
+- Every already-shipped authenticated screen (dashboard, Plan/Focus/Act/Grow/Analytics,
+  Recovery Center, Settings, …) re-themes automatically via the token swap — verified live
+  via a headless-Chromium screenshot of `/dashboard`, no regressions, no purple/indigo
+  remnants.
+- `docs/DESIGN_SYSTEM.md` and `docs/MASTER_SPEC.md` still describe the old indigo palette
+  and don't mention a marketing landing page — a documentation-catch-up pass is owed, not
+  done in this change (the code + this ADR are the source of truth in the meantime).
+- The root route (`/`) is no longer a placeholder; it is a real, public, unauthenticated
+  page. It introduces no new backend/data dependency (fully static, no Firestore reads).
+- The green dark-theme canvas from earlier the same day remains published as a reference
+  artifact but is explicitly not the shipped direction — noted here to avoid future
+  confusion between the two.
