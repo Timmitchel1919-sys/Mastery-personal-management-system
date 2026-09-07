@@ -23,8 +23,8 @@ export function HeroBackground() {
       />
 
       {/* Ivory wash — keeps the peaks visible but never louder than the headline. */}
-      <div className="from-background/25 via-background/55 to-background absolute inset-0 bg-gradient-to-b" />
-      <div className="from-background/40 absolute inset-x-0 top-0 h-24 bg-gradient-to-b to-transparent" />
+      <div className="from-background/25 via-background/55 to-background absolute inset-0 bg-linear-to-b" />
+      <div className="from-background/40 absolute inset-x-0 top-0 h-24 bg-linear-to-b to-transparent" />
     </div>
   );
 }

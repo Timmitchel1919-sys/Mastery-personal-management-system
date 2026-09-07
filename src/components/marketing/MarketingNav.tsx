@@ -47,7 +47,7 @@ export function MarketingNav() {
       <div
         className={cn(
           "mastery-glass mx-auto flex h-14 max-w-6xl items-center justify-between rounded-2xl px-3 transition-all duration-200 sm:px-5",
-          scrolled ? "shadow-[0_18px_45px_rgb(15_23_42_/_0.12)]" : "shadow-none",
+          scrolled ? "shadow-[0_18px_45px_rgb(15_23_42/0.12)]" : "shadow-none",
         )}
         data-scrolled={scrolled}
       >
