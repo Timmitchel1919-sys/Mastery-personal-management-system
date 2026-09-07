@@ -88,7 +88,15 @@
     "install": "Install",
     "installHelp": "Add Mastery to your home screen or desktop.",
     "installLabel": "Install Mastery",
-    "installed": "Installed on this device."
+    "installed": "Installed on this device.",
+    "profileHelp": "Your name and photo appear across Mastery.",
+    "nameSave": "Save",
+    "nameSaved": "Saved",
+    "photo": "Profile photo",
+    "photoChange": "Change photo",
+    "photoRemove": "Remove",
+    "photoUploading": "Uploading…",
+    "profileError": "We couldn't save that. Please try again."
   },
   "notifications": {
     "title": "Notifications",

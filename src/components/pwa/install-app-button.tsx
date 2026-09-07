@@ -3,6 +3,7 @@
 import { Download } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Button, type ButtonProps } from "@/components/ui";
+import { cn } from "@/lib/utils";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -11,21 +12,24 @@ interface BeforeInstallPromptEvent extends Event {
 
 function isStandaloneMode() {
   if (typeof window === "undefined") return false;
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    (window.navigator as Navigator & { standalone?: boolean }).standalone === true
-  );
+  const matches =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(display-mode: standalone)").matches;
+  return matches || (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
 }
 
 export function InstallAppButton({
   className,
   size = "md",
   variant = "secondary",
+  tone = "default",
   showFallbackText = false,
 }: {
   className?: string;
   size?: ButtonProps["size"];
   variant?: ButtonProps["variant"];
+  /** "gold" applies the metallic gold-gloss CTA treatment. */
+  tone?: "default" | "gold";
   showFallbackText?: boolean;
 }) {
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
@@ -79,8 +83,8 @@ export function InstallAppButton({
     <div className="inline-flex flex-col items-start gap-1">
       <Button
         type="button"
-        className={className}
-        variant={variant}
+        className={cn(tone === "gold" && "mastery-gold-btn border-0", className)}
+        variant={tone === "gold" ? "secondary" : variant}
         size={size}
         onClick={handleInstall}
         disabled={installed}

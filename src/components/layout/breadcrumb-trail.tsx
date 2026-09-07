@@ -8,30 +8,23 @@ function titleCase(segment: string): string {
   return segment.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-/** Derive a breadcrumb trail from a pathname using the navigation config for labels. */
+/**
+ * The current page's own label — no "Dashboard ›" prefix and no parent trail. The
+ * module name shown in the panel header (the `<h1>`) is the single wayfinding cue, so
+ * the breadcrumb collapses to just the leaf and `BreadcrumbTrail` renders nothing.
+ */
 export function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
   const segments = pathname.split("/").filter(Boolean);
   if (segments.length === 0) return [{ label: "Dashboard" }];
-
-  const crumbs: BreadcrumbItem[] = [];
-  if (segments[0] !== "dashboard") {
-    crumbs.push({ label: "Dashboard", href: "/dashboard" });
-  }
-
-  let acc = "";
-  segments.forEach((segment, index) => {
-    acc += `/${segment}`;
-    const label = navLabelForHref(acc) ?? titleCase(segment);
-    const isLast = index === segments.length - 1;
-    crumbs.push(isLast ? { label } : { label, href: acc });
-  });
-
-  return crumbs;
+  const acc = `/${segments.join("/")}`;
+  const leaf = segments[segments.length - 1] ?? "";
+  return [{ label: navLabelForHref(acc) ?? titleCase(leaf) }];
 }
 
 export function BreadcrumbTrail({ className }: { className?: string }) {
   const pathname = usePathname();
   const items = buildBreadcrumbs(pathname);
+  // A single leaf crumb duplicates the panel <h1>; don't render it.
   if (items.length <= 1) return null;
   return <Breadcrumbs items={items} className={className} />;
 }

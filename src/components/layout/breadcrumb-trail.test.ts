@@ -2,31 +2,14 @@ import { describe, expect, it } from "vitest";
 import { buildBreadcrumbs } from "./breadcrumb-trail";
 
 describe("buildBreadcrumbs", () => {
-  it("renders the dashboard as a single current crumb", () => {
+  it("returns only the current page's label — no Dashboard prefix, no trail", () => {
+    expect(buildBreadcrumbs("/plan/goals")).toEqual([{ label: "Goals" }]);
+    expect(buildBreadcrumbs("/settings")).toEqual([{ label: "Settings" }]);
     expect(buildBreadcrumbs("/dashboard")).toEqual([{ label: "Dashboard" }]);
   });
 
-  it("prefixes Dashboard and links the parent section", () => {
-    expect(buildBreadcrumbs("/plan/goals")).toEqual([
-      { label: "Dashboard", href: "/dashboard" },
-      { label: "Plan", href: "/plan" },
-      { label: "Goals" },
-    ]);
-  });
-
-  it("title-cases segments that are not in the nav config", () => {
-    expect(buildBreadcrumbs("/plan/some-thing")).toEqual([
-      { label: "Dashboard", href: "/dashboard" },
-      { label: "Plan", href: "/plan" },
-      { label: "Some Thing" },
-    ]);
-  });
-
-  it("handles a single top-level system route", () => {
-    expect(buildBreadcrumbs("/settings")).toEqual([
-      { label: "Dashboard", href: "/dashboard" },
-      { label: "Settings" },
-    ]);
+  it("title-cases a segment that is not in the nav config", () => {
+    expect(buildBreadcrumbs("/plan/some-thing")).toEqual([{ label: "Some Thing" }]);
   });
 
   it("falls back for the root path", () => {

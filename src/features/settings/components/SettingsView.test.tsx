@@ -13,8 +13,9 @@ const render = (ui: ReactElement, opts?: { locale?: Locale }) =>
 vi.mock("next/navigation", () => ({ usePathname: () => "/settings" }));
 vi.mock("@/providers/auth-provider", () => ({
   useAuth: () => ({
-    profile: { displayName: "Sam Rivera", email: "sam@example.com" },
-    user: null,
+    profile: { displayName: "Sam Rivera", email: "sam@example.com", photoURL: null },
+    user: { uid: "u1", displayName: "Sam Rivera", email: "sam@example.com", photoURL: null },
+    refreshProfile: vi.fn(),
   }),
 }));
 
@@ -26,14 +27,16 @@ afterEach(() => {
 });
 
 describe("SettingsView", () => {
-  it("renders the language and theme controls and the profile", () => {
+  it("renders the language and theme controls and an editable profile without an email field", () => {
     render(<SettingsView />);
     expect(screen.getByRole("heading", { name: "Settings" })).toBeInTheDocument();
     expect(screen.getByText("Language")).toBeInTheDocument();
     expect(screen.getByText("Theme")).toBeInTheDocument();
     expect(screen.getByText("Install")).toBeInTheDocument();
-    expect(screen.getByText("Sam Rivera")).toBeInTheDocument();
-    expect(screen.getByText("sam@example.com")).toBeInTheDocument();
+    // Name is editable, seeded from the profile.
+    expect(screen.getByDisplayValue("Sam Rivera")).toBeInTheDocument();
+    // Email is not exposed in Settings.
+    expect(screen.queryByText("sam@example.com")).not.toBeInTheDocument();
   });
 
   it("switches the app locale when a new language is picked", async () => {

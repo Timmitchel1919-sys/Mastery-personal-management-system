@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { BreadcrumbTrail, PageContainer, PageHeader } from "@/components/layout";
+import { PageContainer, PageHeader } from "@/components/layout";
 import {
   Card,
   CardContent,
@@ -14,25 +14,17 @@ import {
   SelectValue,
   ThemeToggle,
 } from "@/components/ui";
-import { useAuth } from "@/providers/auth-provider";
+import { InstallAppButton } from "@/components/pwa/install-app-button";
 import { LOCALES, LOCALE_LABEL, useActiveLocale } from "@/i18n";
-import { InstallButton } from "@/components/pwa";
+import { ProfileCard } from "./ProfileCard";
 
 export function SettingsView() {
   const t = useTranslations("settings");
   const { locale, setLocale } = useActiveLocale();
-  const { profile, user } = useAuth();
-
-  const name = profile?.displayName ?? user?.displayName ?? "—";
-  const email = profile?.email ?? user?.email ?? "—";
 
   return (
-    <PageContainer className="space-y-6">
-      <PageHeader
-        title={t("title")}
-        description={t("description")}
-        breadcrumbs={<BreadcrumbTrail />}
-      />
+    <PageContainer size="full" className="space-y-6">
+      <PageHeader title={t("title")} description={t("description")} />
 
       <Card>
         <CardContent className="space-y-5 p-6">
@@ -65,28 +57,19 @@ export function SettingsView() {
           <div className="space-y-1.5">
             <p className="text-sm font-medium">{t("install")}</p>
             <p className="text-subtle text-xs">{t("installHelp")}</p>
-            <InstallButton label={t("installLabel")} installedLabel={t("installed")} />
+            <InstallAppButton tone="gold" showFallbackText />
           </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="space-y-3 p-6">
-          <h2 className="font-medium">{t("profile")}</h2>
-          <dl className="grid grid-cols-[6rem_1fr] gap-x-4 gap-y-1 text-sm">
-            <dt className="text-subtle">{t("name")}</dt>
-            <dd className="break-words">{name}</dd>
-            <dt className="text-subtle">{t("email")}</dt>
-            <dd className="break-words">{email}</dd>
-          </dl>
-          <p className="text-subtle text-xs">
-            {t("moreInSection")}{" "}
-            <Link className="underline underline-offset-2" href="/notifications">
-              {t("goToNotifications")}
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
+      <ProfileCard />
+
+      <p className="text-subtle text-xs">
+        {t("moreInSection")}{" "}
+        <Link className="underline underline-offset-2" href="/notifications">
+          {t("goToNotifications")}
+        </Link>
+      </p>
     </PageContainer>
   );
 }

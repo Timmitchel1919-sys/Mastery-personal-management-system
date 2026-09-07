@@ -29,7 +29,11 @@ function DeferredCommandPalette() {
 
 /**
  * Responsive application shell for the authenticated area.
- * Desktop: fixed sidebar + sticky topbar. Tablet/mobile: drawer + bottom nav.
+ *
+ * Desktop: the sidebar runs full-height on the left (from the very top of the screen);
+ * the topbar and the module panel share the column to its right. The ambient video
+ * background lives inside the panel only — never behind the sidebar.
+ * Tablet/mobile: drawer + bottom nav, no sidebar column.
  */
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -41,13 +45,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         Skip to content
       </a>
 
-      <div className="relative min-h-dvh bg-background">
-        <ThemeVideoBackground />
-        <Topbar />
-        <div className="flex min-h-dvh pt-14">
-          <Sidebar />
-          <main id="main-content" className="min-w-0 flex-1 pb-16 lg:pb-0">
-            {children}
+      <div className="bg-background relative flex min-h-dvh">
+        <Sidebar />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Topbar />
+          <main id="main-content" className="relative isolate flex flex-1 flex-col pb-16 lg:pb-0">
+            <ThemeVideoBackground />
+            <div className="relative flex-1">{children}</div>
           </main>
         </div>
       </div>

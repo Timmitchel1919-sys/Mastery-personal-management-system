@@ -74,7 +74,7 @@ export function MarketingNav() {
           <Button asChild size="sm" className="px-4">
             <Link href="/register">Get Started</Link>
           </Button>
-          <InstallAppButton size="sm" showFallbackText={false} />
+          <InstallAppButton size="sm" tone="gold" showFallbackText={false} />
         </div>
 
         <Sheet>
@@ -107,7 +107,7 @@ export function MarketingNav() {
               <Button asChild>
                 <Link href="/register">Get Started</Link>
               </Button>
-              <InstallAppButton showFallbackText={false} />
+              <InstallAppButton tone="gold" showFallbackText={false} />
             </div>
           </SheetContent>
         </Sheet>

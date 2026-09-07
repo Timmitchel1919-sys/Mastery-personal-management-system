@@ -88,7 +88,15 @@
     "install": "Installeren",
     "installHelp": "Voeg Mastery toe aan je startscherm of bureaublad.",
     "installLabel": "Mastery installeren",
-    "installed": "Geïnstalleerd op dit apparaat."
+    "installed": "Geïnstalleerd op dit apparaat.",
+    "profileHelp": "Je naam en foto verschijnen in heel Mastery.",
+    "nameSave": "Opslaan",
+    "nameSaved": "Opgeslagen",
+    "photo": "Profielfoto",
+    "photoChange": "Foto wijzigen",
+    "photoRemove": "Verwijderen",
+    "photoUploading": "Uploaden…",
+    "profileError": "Opslaan is niet gelukt. Probeer het opnieuw."
   },
   "notifications": {
     "title": "Meldingen",

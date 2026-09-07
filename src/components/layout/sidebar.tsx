@@ -7,14 +7,15 @@ import { cn } from "@/lib/utils";
 import { SidebarNav } from "./sidebar-nav";
 import { useShell } from "./shell-context";
 
-/** Fixed left sidebar for desktop (>= lg). Collapsible to an icon rail. */
+/** Fixed left sidebar for desktop (>= lg). Runs the full height of the screen and is
+ * collapsible to an icon rail. */
 export function Sidebar() {
   const { sidebarCollapsed, setSidebarCollapsed, toggleSidebar } = useShell();
 
   return (
     <aside
       className={cn(
-        "bg-ivory border-border sticky top-14 hidden h-[calc(100dvh-3.5rem)] shrink-0 flex-col border-r lg:flex",
+        "bg-ivory border-border sticky top-0 hidden h-dvh shrink-0 flex-col border-r lg:flex",
         sidebarCollapsed ? "w-16" : "w-64",
       )}
     >
