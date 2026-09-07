@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { MarketingNav } from "@/components/marketing/MarketingNav";
+import { HeroBackground } from "@/components/marketing/HeroBackground";
 import { Hero } from "@/components/marketing/Hero";
 import { ProductPreview } from "@/components/marketing/ProductPreview";
 import { ValueProps } from "@/components/marketing/ValueProps";
@@ -19,7 +20,8 @@ export default function LandingPage() {
   return (
     <main className="bg-background min-h-dvh overflow-x-hidden">
       <MarketingNav />
-      <div className="mastery-ambient">
+      <div className="relative isolate">
+        <HeroBackground />
         <Hero />
         <ProductPreview />
       </div>

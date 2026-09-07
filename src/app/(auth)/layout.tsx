@@ -20,7 +20,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
 
   if (status !== "unauthenticated") {
     return (
-      <div className="relative flex min-h-dvh items-center justify-center bg-background">
+      <div className="mastery-auth-backdrop relative flex min-h-dvh items-center justify-center bg-background">
         <ThemeVideoBackground />
         <LoadingState />
       </div>
@@ -28,7 +28,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="relative min-h-dvh bg-background">
+    <div className="mastery-auth-backdrop relative min-h-dvh bg-background">
       <ThemeVideoBackground />
       <main className="relative z-10 flex min-h-dvh flex-col items-center justify-center gap-6 px-4 py-10">
         <p className="text-muted text-xs font-medium tracking-[0.2em] uppercase">

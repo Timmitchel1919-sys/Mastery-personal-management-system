@@ -67,8 +67,9 @@ function NavLink({
   );
 }
 
-/** A leaf link inside an expanded section's dropdown — a short tick connects it to the
- * section's vertical tree line instead of repeating an icon for every row. */
+/** A leaf link inside an expanded module card. A short gold tick connects it to the
+ * card's vertical connector line; the active child gets a soft champagne background and
+ * a gold left indicator. */
 function TreeLink({
   item,
   label,
@@ -82,19 +83,25 @@ function TreeLink({
 }) {
   return (
     <div className="relative flex items-center pl-4">
-      <span aria-hidden="true" className="bg-border absolute top-1/2 left-0 h-px w-4" />
+      <span aria-hidden="true" className="bg-gold-connector absolute top-1/2 left-0 h-px w-3.5" />
       <Link
         href={item.href}
         onClick={onNavigate}
         aria-current={active ? "page" : undefined}
         className={cn(
-          "flex h-8 min-w-0 flex-1 items-center rounded-md px-2 text-sm transition-colors outline-none",
+          "relative flex h-8 min-w-0 flex-1 items-center rounded-md px-2.5 text-[0.8125rem] transition-colors outline-none",
           "focus-visible:ring-ring focus-visible:ring-2",
           active
-            ? "bg-surface text-foreground font-medium"
-            : "text-muted hover:bg-surface hover:text-foreground",
+            ? "bg-champagne-soft text-foreground font-medium"
+            : "text-muted hover:bg-champagne-soft/50 hover:text-foreground",
         )}
       >
+        {active ? (
+          <span
+            aria-hidden="true"
+            className="bg-primary absolute top-1.5 bottom-1.5 left-0 w-0.5 rounded-full"
+          />
+        ) : null}
         <span className="truncate">{label}</span>
       </Link>
     </div>
@@ -126,7 +133,7 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
   };
 
   return (
-    <nav aria-label={t("nav.primary")} className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
+    <nav aria-label={t("nav.primary")} className="flex flex-1 flex-col gap-2 overflow-y-auto p-3">
       <NavLink
         item={DASHBOARD_ITEM}
         label={label(DASHBOARD_ITEM.href, DASHBOARD_ITEM.label)}
@@ -140,7 +147,7 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
         const sectionLabel = t.has(sectionKey) ? t(sectionKey) : section.label;
         const Icon = section.icon;
 
-        // Collapsed rail (icon-only): unchanged flat list, no room for a dropdown tree.
+        // Collapsed rail (icon-only): flat list, no room for module cards or a tree.
         if (collapsed) {
           return (
             <div key={section.id} className={cn("mt-4", section.private && "mt-6")}>
@@ -174,7 +181,7 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
         // (docs/RECOVERY_PRIVACY.md — visible, not obscured; still visually separated).
         if (section.private) {
           return (
-            <div key={section.id} className="border-border mt-6 border-t pt-4">
+            <div key={section.id} className="border-border mt-4 border-t pt-4">
               <p className="text-subtle px-3 pb-1 text-xs font-medium tracking-wide uppercase">
                 {sectionLabel}
               </p>
@@ -194,25 +201,36 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
         }
 
         const open = isOpen(section);
+        const active = isSectionActive(section, pathname);
         const panelId = `nav-section-${section.id}`;
         return (
-          <div key={section.id} className="mt-1">
+          <div key={section.id} className="mastery-nav-card px-1.5 py-1.5" data-active={active}>
             <button
               type="button"
               onClick={() => toggleSection(section)}
               aria-expanded={open}
               aria-controls={panelId}
               className={cn(
-                "flex h-9 w-full items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors outline-none",
-                "text-muted hover:bg-surface hover:text-foreground focus-visible:ring-ring focus-visible:ring-2",
+                "flex h-9 w-full items-center gap-2.5 rounded-lg px-1.5 text-sm transition-colors outline-none",
+                "focus-visible:ring-ring focus-visible:ring-2",
+                active
+                  ? "text-foreground font-semibold"
+                  : "text-muted hover:text-foreground font-medium",
               )}
             >
-              <Icon className="size-4 shrink-0" aria-hidden="true" />
-              <span className="flex-1 truncate text-left">{sectionLabel}</span>
+              <span
+                className={cn(
+                  "grid size-7 shrink-0 place-items-center rounded-lg transition-colors",
+                  active ? "bg-primary/15 text-primary" : "bg-gold-subtle text-accent",
+                )}
+              >
+                <Icon className="size-4" aria-hidden="true" />
+              </span>
+              <span className="flex-1 truncate text-left tracking-tight">{sectionLabel}</span>
               <ChevronDown
                 aria-hidden="true"
                 className={cn(
-                  "size-4 shrink-0 transition-transform duration-200",
+                  "text-subtle size-4 shrink-0 transition-transform duration-200 ease-out",
                   open && "rotate-180",
                 )}
               />
@@ -221,7 +239,7 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
             {open ? (
               <div
                 id={panelId}
-                className="border-border relative mt-0.5  flex flex-col gap-0.5 border-l py-0.5"
+                className="mastery-expand border-gold-connector relative mt-1 ml-3.5 flex flex-col gap-0.5 border-l pt-0.5 pb-0.5 pl-0"
               >
                 <TreeLink
                   item={{ href: section.href }}
@@ -244,7 +262,7 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
         );
       })}
 
-      <div className="border-border mt-6 flex flex-col gap-0.5 border-t pt-4">
+      <div className="border-border mt-4 flex flex-col gap-0.5 border-t pt-4">
         {SYSTEM_ITEMS.map((item) => (
           <NavLink
             key={item.href}

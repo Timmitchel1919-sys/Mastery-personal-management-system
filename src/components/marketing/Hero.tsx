@@ -3,18 +3,18 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui";
 
 /**
- * Hero — the promise, not the pitch. Ambient gold glow behind the panel comes from
- * `.mastery-ambient` on the section wrapper (see page.tsx); no imagery competes with
- * the logo or the headline.
+ * Hero — the promise, not the pitch. Sits over the mountain atmosphere from
+ * `<HeroBackground />` (see page.tsx). One gold accent on "Life." ties the headline to
+ * the brand mark; nothing else competes.
  */
 export function Hero() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col items-center px-4 pt-40 pb-8 text-center sm:pt-48">
-      <p className="text-primary mb-6 text-xs font-semibold tracking-[0.08em] uppercase">
-        A personal operating system
+      <p className="text-primary mb-6 text-xs font-semibold tracking-[0.16em] uppercase">
+        AI-Powered Personal Operating System
       </p>
       <h1 className="text-foreground text-5xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-6xl lg:text-7xl">
-        Master Your Life.
+        Master Your <span className="text-primary">Life.</span>
       </h1>
       <p className="text-muted mt-6 max-w-xl text-lg leading-relaxed text-balance sm:text-xl">
         Plan with intention. Focus on what matters. Act with discipline. Grow with purpose.
@@ -26,10 +26,12 @@ export function Hero() {
             <ArrowRight className="size-4" />
           </Link>
         </Button>
-        <Button asChild size="lg" variant="ghost">
+        <Button asChild size="lg" variant="outline">
           <a href="#product">Explore MASTERY</a>
         </Button>
       </div>
+      <span aria-hidden="true" className="bg-gold-connector mt-12 h-px w-16" />
+      <p className="text-subtle mt-4 text-sm italic">Discipline today. A greater tomorrow.</p>
     </div>
   );
 }
