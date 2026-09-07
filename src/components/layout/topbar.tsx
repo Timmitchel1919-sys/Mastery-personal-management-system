@@ -4,7 +4,6 @@ import { Menu } from "lucide-react";
 import { IconButton } from "@/components/ui";
 import { InstallAppButton } from "@/components/pwa/install-app-button";
 import { UserMenu } from "@/features/auth";
-import { NotificationBell } from "@/features/notifications/components/NotificationBell";
 import { LiveClock } from "./live-clock";
 import { SearchTrigger } from "./search-trigger";
 import { useShell } from "./shell-context";
@@ -36,8 +35,6 @@ export function Topbar() {
         tone="gold"
         showFallbackText={false}
       />
-
-      <NotificationBell />
 
       <UserMenu />
     </header>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -21,6 +21,54 @@ import { cn } from "@/lib/utils";
 interface SidebarNavProps {
   collapsed?: boolean;
   onNavigate?: () => void;
+}
+
+/** The icon-and-label row shared by the module-card headers and the standalone cards
+ * (Dashboard / Recovery / Settings), so every card in the sidebar reads the same. */
+function NavCardLink({
+  item,
+  label,
+  active,
+  onNavigate,
+}: {
+  item: Pick<NavItem, "href" | "icon">;
+  label: string;
+  active: boolean;
+  onNavigate?: () => void;
+}) {
+  const Icon = item.icon;
+  return (
+    <Link
+      href={item.href}
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "flex h-9 w-full items-center gap-2.5 rounded-lg px-1.5 text-sm transition-colors outline-none",
+        "focus-visible:ring-ring focus-visible:ring-2",
+        active ? "text-foreground font-semibold" : "text-muted hover:text-foreground font-medium",
+      )}
+    >
+      <span
+        className={cn(
+          "grid size-7 shrink-0 place-items-center rounded-lg transition-colors",
+          active ? "bg-primary/15 text-primary" : "bg-gold-subtle text-accent",
+        )}
+      >
+        <Icon className="size-4" aria-hidden="true" />
+      </span>
+      <span className="flex-1 truncate text-left tracking-tight">{label}</span>
+    </Link>
+  );
+}
+
+/** A card wrapper matching the module cards, for a link (or small group of links) that
+ * doesn't expand. */
+function NavCard({ active, children }: { active: boolean; children: ReactNode }) {
+  return (
+    <div className="mastery-nav-card px-1.5 py-1.5" data-active={active}>
+      {children}
+    </div>
+  );
 }
 
 function NavLink({
@@ -132,15 +180,30 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
     setOpenOverrides((prev) => ({ ...prev, [section.id]: !isOpen(section) }));
   };
 
+  // The Notifications item is retired from the sidebar (reachable from Settings).
+  const systemItems = SYSTEM_ITEMS.filter((item) => item.href !== "/notifications");
+  const dashboardActive = isNavItemActive(pathname, DASHBOARD_ITEM.href);
+
   return (
     <nav aria-label={t("nav.primary")} className="flex flex-1 flex-col gap-2 overflow-y-auto p-3">
-      <NavLink
-        item={DASHBOARD_ITEM}
-        label={label(DASHBOARD_ITEM.href, DASHBOARD_ITEM.label)}
-        active={isNavItemActive(pathname, DASHBOARD_ITEM.href)}
-        collapsed={collapsed}
-        onNavigate={onNavigate}
-      />
+      {collapsed ? (
+        <NavLink
+          item={DASHBOARD_ITEM}
+          label={label(DASHBOARD_ITEM.href, DASHBOARD_ITEM.label)}
+          active={dashboardActive}
+          collapsed
+          onNavigate={onNavigate}
+        />
+      ) : (
+        <NavCard active={dashboardActive}>
+          <NavCardLink
+            item={DASHBOARD_ITEM}
+            label={label(DASHBOARD_ITEM.href, DASHBOARD_ITEM.label)}
+            active={dashboardActive}
+            onNavigate={onNavigate}
+          />
+        </NavCard>
+      )}
 
       {NAV_SECTIONS.map((section) => {
         const sectionKey = navSectionMessageKey(section.id);
@@ -177,26 +240,25 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
           );
         }
 
-        // Recovery Center: always one direct link, never behind an extra click
-        // (docs/RECOVERY_PRIVACY.md — visible, not obscured; still visually separated).
+        // Recovery Center: a plain card (no divider line above it), one direct link per
+        // item — never behind an extra click (docs/RECOVERY_PRIVACY.md: visible, not
+        // obscured; still visually set apart by the "Private" label).
         if (section.private) {
           return (
-            <div key={section.id} className="border-border mt-4 border-t pt-4">
-              <p className="text-subtle px-3 pb-1 text-xs font-medium tracking-wide uppercase">
+            <NavCard key={section.id} active={isSectionActive(section, pathname)}>
+              <p className="text-subtle px-1.5 pt-0.5 pb-1 text-[0.65rem] font-medium tracking-wide uppercase">
                 {sectionLabel}
               </p>
-              <div className="flex flex-col gap-0.5">
-                {section.items.map((item) => (
-                  <NavLink
-                    key={item.href}
-                    item={item}
-                    label={label(item.href, item.label)}
-                    active={isNavItemActive(pathname, item.href)}
-                    onNavigate={onNavigate}
-                  />
-                ))}
-              </div>
-            </div>
+              {section.items.map((item) => (
+                <NavCardLink
+                  key={item.href}
+                  item={item}
+                  label={label(item.href, item.label)}
+                  active={isNavItemActive(pathname, item.href)}
+                  onNavigate={onNavigate}
+                />
+              ))}
+            </NavCard>
           );
         }
 
@@ -262,18 +324,31 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
         );
       })}
 
-      <div className="border-border mt-4 flex flex-col gap-0.5 border-t pt-4">
-        {SYSTEM_ITEMS.map((item) => (
-          <NavLink
-            key={item.href}
-            item={item}
-            label={label(item.href, item.label)}
-            active={isNavItemActive(pathname, item.href)}
-            collapsed={collapsed}
-            onNavigate={onNavigate}
-          />
-        ))}
-      </div>
+      {collapsed ? (
+        <div className="mt-4 flex flex-col gap-0.5">
+          {systemItems.map((item) => (
+            <NavLink
+              key={item.href}
+              item={item}
+              label={label(item.href, item.label)}
+              active={isNavItemActive(pathname, item.href)}
+              collapsed
+              onNavigate={onNavigate}
+            />
+          ))}
+        </div>
+      ) : (
+        systemItems.map((item) => (
+          <NavCard key={item.href} active={isNavItemActive(pathname, item.href)}>
+            <NavCardLink
+              item={item}
+              label={label(item.href, item.label)}
+              active={isNavItemActive(pathname, item.href)}
+              onNavigate={onNavigate}
+            />
+          </NavCard>
+        ))
+      )}
     </nav>
   );
 }

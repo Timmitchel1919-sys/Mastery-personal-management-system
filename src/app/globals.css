@@ -289,6 +289,31 @@
     outline-offset: 2px;
   }
 
+  /* Thin, unobtrusive scrollbars everywhere — both themes. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--color-foreground) 24%, transparent) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklab, var(--color-foreground) 24%, transparent);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in oklab, var(--color-foreground) 40%, transparent);
+  }
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
