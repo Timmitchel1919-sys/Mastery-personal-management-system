@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import {
@@ -14,7 +13,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui";
-import { cn } from "@/lib/utils";
+import { InstallAppButton } from "@/components/pwa/install-app-button";
 
 const LINKS = [
   { href: "#product", label: "Product" },
@@ -23,29 +22,9 @@ const LINKS = [
   { href: "#about", label: "About" },
 ];
 
-/**
- * Public marketing navigation. Lightweight glass at rest; past a small scroll
- * threshold the bar picks up a touch more opacity so it stays legible over
- * whatever content is scrolling beneath it.
- */
 export function MarketingNav() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
-    <header
-      className={cn(
-        "mastery-glass fixed inset-x-4 top-3 z-40 mx-auto flex h-16 max-w-6xl items-center",
-        "justify-between rounded-2xl px-4 transition-colors sm:px-6",
-        scrolled && "bg-surface-raised/90",
-      )}
-    >
+    <header className="bg-surface-raised border-border fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b px-4 sm:px-6">
       <Link href="/" aria-label="Mastery" className="flex items-center">
         <Logo variant="full" height={24} />
       </Link>
@@ -66,9 +45,7 @@ export function MarketingNav() {
         <Button asChild variant="ghost" size="sm">
           <Link href="/login">Log In</Link>
         </Button>
-        <Button asChild size="sm">
-          <Link href="/register">Get Started</Link>
-        </Button>
+        <InstallAppButton size="sm" showFallbackText={false} />
       </div>
 
       <Sheet>
@@ -98,9 +75,7 @@ export function MarketingNav() {
             <Button asChild variant="outline">
               <Link href="/login">Log In</Link>
             </Button>
-            <Button asChild>
-              <Link href="/register">Get Started</Link>
-            </Button>
+            <InstallAppButton showFallbackText={false} />
           </div>
         </SheetContent>
       </Sheet>

@@ -23,6 +23,60 @@ Living build tracker. Updated at the end of every layer.
 
 ## Layer log
 
+### 2026-09-07 — User-requested UI/theming polish (maintenance patch)
+
+Dark-theme visual polish and shell ergonomics requested by the owner; no domain-layer logic
+was added.
+
+**Created:**
+- `src/components/layout/theme-video-background.tsx` — reusable dark-theme-only background
+  video layer (`/public/mastery video.mp4`) with readability overlay.
+- `src/components/pwa/install-app-button.tsx` — reusable PWA install CTA that handles
+  `beforeinstallprompt`, `appinstalled`, and browser-menu fallback messaging.
+
+**Modified:**
+- `src/app/(auth)/layout.tsx` — login/register/forgot-password now render the dark-theme
+  background video.
+- `src/components/layout/app-shell.tsx` — app shell now uses a fixed full-width topbar,
+  adds top spacing to content, and applies the dark-theme background video to the app area.
+- `src/components/layout/topbar.tsx` — topbar is now fixed, opaque, edge-to-edge, and
+  includes a Download app action.
+- `src/components/layout/sidebar.tsx` — replaced text-only brand with the `M` logo from
+  `public/`, hides collapse control when collapsed, and lets logo-click expand the full
+  sidebar modules.
+- `src/components/layout/shell-context.tsx` — exposed `setSidebarCollapsed` for logo-driven
+  expand behavior.
+- `src/app/page.tsx` — landing page now has a fixed full-width non-transparent top bar and a
+  Download app CTA in place of the secondary account CTA.
+- `src/app/globals.css` — light theme palette slightly dimmed (less bright background and
+  surface tones).
+
+**Verification:**
+- `npm run typecheck` ✅
+- `npm run lint` ⚠️ fails in this workspace because ESLint is currently scanning generated
+  `.claude/worktrees/**/out/_next/**` artifacts (pre-existing, unrelated to this patch).
+- `npx eslint src/components/pwa/install-app-button.tsx src/components/layout/topbar.tsx src/components/layout/sidebar.tsx src/components/layout/app-shell.tsx src/components/layout/shell-context.tsx src/app/(auth)/layout.tsx src/app/page.tsx src/components/layout/theme-video-background.tsx` ✅
+- `npm test` ✅
+- `npm run build` ✅
+
+**Manual test instructions:**
+1. Switch to dark theme and open `/login` and `/register` → the `mastery video.mp4`
+   background appears behind auth content.
+2. While signed in, switch to dark theme → background video appears behind the app shell;
+   switch back to light → video disappears.
+3. Collapse the sidebar on desktop, then click the `M` logo → sidebar expands and modules
+   are fully visible.
+4. Scroll any app page and the landing page → top bar stays fully opaque and flush to the
+   top edge with no content showing through.
+5. Use **Download app** on landing or topbar: install prompt appears when available; if not,
+   fallback guidance text is shown on landing.
+
+**Known limitations:**
+- PWA install prompting depends on browser support and manifest/service-worker readiness;
+  unsupported contexts show fallback guidance only.
+- Background video currently appears only in dark mode by design and uses a static overlay,
+  not per-route intensity tuning.
+
 ### Layer 0 — Project Constitution — ✅ complete (2026-08-27)
 
 Governance and documentation only. No application code.

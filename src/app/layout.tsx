@@ -42,7 +42,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <ThemeScript />
       </head>
-      <body className="bg-background text-foreground min-h-full font-sans">
+      <body className="bg-background text-foreground min-h-full font-sans" suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>

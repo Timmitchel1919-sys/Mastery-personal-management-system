@@ -8,6 +8,7 @@ import { Topbar } from "./topbar";
 import { BottomNav } from "./bottom-nav";
 import { NavDrawer } from "./nav-drawer";
 import { useShell } from "./shell-context";
+import { ThemeVideoBackground } from "./theme-video-background";
 
 // The command palette pulls in `cmdk`; it is never visible on first paint (opens
 // on ⌘K / Ctrl-K, handled in ShellProvider). Split it out and mount it only once
@@ -40,11 +41,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         Skip to content
       </a>
 
-      <div className="flex min-h-dvh">
-        <Sidebar />
-        <div className="flex min-w-0 flex-1 flex-col">
-          <Topbar />
-          <main id="main-content" className="flex-1 pb-16 lg:pb-0">
+      <div className="relative min-h-dvh bg-background">
+        <ThemeVideoBackground />
+        <Topbar />
+        <div className="flex min-h-dvh pt-14">
+          <Sidebar />
+          <main id="main-content" className="min-w-0 flex-1 pb-16 lg:pb-0">
             {children}
           </main>
         </div>

@@ -8,6 +8,24 @@ layers; each entry maps to a layer.
 
 ### Brand pivot — Gold/Obsidian/Ivory/Slate design system — 2026-09-06
 
+### Maintenance UI patch — 2026-09-07
+
+**Added**
+- `src/components/layout/theme-video-background.tsx` to render `public/mastery video.mp4`
+  as a dark-theme-only background layer.
+- `src/components/pwa/install-app-button.tsx` for browser-native PWA installation prompts
+  with a fallback message path.
+
+**Changed**
+- Auth pages now render the dark-theme video background.
+- App shell topbar is fixed, opaque, and edge-to-edge; shell content now offsets below it.
+- Sidebar branding now uses the `M` logo image; in collapsed mode the collapse control is
+  hidden and clicking the logo expands the full module sidebar.
+- Landing page top bar now spans full width and includes Download app; the secondary CTA is
+  no longer an account-start button.
+- Light theme background/surface/border token values are slightly darker to reduce
+  brightness.
+
 **Added**
 - Full owner-specified color token system in `globals.css` (light primary, dark
   counterpart) replacing the Layer 2 indigo palette — Mastery Gold `#C9972B` as the sole

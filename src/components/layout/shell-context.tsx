@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 
 interface ShellContextValue {
   sidebarCollapsed: boolean;
+  setSidebarCollapsed: (collapsed: boolean) => void;
   toggleSidebar: () => void;
   drawerOpen: boolean;
   setDrawerOpen: (open: boolean) => void;
@@ -36,13 +37,14 @@ export function ShellProvider({ children }: { children: ReactNode }) {
   const value = useMemo<ShellContextValue>(
     () => ({
       sidebarCollapsed,
+      setSidebarCollapsed,
       toggleSidebar,
       drawerOpen,
       setDrawerOpen,
       commandOpen,
       setCommandOpen,
     }),
-    [sidebarCollapsed, toggleSidebar, drawerOpen, commandOpen],
+    [sidebarCollapsed, drawerOpen, commandOpen, toggleSidebar],
   );
 
   return <ShellContext.Provider value={value}>{children}</ShellContext.Provider>;
