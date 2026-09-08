@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -7,34 +7,63 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push }), usePathname: ()
 
 import { BrainHub } from "./BrainHub";
 
+function moduleButton(name: string) {
+  const list = screen.getByRole("list", { name: "Mastery modules" });
+  return within(list).getByRole("button", { name });
+}
+
 describe("BrainHub", () => {
   it("exposes all six modules as reachable button controls", () => {
     render(<BrainHub />);
-    const list = screen.getByRole("list", { name: "Mastery modules" });
     for (const label of ["Goals", "Plan", "Focus", "Act", "Grow", "Analytics"]) {
-      expect(within(list).getByRole("button", { name: label })).toBeInTheDocument();
+      expect(moduleButton(label)).toBeInTheDocument();
     }
   });
 
-  it("navigates to the module route and activates its node on select", async () => {
+  it("selecting a module enters it spatially without navigating away", async () => {
     push.mockClear();
     render(<BrainHub />);
-    const list = screen.getByRole("list", { name: "Mastery modules" });
-    await userEvent.click(within(list).getByRole("button", { name: "Focus" }));
-    expect(push).toHaveBeenCalledWith("/focus");
-    expect(within(list).getByRole("button", { name: "Focus" })).toHaveAttribute(
-      "aria-current",
-      "true",
-    );
+    await userEvent.click(moduleButton("Focus"));
+
+    // The spatial context appears; the app did not route.
+    const status = await screen.findByRole("status");
+    expect(status).toHaveTextContent(/Now in\s*Focus/i);
+    expect(push).not.toHaveBeenCalled();
+
+    // The camera settles into module-active.
+    await waitFor(() => expect(status).not.toHaveTextContent(/settling/i));
   });
 
-  it("lets a caller override selection instead of navigating (Layer B seam)", async () => {
-    const onSelect = vi.fn();
+  it("only the explicit Open action navigates; Back returns to the brain", async () => {
     push.mockClear();
-    render(<BrainHub onSelect={onSelect} />);
-    const list = screen.getByRole("list", { name: "Mastery modules" });
-    await userEvent.click(within(list).getByRole("button", { name: "Grow" }));
-    expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "grow", href: "/grow" }));
+    render(<BrainHub />);
+    await userEvent.click(moduleButton("Focus"));
+
+    await userEvent.click(screen.getByRole("button", { name: /open focus/i }));
+    expect(push).toHaveBeenCalledWith("/focus");
+
+    await userEvent.click(screen.getByRole("button", { name: /back to brain/i }));
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("lets a caller override navigation with onOpen (Layer C seam)", async () => {
+    const onOpen = vi.fn();
+    push.mockClear();
+    render(<BrainHub onOpen={onOpen} />);
+    await userEvent.click(moduleButton("Grow"));
+    await userEvent.click(screen.getByRole("button", { name: /open grow/i }));
+    expect(onOpen).toHaveBeenCalledWith(expect.objectContaining({ id: "grow" }));
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("Escape returns toward the brain without leaving the app", async () => {
+    push.mockClear();
+    render(<BrainHub />);
+    await userEvent.click(moduleButton("Act"));
+    expect(await screen.findByRole("status")).toBeInTheDocument();
+
+    await userEvent.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("status")).not.toBeInTheDocument());
     expect(push).not.toHaveBeenCalled();
   });
 });

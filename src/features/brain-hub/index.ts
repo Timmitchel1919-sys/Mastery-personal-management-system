@@ -5,6 +5,8 @@ export {
   useBrainNavigation,
   type BrainModule,
   type BrainModuleId,
+  type BrainModuleStatus,
+  type BrainHubPhase,
   type BrainNavigationState,
 } from "./brain-navigation";
 export { supportsWebgl } from "./webgl";

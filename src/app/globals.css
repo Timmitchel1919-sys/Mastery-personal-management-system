@@ -1077,13 +1077,58 @@
     stroke-dashoffset: 0;
   }
 }
+/* Restrained continuous "thinking" — a slow breath of the core glow (Layer B). */
+@keyframes brain-core-pulse {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 2px 6px rgb(255 255 255 / 0.06),
+      inset 0 -18px 40px rgb(0 0 0 / 0.45),
+      0 0 50px color-mix(in oklab, var(--color-gold) 14%, transparent);
+  }
+  50% {
+    box-shadow:
+      inset 0 2px 6px rgb(255 255 255 / 0.08),
+      inset 0 -18px 40px rgb(0 0 0 / 0.42),
+      0 0 78px color-mix(in oklab, var(--color-gold) 24%, transparent);
+  }
+}
+
+/* The "camera" — a CSS transform on the whole scene. The transition is applied
+   inline by BrainScene so it can be dropped under reduced motion. */
+.brain-camera {
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
 
 @media (prefers-reduced-motion: no-preference) {
   .brain-core {
     animation: brain-drift 16s ease-in-out infinite;
   }
+  .brain-core[data-engaged] {
+    animation:
+      brain-drift 16s ease-in-out infinite,
+      brain-core-pulse 6s ease-in-out infinite;
+  }
   .brain-impulse {
     animation: brain-impulse 2.6s linear infinite;
+  }
+  .brain-impulse--fast {
+    animation-duration: 1.1s;
+  }
+}
+
+/* Other modules step back while one is engaged — never hidden. */
+.brain-node--dimmed {
+  opacity: 0.45;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .brain-node--dimmed {
+    transition:
+      opacity var(--duration-slow) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out);
   }
 }
 

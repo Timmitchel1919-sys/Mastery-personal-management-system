@@ -6,18 +6,19 @@ import { BrainNode } from "./BrainNode";
 
 const focus = brainModule("focus");
 
-function setup(selected = false) {
+function setup(props: Partial<Parameters<typeof BrainNode>[0]> = {}) {
   const onSelect = vi.fn();
   const onActivate = vi.fn();
   const onDeactivate = vi.fn();
   render(
     <BrainNode
       module={focus}
-      selected={selected}
+      selected={false}
       radius={40}
       onSelect={onSelect}
       onActivate={onActivate}
       onDeactivate={onDeactivate}
+      {...props}
     />,
   );
   return { onSelect, onActivate, onDeactivate };
@@ -26,12 +27,12 @@ function setup(selected = false) {
 describe("BrainNode", () => {
   it("is a semantic button with an accessible name", () => {
     setup();
-    expect(screen.getByRole("button", { name: "Focus module" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Open Focus" })).toBeInTheDocument();
   });
 
   it("selects on click and reports hover / focus activation", async () => {
     const { onSelect, onActivate, onDeactivate } = setup();
-    const button = screen.getByRole("button", { name: "Focus module" });
+    const button = screen.getByRole("button", { name: "Open Focus" });
 
     await userEvent.hover(button);
     expect(onActivate).toHaveBeenCalled();
@@ -49,10 +50,30 @@ describe("BrainNode", () => {
     expect(onSelect).toHaveBeenCalledTimes(1);
   });
 
-  it("marks the selected state for assistive tech and styling", () => {
-    setup(true);
-    const button = screen.getByRole("button", { name: "Focus module" });
+  it("marks the selected state and steps back when dimmed", () => {
+    const { onSelect } = setup({ selected: true, dimmed: true });
+    const button = screen.getByRole("button", { name: "Open Focus" });
     expect(button).toHaveAttribute("data-selected", "true");
     expect(button).toHaveAttribute("aria-current", "true");
+    expect(button.className).toContain("brain-node--dimmed");
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it("shows a status indicator with a text label, only for real non-normal status", () => {
+    setup({ status: "attention" });
+    expect(screen.getByText("Needs attention")).toBeInTheDocument();
+  });
+
+  it("renders no status indicator for normal / missing status", () => {
+    setup({ status: "normal" });
+    expect(screen.queryByText(/needs attention|active now/i)).not.toBeInTheDocument();
+  });
+
+  it("associates a preview with the node only while it is open", () => {
+    setup({ previewId: "preview-focus", previewOpen: true });
+    expect(screen.getByRole("button", { name: "Open Focus" })).toHaveAttribute(
+      "aria-describedby",
+      "preview-focus",
+    );
   });
 });
