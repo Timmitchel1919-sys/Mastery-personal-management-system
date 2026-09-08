@@ -1,4 +1,5 @@
-import { Flame, Target, Timer, TrendingUp } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Flame, Target, Timer, TrendingUp } from "lucide-react";
 import { MetricCard } from "@/components/mastery";
 import type { DashboardAggregate } from "../dashboard-aggregate";
 
@@ -13,9 +14,18 @@ export function PerformanceInsights({ aggregate }: { aggregate: DashboardAggrega
 
   return (
     <section aria-labelledby="insight-heading" className="space-y-3">
-      <h2 id="insight-heading" className="text-eyebrow">
-        Performance
-      </h2>
+      <div className="flex items-center justify-between gap-3">
+        <h2 id="insight-heading" className="text-eyebrow">
+          Performance
+        </h2>
+        <Link
+          href="/analytics"
+          className="text-primary inline-flex items-center gap-1 text-xs font-medium hover:underline"
+        >
+          View analytics
+          <ArrowRight className="size-3" aria-hidden="true" />
+        </Link>
+      </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           label="Focus today"

@@ -1,5 +1,8 @@
-import { SectionLanding } from "@/components/layout";
+import type { Metadata } from "next";
+import { AnalyticsView } from "@/features/analytics";
+
+export const metadata: Metadata = { title: "Analytics" };
 
 export default function Page() {
-  return <SectionLanding sectionId="analytics" />;
+  return <AnalyticsView />;
 }
