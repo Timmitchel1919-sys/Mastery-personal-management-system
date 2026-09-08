@@ -7,8 +7,8 @@ let dashboardValue: Record<string, unknown>;
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/dashboard" }));
 vi.mock("../use-dashboard", () => ({ useDashboard: () => dashboardValue }));
-vi.mock("@/features/intelligence", () => ({
-  IntelligencePanel: () => null,
+vi.mock("@/features/personalization", () => ({
+  DashboardAdaptive: () => null,
 }));
 
 import { DashboardView } from "./DashboardView";

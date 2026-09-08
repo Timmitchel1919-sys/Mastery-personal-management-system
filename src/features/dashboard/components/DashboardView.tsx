@@ -3,7 +3,7 @@
 import { PageContainer } from "@/components/layout";
 import { ErrorState } from "@/components/shared";
 import { Skeleton } from "@/components/ui";
-import { IntelligencePanel } from "@/features/intelligence";
+import { DashboardAdaptive } from "@/features/personalization";
 import { useDashboard } from "../use-dashboard";
 import { DailyTimeline } from "./DailyTimeline";
 import { DashboardHeader } from "./DashboardHeader";
@@ -97,7 +97,7 @@ export function DashboardView() {
 
           <PerformanceInsights aggregate={aggregate} />
 
-          <IntelligencePanel variant="compact" limit={2} />
+          <DashboardAdaptive />
 
           <div className="max-w-sm">
             <RecoveryShortcut />

@@ -15,6 +15,7 @@ import {
   ThemeToggle,
 } from "@/components/ui";
 import { InstallAppButton } from "@/components/pwa/install-app-button";
+import { PersonalizationSettingsCard } from "@/features/personalization";
 import { LOCALES, LOCALE_LABEL, useActiveLocale } from "@/i18n";
 import { ProfileCard } from "./ProfileCard";
 
@@ -63,6 +64,8 @@ export function SettingsView() {
       </Card>
 
       <ProfileCard />
+
+      <PersonalizationSettingsCard />
 
       <p className="text-subtle text-xs">
         {t("moreInSection")}{" "}

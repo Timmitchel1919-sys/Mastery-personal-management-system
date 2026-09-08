@@ -9,6 +9,11 @@ interface NextBestActionCardProps {
   title: string;
   /** Plain reasons it rose to the top — shown as a list, never a hidden score. */
   why: string[];
+  /**
+   * Optional personalization line ("WHY THIS TIME") — pass ONLY when it is
+   * backed by the user's real recorded behaviour, e.g. an observed focus period.
+   */
+  whyThisTime?: string;
   /** Primary action — begin the work now. Omit if there's nothing real to do. */
   onStart?: () => void;
   startLabel?: string;
@@ -29,6 +34,7 @@ interface NextBestActionCardProps {
 export function NextBestActionCard({
   title,
   why,
+  whyThisTime,
   onStart,
   startLabel = "Start",
   onSchedule,
@@ -48,16 +54,30 @@ export function NextBestActionCard({
         <p className="text-foreground text-base font-semibold tracking-tight">{title}</p>
 
         {why.length > 0 ? (
-          <ul className="text-muted space-y-0.5 text-sm">
-            {why.map((reason, index) => (
-              <li key={index} className="flex gap-2">
-                <span aria-hidden="true" className="text-subtle">
-                  •
-                </span>
-                {reason}
-              </li>
-            ))}
-          </ul>
+          <div>
+            <p className="text-subtle text-[0.6875rem] font-semibold tracking-[0.08em] uppercase">
+              Why now
+            </p>
+            <ul className="text-muted mt-0.5 space-y-0.5 text-sm">
+              {why.map((reason, index) => (
+                <li key={index} className="flex gap-2">
+                  <span aria-hidden="true" className="text-subtle">
+                    •
+                  </span>
+                  {reason}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {whyThisTime ? (
+          <div>
+            <p className="text-subtle text-[0.6875rem] font-semibold tracking-[0.08em] uppercase">
+              Why this time
+            </p>
+            <p className="text-muted mt-0.5 text-sm">{whyThisTime}</p>
+          </div>
         ) : null}
 
         <div className="flex flex-wrap gap-2 pt-1">
