@@ -11,6 +11,7 @@
 export { MetricCard, type MetricCardProps } from "./MetricCard";
 export { ModuleCard, type ModuleCardProps } from "./ModuleCard";
 export { StatusBadge, type StatusBadgeProps, type StatusKind } from "./StatusBadge";
+export { AIInsightCard, type AIInsightCardProps, type InsightSignal } from "./AIInsightCard";
 
 // Re-exports — shared Mastery pieces that already live elsewhere.
 export {

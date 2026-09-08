@@ -41,6 +41,24 @@ export function AiCoachView() {
   const canSubmit =
     (!needsMessage || userMessage.trim().length > 0) && (!needsGoal || goalId !== "");
 
+  // Contextual quick-actions — each maps to a real intent (and, for a free-form
+  // query, a starting prompt). Not decorative: clicking one primes the composer.
+  const CONTEXT_CHIPS: { label: string; intent: AiIntent; message?: string }[] = [
+    { label: "Plan recommendations", intent: "planning-recommendations" },
+    { label: "Execution patterns", intent: "execution-patterns" },
+    { label: "Reflection prompts", intent: "reflection-questions" },
+    {
+      label: "Prioritize my goals",
+      intent: "coach-query",
+      message: "Which of my goals should I prioritize right now, and why?",
+    },
+    {
+      label: "Find what's overdue",
+      intent: "coach-query",
+      message: "What in my plan is overdue or at risk, and what should I do first?",
+    },
+  ];
+
   async function handleAsk() {
     await ask(intent, {
       userMessage: needsMessage ? userMessage : null,
@@ -64,6 +82,22 @@ export function AiCoachView() {
         </TabsList>
 
         <TabsContent value="ask" className="space-y-6">
+          <div className="flex flex-wrap gap-2" aria-label="Quick actions">
+            {CONTEXT_CHIPS.map((chip) => (
+              <Button
+                key={chip.label}
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setIntent(chip.intent);
+                  if (chip.message) setUserMessage(chip.message);
+                }}
+              >
+                {chip.label}
+              </Button>
+            ))}
+          </div>
+
           <Card>
             <CardContent className="space-y-4 p-4">
               <Select value={intent} onValueChange={(next) => setIntent(next as AiIntent)}>
@@ -133,7 +167,7 @@ export function AiCoachView() {
               description="Ask a question above to get started."
             />
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4" aria-live="polite" aria-busy={asking}>
               {exchanges.map((exchange) => (
                 <ExchangeCard key={exchange.id} exchange={exchange} />
               ))}
