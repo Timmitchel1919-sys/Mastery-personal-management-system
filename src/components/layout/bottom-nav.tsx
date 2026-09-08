@@ -6,7 +6,8 @@ import { useTranslations } from "next-intl";
 import { BOTTOM_NAV_ITEMS, isNavItemActive, navMessageKey } from "@/config/navigation";
 import { cn } from "@/lib/utils";
 
-/** Fixed bottom navigation for mobile (< lg): the five Plan→Grow loop entry points. */
+/** Fixed bottom navigation for mobile (< md): the five Dashboard + Plan→Grow loop
+ * entry points. Tablet and up use the persistent sidebar rail instead. */
 export function BottomNav() {
   const pathname = usePathname();
   const t = useTranslations();
@@ -14,7 +15,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label={t("nav.primary")}
-      className="bg-background/95 border-border fixed inset-x-0 bottom-0 z-30 flex border-t pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+      className="bg-section/95 border-border fixed inset-x-0 bottom-0 z-30 flex border-t pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
     >
       {BOTTOM_NAV_ITEMS.map((item) => {
         const Icon = item.icon;

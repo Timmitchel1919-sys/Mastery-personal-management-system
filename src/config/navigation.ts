@@ -83,10 +83,6 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Quarterly Plans", href: "/plan/quarterly", icon: CalendarDays, plannedLayer: 8 },
       { label: "Monthly Plans", href: "/plan/monthly", icon: CalendarDays, plannedLayer: 8 },
       { label: "Weekly Plans", href: "/plan/weekly", icon: CalendarDays, plannedLayer: 8 },
-      { label: "Goals", href: "/plan/goals", icon: Target, plannedLayer: 8 },
-      { label: "Projects", href: "/plan/projects", icon: FolderKanban, plannedLayer: 8 },
-      { label: "Milestones", href: "/plan/milestones", icon: Milestone, plannedLayer: 8 },
-      { label: "Roadmaps", href: "/plan/roadmaps", icon: Route, plannedLayer: 8 },
       {
         label: "Planning Cascade",
         href: "/plan/cascade",
@@ -94,6 +90,17 @@ export const NAV_SECTIONS: NavSection[] = [
         description: "Trace every record up to your vision",
         plannedLayer: 8,
       },
+    ],
+  },
+  {
+    id: "goals",
+    label: "Goals",
+    href: "/plan/goals",
+    icon: Target,
+    items: [
+      { label: "Projects", href: "/plan/projects", icon: FolderKanban, plannedLayer: 8 },
+      { label: "Milestones", href: "/plan/milestones", icon: Milestone, plannedLayer: 8 },
+      { label: "Roadmaps", href: "/plan/roadmaps", icon: Route, plannedLayer: 8 },
     ],
   },
   {
@@ -192,10 +199,12 @@ export const SYSTEM_ITEMS: NavItem[] = [
   },
 ];
 
-/** Mobile bottom navigation — the five loop entry points. */
+/** Mobile bottom navigation — the five loop entry points (Dashboard + Plan→Grow).
+ * Goals and Analytics are top-level sidebar modules but not part of the daily loop. */
+const BOTTOM_NAV_EXCLUDE = new Set(["analytics", "goals"]);
 export const BOTTOM_NAV_ITEMS: NavItem[] = [
   DASHBOARD_ITEM,
-  ...NAV_SECTIONS.filter((section) => !section.private && section.id !== "analytics").map(
+  ...NAV_SECTIONS.filter((section) => !section.private && !BOTTOM_NAV_EXCLUDE.has(section.id)).map(
     (section) => ({ label: section.label, href: section.href, icon: section.icon }),
   ),
 ];

@@ -61,11 +61,23 @@ function NavCardLink({
   );
 }
 
+/** The gold left indicator on an active card — an extra, non-colour cue on top of the
+ * elevated surface, gold icon chip, and heavier text. */
+function ActiveRail() {
+  return (
+    <span
+      aria-hidden="true"
+      className="bg-gold absolute top-2 bottom-2 left-0 w-0.5 rounded-full"
+    />
+  );
+}
+
 /** A card wrapper matching the module cards, for a link (or small group of links) that
  * doesn't expand. */
 function NavCard({ active, children }: { active: boolean; children: ReactNode }) {
   return (
-    <div className="mastery-nav-card px-1.5 py-1.5" data-active={active}>
+    <div className="mastery-nav-card relative px-1.5 py-1.5" data-active={active}>
+      {active ? <ActiveRail /> : null}
       {children}
     </div>
   );
@@ -140,14 +152,14 @@ function TreeLink({
           "relative flex h-8 min-w-0 flex-1 items-center rounded-md px-2.5 text-[0.8125rem] transition-colors outline-none",
           "focus-visible:ring-ring focus-visible:ring-2",
           active
-            ? "bg-champagne-soft text-foreground font-medium"
-            : "text-muted hover:bg-champagne-soft/50 hover:text-foreground",
+            ? "bg-selected text-foreground font-medium"
+            : "text-muted hover:bg-selected/60 hover:text-foreground",
         )}
       >
         {active ? (
           <span
             aria-hidden="true"
-            className="bg-primary absolute top-1.5 bottom-1.5 left-0 w-0.5 rounded-full"
+            className="bg-gold absolute top-1.5 bottom-1.5 left-0 w-0.5 rounded-full"
           />
         ) : null}
         <span className="truncate">{label}</span>
@@ -156,9 +168,13 @@ function TreeLink({
   );
 }
 
-/** Whether the pathname is on this section's overview page or one of its items. */
+/** Whether the current route belongs to this section — its own landing page exactly, or
+ * one of its submodules (and their children). Matching items (not the broad section
+ * prefix) keeps sibling modules that share a URL prefix — e.g. Plan `/plan` vs Goals
+ * `/plan/goals` — from both lighting up. */
 function isSectionActive(section: NavSection, pathname: string): boolean {
-  return isNavItemActive(pathname, section.href);
+  if (pathname === section.href) return true;
+  return section.items.some((item) => isNavItemActive(pathname, item.href));
 }
 
 export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
@@ -266,7 +282,12 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
         const active = isSectionActive(section, pathname);
         const panelId = `nav-section-${section.id}`;
         return (
-          <div key={section.id} className="mastery-nav-card px-1.5 py-1.5" data-active={active}>
+          <div
+            key={section.id}
+            className="mastery-nav-card relative px-1.5 py-1.5"
+            data-active={active}
+          >
+            {active ? <ActiveRail /> : null}
             <button
               type="button"
               onClick={() => toggleSection(section)}

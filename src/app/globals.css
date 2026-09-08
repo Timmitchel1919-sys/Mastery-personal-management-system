@@ -326,6 +326,8 @@
     --gold-subtle: #211a0d;
     --glass-fill: rgb(19 21 25 / 0.6);
     --glass-border-color: rgb(255 255 255 / 0.07);
+    --nav-card-fill: rgb(16 18 21 / 0.55);
+    --nav-card-active-fill: rgb(24 27 32 / 0.85);
 
     --secondary: var(--muted);
     --tertiary: var(--subtle);

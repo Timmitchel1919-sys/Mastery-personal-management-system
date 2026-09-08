@@ -30,10 +30,13 @@ function DeferredCommandPalette() {
 /**
  * Responsive application shell for the authenticated area.
  *
- * Desktop: the sidebar runs full-height on the left (from the very top of the screen);
- * the topbar and the module panel share the column to its right. The ambient video
- * background lives inside the panel only — never behind the sidebar.
- * Tablet/mobile: drawer + bottom nav, no sidebar column.
+ * - Desktop (>= lg): full-height sidebar with expanded module cards, collapsible to an
+ *   icon rail; the topbar + module panel share the column to its right.
+ * - Tablet (md–lg): the sidebar is the compact icon rail; no bottom nav.
+ * - Mobile (< md): sidebar hidden; a drawer (menu button in the topbar) + the bottom
+ *   nav take over.
+ *
+ * The ambient panel video lives inside `<main>` only — never behind the sidebar.
  */
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -49,7 +52,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <Topbar />
-          <main id="main-content" className="relative isolate flex flex-1 flex-col pb-16 lg:pb-0">
+          <main id="main-content" className="relative isolate flex flex-1 flex-col pb-16 md:pb-0">
             <ThemeVideoBackground />
             <div className="relative flex-1">{children}</div>
           </main>
