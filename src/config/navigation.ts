@@ -3,6 +3,7 @@ import {
   BarChart3,
   Bell,
   BookOpen,
+  BrainCircuit,
   Calendar,
   CalendarClock,
   CalendarDays,
@@ -68,6 +69,13 @@ export const DASHBOARD_ITEM: NavItem = {
   icon: LayoutDashboard,
   description: "Your daily overview",
   plannedLayer: 7,
+};
+
+export const BRAIN_HUB_ITEM: NavItem = {
+  label: "Brain Hub",
+  href: "/hub",
+  icon: BrainCircuit,
+  description: "The Mastery brain — spatial module navigation",
 };
 
 export const NAV_SECTIONS: NavSection[] = [
@@ -214,6 +222,7 @@ export const BOTTOM_NAV_ITEMS: NavItem[] = [
 export const ALL_NAV_ITEMS: NavItem[] = (() => {
   const collected: NavItem[] = [
     DASHBOARD_ITEM,
+    BRAIN_HUB_ITEM,
     ...NAV_SECTIONS.flatMap((section) => [
       {
         label: section.label,

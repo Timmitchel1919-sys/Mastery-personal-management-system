@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
 import {
+  BRAIN_HUB_ITEM,
   DASHBOARD_ITEM,
   NAV_SECTIONS,
   SYSTEM_ITEMS,
@@ -199,6 +200,7 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
   // The Notifications item is retired from the sidebar (reachable from Settings).
   const systemItems = SYSTEM_ITEMS.filter((item) => item.href !== "/notifications");
   const dashboardActive = isNavItemActive(pathname, DASHBOARD_ITEM.href);
+  const brainHubActive = isNavItemActive(pathname, BRAIN_HUB_ITEM.href);
 
   return (
     <nav aria-label={t("nav.primary")} className="flex flex-1 flex-col gap-2 overflow-y-auto p-3">
@@ -216,6 +218,25 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
             item={DASHBOARD_ITEM}
             label={label(DASHBOARD_ITEM.href, DASHBOARD_ITEM.label)}
             active={dashboardActive}
+            onNavigate={onNavigate}
+          />
+        </NavCard>
+      )}
+
+      {collapsed ? (
+        <NavLink
+          item={BRAIN_HUB_ITEM}
+          label={label(BRAIN_HUB_ITEM.href, BRAIN_HUB_ITEM.label)}
+          active={brainHubActive}
+          collapsed
+          onNavigate={onNavigate}
+        />
+      ) : (
+        <NavCard active={brainHubActive}>
+          <NavCardLink
+            item={BRAIN_HUB_ITEM}
+            label={label(BRAIN_HUB_ITEM.href, BRAIN_HUB_ITEM.label)}
+            active={brainHubActive}
             onNavigate={onNavigate}
           />
         </NavCard>
