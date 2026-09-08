@@ -3,10 +3,9 @@
 import type { ReactNode } from "react";
 import { BreadcrumbTrail, PageContainer, PageHeader } from "@/components/layout";
 import { ErrorState } from "@/components/shared";
+import { MetricCard } from "@/components/mastery";
 import {
   Badge,
-  Card,
-  CardContent,
   Select,
   SelectContent,
   SelectItem,
@@ -20,18 +19,6 @@ import {
   type ExecutionPeriod,
 } from "../execution-tracker";
 import { useExecutionTracker } from "../use-execution-tracker";
-
-function StatTile({ label, value, hint }: { label: string; value: string; hint?: string }) {
-  return (
-    <Card>
-      <CardContent className="p-4">
-        <p className="text-subtle text-xs">{label}</p>
-        <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
-        {hint ? <p className="text-subtle mt-0.5 text-xs">{hint}</p> : null}
-      </CardContent>
-    </Card>
-  );
-}
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -85,11 +72,11 @@ export function ExecutionTrackerView() {
         <div className="space-y-8">
           <Section title="Tasks">
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-              <StatTile label="Completed on time" value={String(tasks.completedOnTime)} />
-              <StatTile label="Completed later" value={String(tasks.completedLater)} />
-              <StatTile label="Past due, still open" value={String(tasks.overdue)} />
-              <StatTile label="Upcoming" value={String(tasks.upcoming)} />
-              <StatTile label="Cancelled" value={String(tasks.cancelled)} />
+              <MetricCard label="Completed on time" value={String(tasks.completedOnTime)} />
+              <MetricCard label="Completed later" value={String(tasks.completedLater)} />
+              <MetricCard label="Past due, still open" value={String(tasks.overdue)} />
+              <MetricCard label="Upcoming" value={String(tasks.upcoming)} />
+              <MetricCard label="Cancelled" value={String(tasks.cancelled)} />
             </div>
             <p className="text-subtle text-sm">
               {tasks.actualMinutes} of {tasks.estimatedMinutes} estimated minutes logged.
@@ -118,19 +105,19 @@ export function ExecutionTrackerView() {
 
           <Section title="Habits">
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-              <StatTile label="Expected" value={String(habits.expected)} />
-              <StatTile label="Completed" value={String(habits.completed)} />
-              <StatTile label="Not completed" value={String(habits.notCompleted)} />
+              <MetricCard label="Expected" value={String(habits.expected)} />
+              <MetricCard label="Completed" value={String(habits.completed)} />
+              <MetricCard label="Not completed" value={String(habits.notCompleted)} />
             </div>
           </Section>
 
           <Section title="Routines">
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-              <StatTile
+              <MetricCard
                 label="Steps completed"
                 value={`${routines.stepsCompleted}/${routines.stepsExpected}`}
               />
-              <StatTile
+              <MetricCard
                 label="Minutes"
                 value={`${routines.minutesCompleted}/${routines.minutesPlanned}`}
               />
@@ -140,19 +127,19 @@ export function ExecutionTrackerView() {
           <Section title="Focus & energy">
             <p className="text-subtle text-sm">From your recent Deep Work sessions.</p>
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-              <StatTile
+              <MetricCard
                 label="Avg. focus quality"
                 value={
                   focusEnergy.avgFocusQuality === null ? "—" : `${focusEnergy.avgFocusQuality}/5`
                 }
               />
-              <StatTile
+              <MetricCard
                 label="Avg. energy"
                 value={
                   focusEnergy.avgEnergyLevel === null ? "—" : `${focusEnergy.avgEnergyLevel}/5`
                 }
               />
-              <StatTile
+              <MetricCard
                 label="Focus minutes (7d)"
                 value={String(focusEnergy.focusMinutesLast7Days)}
               />

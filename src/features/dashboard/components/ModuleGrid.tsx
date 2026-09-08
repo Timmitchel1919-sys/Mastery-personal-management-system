@@ -1,6 +1,6 @@
+import { ModuleCard } from "@/components/mastery";
 import { DASHBOARD_MODULES } from "../dashboard-modules";
 import { MasteryCenter } from "./MasteryCenter";
-import { ModuleCard } from "./ModuleCard";
 
 /** xl: PLAN/GOALS/FOCUS in the left column, ACT/GROW/ANALYTICS in the right,
  * the central anchor spanning the middle. Below xl the anchor becomes a
@@ -29,11 +29,11 @@ export function ModuleGrid({ displayName }: { displayName: string }) {
         {DASHBOARD_MODULES.map((module) => (
           <ModuleCard
             key={module.id}
-            name={module.name}
-            purpose={module.purpose}
+            title={module.name}
+            description={module.purpose}
             href={module.href}
             icon={module.icon}
-            tier={module.tier}
+            accent={module.tier === "secondary" ? "gold" : "neutral"}
             className={PLACEMENT[module.id]}
           />
         ))}

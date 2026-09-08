@@ -1,10 +1,11 @@
-import { SectionHeader } from "@/components/ui";
+import { ModuleCard, SectionHeader } from "@/components/mastery";
 import { MARKETING_MODULES } from "./marketing-modules";
 import { Reveal } from "./Reveal";
 
 /**
- * The six Mastery pillars. Cards share the dashboard's `.mastery-module-card`
- * language — obsidian surface, gold accent, CSS-only hover depth.
+ * The six Mastery pillars. Cards use the shared `<ModuleCard />` (same component
+ * the dashboard constellation renders) with no `href` — descriptive, not
+ * navigable — so the landing page and the app stay visually identical.
  */
 export function ModulesGrid() {
   return (
@@ -18,22 +19,17 @@ export function ModulesGrid() {
       </Reveal>
 
       <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {MARKETING_MODULES.map((module, index) => {
-          const Icon = module.icon;
-          return (
-            <Reveal key={module.id} delay={index * 60}>
-              <article className="mastery-module-card h-full p-6">
-                <div className="bg-gold-subtle border-border-gold mb-5 flex size-11 items-center justify-center rounded-xl border">
-                  <Icon className="text-accent size-5" aria-hidden="true" />
-                </div>
-                <h3 className="text-foreground text-lg font-semibold tracking-tight">
-                  {module.name}
-                </h3>
-                <p className="text-muted mt-2 text-sm leading-relaxed">{module.blurb}</p>
-              </article>
-            </Reveal>
-          );
-        })}
+        {MARKETING_MODULES.map((module, index) => (
+          <Reveal key={module.id} delay={index * 60} className="h-full">
+            <ModuleCard
+              title={module.name}
+              description={module.blurb}
+              icon={module.icon}
+              accent="gold"
+              className="h-full"
+            />
+          </Reveal>
+        ))}
       </div>
     </section>
   );

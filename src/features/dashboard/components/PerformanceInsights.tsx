@@ -1,6 +1,6 @@
 import { Flame, Target, Timer, TrendingUp } from "lucide-react";
+import { MetricCard } from "@/components/mastery";
 import type { DashboardAggregate } from "../dashboard-aggregate";
-import { StatTile } from "./StatTile";
 
 /**
  * A compact read on trajectory. Shows only metrics the aggregate actually
@@ -17,19 +17,19 @@ export function PerformanceInsights({ aggregate }: { aggregate: DashboardAggrega
         Performance
       </h2>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatTile
+        <MetricCard
           label="Focus today"
           value={focusMinutesToday ?? "—"}
           hint={focusMinutesToday === null ? "Not tracked yet" : "minutes"}
           icon={<Timer className="size-4" />}
         />
-        <StatTile
+        <MetricCard
           label="Tasks done"
           value={tasksCompletedToday ?? "—"}
           hint={tasksCompletedToday === null ? "Not tracked yet" : "today"}
           icon={<Target className="size-4" />}
         />
-        <StatTile
+        <MetricCard
           label="Habits"
           value={
             habitsLoggedToday
@@ -39,7 +39,7 @@ export function PerformanceInsights({ aggregate }: { aggregate: DashboardAggrega
           hint={habitsLoggedToday === null ? "Not tracked yet" : "logged today"}
           icon={<Flame className="size-4" />}
         />
-        <StatTile
+        <MetricCard
           label="Goal progress"
           value={goalProgress === null ? "—" : `${Math.round(goalProgress * 100)}%`}
           hint={goalProgress === null ? "Not tracked yet" : "across goals"}

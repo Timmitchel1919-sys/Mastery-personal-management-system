@@ -16,16 +16,8 @@ import {
   DialogTitle,
   IconButton,
 } from "@/components/ui";
+import { MetricCard } from "@/components/mastery";
 import type { WeeklySummary } from "../schema";
-
-function StatTile({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-subtle text-xs">{label}</p>
-      <p className="text-sm font-semibold tabular-nums">{value}</p>
-    </div>
-  );
-}
 
 interface WeeklySummaryCardProps {
   summary: WeeklySummary;
@@ -72,15 +64,16 @@ export function WeeklySummaryCard({ summary, onArchive, onDelete }: WeeklySummar
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatTile label="Tasks" value={`${summary.tasksCompleted} done`} />
-          <StatTile label="Overdue" value={String(summary.tasksStillOverdue)} />
-          <StatTile
+          <MetricCard variant="plain" label="Tasks" value={`${summary.tasksCompleted} done`} />
+          <MetricCard variant="plain" label="Overdue" value={String(summary.tasksStillOverdue)} />
+          <MetricCard
+            variant="plain"
             label="Habits"
             value={
               summary.habitConsistencyPercent === null ? "—" : `${summary.habitConsistencyPercent}%`
             }
           />
-          <StatTile label="Focus" value={`${summary.focusMinutes} min`} />
+          <MetricCard variant="plain" label="Focus" value={`${summary.focusMinutes} min`} />
         </div>
 
         {summary.goalsCompleted.length > 0 || summary.milestonesCompleted.length > 0 ? (
