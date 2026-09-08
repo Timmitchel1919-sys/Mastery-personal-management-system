@@ -1,9 +1,16 @@
 @import "tailwindcss";
 
 /* ─────────────────────────────────────────────────────────────
- * Mastery design system — token layer (Layer 2).
+ * Mastery design system — token layer.
  * See docs/DESIGN_SYSTEM.md. Components consume the semantic
- * `--color-*` / `--font-*` tokens below, never raw hex.
+ * `--color-*` / `--font-*` / `--radius-*` / `--shadow-*` tokens
+ * below, never raw hex.
+ *
+ * The four palette blocks that follow are the original base
+ * (kept intact). The "Mastery design foundation" section further
+ * down layers the premium obsidian/gold direction and the
+ * text / border / shadow / interaction / radius / typography
+ * families on top — all additive, all token-driven.
  * ───────────────────────────────────────────────────────────── */
 
 /* `dark:` utilities follow the [data-theme="dark"] attribute set by the
@@ -208,6 +215,216 @@
   --pillar-societal: #fb923c;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+ * MASTERY DESIGN FOUNDATION
+ * Premium personal-operating-system visual language. Additive —
+ * it refines the dark palette toward obsidian + gold and adds the
+ * semantic token families every future UI layer will consume.
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* ── Theme-invariant tokens: radius · typography · motion · spacing ── */
+:root {
+  --radius-xs: 0.375rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-pill: 9999px;
+
+  /* Type scale — fluid where a heading benefits from it. */
+  --text-display: clamp(2.5rem, 1.9rem + 2.6vw, 3.75rem);
+  --text-h1: clamp(2rem, 1.65rem + 1.6vw, 2.75rem);
+  --text-h2: clamp(1.5rem, 1.34rem + 0.8vw, 1.875rem);
+  --text-h3: 1.25rem;
+  --text-body-lg: 1.125rem;
+  --text-body: 1rem;
+  --text-body-sm: 0.875rem;
+  --text-label: 0.8125rem;
+  --text-caption: 0.75rem;
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.35;
+  --leading-normal: 1.6;
+
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.02em;
+  --tracking-caps: 0.08em;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Semantic layout rhythm (Tailwind's 0.25rem scale still underpins spacing). */
+  --space-page: 1.5rem;
+  --space-section: 2.5rem;
+  --space-card: 1.25rem;
+  --space-stack: 1rem;
+
+  /* Motion — restrained, ease-out. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 260ms;
+
+  /* Light-resolved semantic families (default). Dark overrides follow. */
+  --section: #f1f1f4;
+  --surface-glass: rgb(255 255 255 / 0.66);
+
+  --secondary: var(--muted);
+  --tertiary: var(--subtle);
+  --disabled: #aab0b8;
+  --inverse: #f7f7f9;
+
+  --border-subtle: rgb(21 23 26 / 0.08);
+  --border-gold: color-mix(in oklab, var(--primary) 42%, transparent);
+
+  --hover-surface: rgb(21 23 26 / 0.04);
+  --active-surface: rgb(21 23 26 / 0.08);
+  --selected-surface: color-mix(in oklab, var(--primary) 12%, transparent);
+
+  --gold: var(--primary);
+  --gold-hover: var(--primary-hover);
+  --gold-active: #a87513;
+  --gold-muted: #8f6a24;
+  --gold-soft: #e6c878;
+  --gold-glow: color-mix(in oklab, var(--primary) 22%, transparent);
+
+  --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.06), 0 1px 3px rgb(15 23 42 / 0.05);
+  --shadow-md: 0 4px 14px rgb(15 23 42 / 0.09), 0 2px 6px rgb(15 23 42 / 0.05);
+  --shadow-lg: 0 20px 50px rgb(15 23 42 / 0.12), 0 6px 16px rgb(15 23 42 / 0.07);
+  --shadow-gold-glow: 0 6px 20px var(--gold-glow), 0 1px 2px rgb(15 23 42 / 0.1);
+}
+
+/* ── Obsidian + gold — dark resolution (OS preference) ── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #08090b;
+    --section: #0d0f13;
+    --surface: #131519;
+    --surface-raised: #1a1d23;
+    --surface-glass: rgb(19 21 25 / 0.64);
+    --overlay: rgb(0 0 0 / 0.68);
+
+    --foreground: #f2f3f5;
+    --muted: #a1a7b1;
+    --subtle: #767d8a;
+
+    --border: #24272e;
+    --border-strong: #3b3f48;
+    --border-subtle: rgb(255 255 255 / 0.05);
+    --border-gold: color-mix(in oklab, var(--primary) 38%, transparent);
+
+    --primary: #c89b3c;
+    --primary-foreground: #0b0c0e;
+    --primary-hover: #d8ad52;
+    --accent: #e6c878;
+    --ring: #d8ad52;
+
+    --gold-subtle: #211a0d;
+    --glass-fill: rgb(19 21 25 / 0.6);
+    --glass-border-color: rgb(255 255 255 / 0.07);
+
+    --secondary: var(--muted);
+    --tertiary: var(--subtle);
+    --disabled: #565c66;
+    --inverse: #0b0c0e;
+
+    --hover-surface: rgb(255 255 255 / 0.05);
+    --active-surface: rgb(255 255 255 / 0.09);
+    --selected-surface: color-mix(in oklab, var(--primary) 15%, transparent);
+
+    --gold: var(--primary);
+    --gold-hover: var(--primary-hover);
+    --gold-active: #b98a2f;
+    --gold-muted: #8f6a24;
+    --gold-soft: #e6c878;
+    --gold-glow: color-mix(in oklab, var(--primary) 30%, transparent);
+
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.45), 0 1px 3px rgb(0 0 0 / 0.3);
+    --shadow-md: 0 6px 18px rgb(0 0 0 / 0.5), 0 2px 8px rgb(0 0 0 / 0.35);
+    --shadow-lg: 0 26px 64px rgb(0 0 0 / 0.58), 0 8px 22px rgb(0 0 0 / 0.42);
+    --shadow-gold-glow: 0 8px 30px var(--gold-glow), 0 1px 3px rgb(0 0 0 / 0.5);
+  }
+}
+
+/* Explicit light re-asserts the light semantic families over the media query. */
+:root[data-theme="light"] {
+  --section: #f1f1f4;
+  --surface-glass: rgb(255 255 255 / 0.66);
+  --secondary: var(--muted);
+  --tertiary: var(--subtle);
+  --disabled: #aab0b8;
+  --inverse: #f7f7f9;
+  --border-subtle: rgb(21 23 26 / 0.08);
+  --border-gold: color-mix(in oklab, var(--primary) 42%, transparent);
+  --hover-surface: rgb(21 23 26 / 0.04);
+  --active-surface: rgb(21 23 26 / 0.08);
+  --selected-surface: color-mix(in oklab, var(--primary) 12%, transparent);
+  --gold: var(--primary);
+  --gold-hover: var(--primary-hover);
+  --gold-active: #a87513;
+  --gold-muted: #8f6a24;
+  --gold-soft: #e6c878;
+  --gold-glow: color-mix(in oklab, var(--primary) 22%, transparent);
+  --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.06), 0 1px 3px rgb(15 23 42 / 0.05);
+  --shadow-md: 0 4px 14px rgb(15 23 42 / 0.09), 0 2px 6px rgb(15 23 42 / 0.05);
+  --shadow-lg: 0 20px 50px rgb(15 23 42 / 0.12), 0 6px 16px rgb(15 23 42 / 0.07);
+  --shadow-gold-glow: 0 6px 20px var(--gold-glow), 0 1px 2px rgb(15 23 42 / 0.1);
+}
+
+/* Explicit dark — the approved Mastery obsidian/gold direction. */
+:root[data-theme="dark"] {
+  --background: #08090b;
+  --section: #0d0f13;
+  --surface: #131519;
+  --surface-raised: #1a1d23;
+  --surface-glass: rgb(19 21 25 / 0.64);
+  --overlay: rgb(0 0 0 / 0.68);
+
+  --foreground: #f2f3f5;
+  --muted: #a1a7b1;
+  --subtle: #767d8a;
+
+  --border: #24272e;
+  --border-strong: #3b3f48;
+  --border-subtle: rgb(255 255 255 / 0.05);
+  --border-gold: color-mix(in oklab, var(--primary) 38%, transparent);
+
+  --primary: #c89b3c;
+  --primary-foreground: #0b0c0e;
+  --primary-hover: #d8ad52;
+  --accent: #e6c878;
+  --ring: #d8ad52;
+
+  --gold-subtle: #211a0d;
+  --glass-fill: rgb(19 21 25 / 0.6);
+  --glass-border-color: rgb(255 255 255 / 0.07);
+
+  --secondary: var(--muted);
+  --tertiary: var(--subtle);
+  --disabled: #565c66;
+  --inverse: #0b0c0e;
+
+  --hover-surface: rgb(255 255 255 / 0.05);
+  --active-surface: rgb(255 255 255 / 0.09);
+  --selected-surface: color-mix(in oklab, var(--primary) 15%, transparent);
+
+  --gold: var(--primary);
+  --gold-hover: var(--primary-hover);
+  --gold-active: #b98a2f;
+  --gold-muted: #8f6a24;
+  --gold-soft: #e6c878;
+  --gold-glow: color-mix(in oklab, var(--primary) 30%, transparent);
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.45), 0 1px 3px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 6px 18px rgb(0 0 0 / 0.5), 0 2px 8px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 26px 64px rgb(0 0 0 / 0.58), 0 8px 22px rgb(0 0 0 / 0.42);
+  --shadow-gold-glow: 0 8px 30px var(--gold-glow), 0 1px 3px rgb(0 0 0 / 0.5);
+}
+
 /* ── Expose tokens to Tailwind utilities (runtime-swappable) ──── */
 @theme inline {
   --font-sans: var(--font-sans);
@@ -253,6 +470,22 @@
   --color-champagne-soft: var(--champagne-soft);
   --color-ivory: var(--ivory);
   --color-gold-connector: var(--gold-connector);
+
+  /* Mastery design foundation — semantic families. */
+  --color-section: var(--section);
+  --color-surface-glass: var(--surface-glass);
+  --color-secondary: var(--secondary);
+  --color-tertiary: var(--tertiary);
+  --color-disabled: var(--disabled);
+  --color-inverse: var(--inverse);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-gold: var(--border-gold);
+  --color-gold: var(--gold);
+  --color-gold-hover: var(--gold-hover);
+  --color-gold-active: var(--gold-active);
+  --color-gold-muted: var(--gold-muted);
+  --color-gold-soft: var(--gold-soft);
+  --color-selected: var(--selected-surface);
 
   --color-pillar-spiritual: var(--pillar-spiritual);
   --color-pillar-personal: var(--pillar-personal);
@@ -350,11 +583,98 @@
   }
 }
 
+/* ── Typography foundation — opt-in classes future layers apply; Tailwind
+   font-size utilities still override them when a component needs a one-off. ── */
+@layer components {
+  .text-display {
+    font-size: var(--text-display);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    font-weight: var(--weight-semibold);
+  }
+  .text-h1 {
+    font-size: var(--text-h1);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    font-weight: var(--weight-semibold);
+  }
+  .text-h2 {
+    font-size: var(--text-h2);
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-tight);
+    font-weight: var(--weight-semibold);
+  }
+  .text-h3 {
+    font-size: var(--text-h3);
+    line-height: var(--leading-snug);
+    font-weight: var(--weight-semibold);
+  }
+  .text-body-lg {
+    font-size: var(--text-body-lg);
+    line-height: var(--leading-normal);
+  }
+  .text-body {
+    font-size: var(--text-body);
+    line-height: var(--leading-normal);
+  }
+  .text-body-secondary {
+    font-size: var(--text-body-sm);
+    line-height: var(--leading-normal);
+    color: var(--color-secondary);
+  }
+  .text-caption {
+    font-size: var(--text-caption);
+    line-height: var(--leading-snug);
+    color: var(--color-tertiary);
+  }
+  .text-label {
+    font-size: var(--text-label);
+    line-height: var(--leading-snug);
+    font-weight: var(--weight-medium);
+  }
+  .text-nav {
+    font-size: var(--text-body-sm);
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    font-weight: var(--weight-medium);
+  }
+  .text-eyebrow {
+    font-size: var(--text-caption);
+    letter-spacing: var(--tracking-caps);
+    font-weight: var(--weight-semibold);
+    text-transform: uppercase;
+    color: var(--color-gold);
+  }
+}
+
+/* ── Surface / elevation ladder — opt-in foundation for future card layers.
+   page → section → panel → card → elevated card. ── */
+@layer components {
+  .mastery-panel {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+  .mastery-card {
+    background-color: var(--color-surface-raised);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  .mastery-card-elevated {
+    background-color: var(--color-surface-raised);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+  }
+}
+
 /* Restrained glassmorphism — navigation, auth cards, floating panels, modals,
    toasts, feature cards. Not every surface: flat --color-surface-raised stays the
    default for dense, scannable content (tables, forms, dashboard cards). Both
-   themes share one recipe via the --glass-* tokens; a non-blur browser gets the
-   opaque --color-surface-raised fallback instead of a broken transparent panel. */
+   themes share one recipe via the --glass-* / --shadow-* tokens; a non-blur
+   browser gets the opaque --color-surface-raised fallback instead of a broken
+   transparent panel. `.mastery-glass--gold` adds the optional faint gold edge. */
 .mastery-glass,
 .mastery-glass-card {
   background-color: var(--glass-fill);
@@ -362,8 +682,14 @@
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.04),
-    0 24px 60px rgb(15 23 42 / 0.1);
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    var(--shadow-lg);
+}
+.mastery-glass--gold {
+  border-color: var(--border-gold);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--gold) 12%, transparent),
+    var(--shadow-lg);
 }
 @supports not (backdrop-filter: blur(1px)) {
   .mastery-glass,

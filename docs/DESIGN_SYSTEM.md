@@ -128,3 +128,48 @@ PageContainer, PageHeader, Breadcrumbs. Showcase route: `/design-system`.
 **Deferred** (added by the first layer that needs them, same wrapper pattern): Accordion,
 Popover, Toast, Combobox, Slider, DatePicker/TimePicker, Table/DataTable, Pagination,
 CommandPalette. The responsive app shell (Sidebar / Topbar / BottomNav) is Layer 5.
+
+---
+
+## Mastery design foundation (obsidian / gold)
+
+Established in `src/app/globals.css` on top of the base palette — additive, token-driven,
+no component rewrites. The approved dark direction is a premium personal-operating-system
+look: obsidian foundation, warm premium gold accent, ivory text, slate secondary text,
+restrained dark glass.
+
+**Dark palette (obsidian ladder)** — `--background #08090b` · `--section #0d0f13` ·
+`--surface #131519` · `--surface-raised #1a1d23` · `--surface-glass` (translucent). Text:
+`--foreground #f2f3f5` (ivory, not pure white) · `--muted #a1a7b1` · `--subtle #767d8a`.
+Borders: `--border #24272e` (restrained) · `--border-strong` · `--border-subtle` (hairline).
+
+**Gold family** — `--gold` / `--primary #c89b3c` (premium warm gold) · `--gold-hover #d8ad52`
+· `--gold-active #b98a2f` · `--gold-muted #8f6a24` · `--gold-soft #e6c878` · `--gold-glow`
+(controlled). Gold is brand / primary CTA / active nav / progress / selection only — never a
+large fill. `--ring #d8ad52` for focus on dark.
+
+**Semantic families** (both themes, exposed as `--color-*`) — text: `secondary`, `tertiary`,
+`disabled`, `inverse`. border: `subtle`, `default`, `strong`, `gold`. interaction:
+`--hover-surface`, `--active-surface`, `--selected-surface`.
+
+**Radius** — `--radius-xs .375` · `sm .5` · `md .75` · `lg 1` · `xl 1.25` · `2xl 1.5rem` ·
+`pill`. (Bare tokens; Tailwind's own `rounded-*` scale is untouched so existing components
+keep their radii.)
+
+**Shadow** — `--shadow-sm` / `--shadow-md` / `--shadow-lg` (deeper on dark) and
+`--shadow-gold-glow` for the primary CTA. `.mastery-glass` now derives its shadow from
+`--shadow-lg`; `.mastery-glass--gold` adds a faint gold edge.
+
+**Typography** — fluid scale tokens `--text-{display,h1,h2,h3,body-lg,body,body-sm,label,
+caption}` + `--leading-*` / `--tracking-*` / `--weight-*`, surfaced as opt-in classes
+`.text-{display,h1,h2,h3,body,body-lg,body-secondary,caption,label,nav,eyebrow}` in
+`@layer components` (Tailwind font-size utilities still override per component).
+
+**Surface classes** — `.mastery-panel` / `.mastery-card` / `.mastery-card-elevated` — opt-in
+foundations for future card layers.
+
+**Motion** — `--ease-out` + `--duration-{fast,base,slow}` (120 / 180 / 260 ms). Restrained;
+no scaling or glow animations.
+
+**Spacing** — Tailwind's 0.25rem scale still underpins everything; `--space-{page,section,
+card,stack}` give future layout layers a semantic rhythm.
