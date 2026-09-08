@@ -900,6 +900,56 @@
   }
 }
 
+/* ── Landing page — Premium marketing surfaces (Layer 4) ───────────────
+   Scroll-reveal, the hero system-orbit float, and connector lines. All motion
+   is gated on prefers-reduced-motion and (for the orbit) the lg breakpoint. */
+
+/* Scroll reveal — see components/marketing/Reveal.tsx. The hidden state is only
+   ever applied client-side, so a pre-hydration paint shows everything. */
+.mastery-reveal {
+  transition:
+    opacity 0.6s var(--ease-out),
+    transform 0.6s var(--ease-out);
+}
+.mastery-reveal--hidden {
+  opacity: 0;
+  transform: translateY(16px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mastery-reveal {
+    transition: none;
+  }
+  .mastery-reveal--hidden {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Hero system orbit — six module nodes surrounding the centre. Below lg the nodes
+   flow in normal grid order; at lg they are absolutely placed and drift slowly. */
+@keyframes mastery-orbit-float {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateY(0);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(-8px);
+  }
+}
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .mastery-orbit-node {
+    animation: mastery-orbit-float 7s ease-in-out infinite;
+  }
+}
+
+.mastery-orbit-glow {
+  background: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in oklab, var(--color-gold) 20%, transparent),
+    transparent 62%
+  );
+}
+
 /* Layer 16 — print-to-PDF: isolate the report document, hide app chrome. */
 @media print {
   body * {

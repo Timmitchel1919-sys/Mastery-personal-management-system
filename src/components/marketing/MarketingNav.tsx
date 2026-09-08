@@ -19,15 +19,14 @@ import { cn } from "@/lib/utils";
 
 const LINKS = [
   { href: "#product", label: "Product" },
-  { href: "#how-it-works", label: "How It Works" },
-  { href: "#framework", label: "Framework" },
-  { href: "#about", label: "About" },
+  { href: "#modules", label: "Modules" },
+  { href: "#how-it-works", label: "How it works" },
+  { href: "#philosophy", label: "Philosophy" },
 ];
 
 /**
- * Floating glass navigation — a rounded translucent bar that sits over the mountain
- * hero rather than a solid website navbar. Gains opacity + a soft shadow once the
- * page is scrolled.
+ * Floating glass navigation — a rounded translucent bar over the hero rather than a
+ * solid website navbar. Gains a soft shadow once the page is scrolled.
  */
 export function MarketingNav() {
   const [scrolled, setScrolled] = useState(false);
