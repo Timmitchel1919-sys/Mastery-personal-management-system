@@ -1,7 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BarChart3, CheckSquare, Compass, Sprout, Target, Timer, type LucideIcon } from "lucide-react";
+import {
+  BRAIN_MODULES,
+  brainModule,
+  nodePosition,
+  type BrainHubPhase,
+  type BrainModule,
+  type BrainModuleId,
+  type BrainModuleStatus,
+} from "./brain-modules";
 
 /**
  * Navigation-state contract for the Mastery Brain Hub.
@@ -12,66 +20,21 @@ import { BarChart3, CheckSquare, Compass, Sprout, Target, Timer, type LucideIcon
  * `selectedId` / `activeId` / `phase` and draws accordingly — it never becomes
  * the source of truth for navigation, and it never touches auth, the database,
  * or module business logic.
+ *
+ * Static data + geometry live in `./brain-modules` (a non-client module so the
+ * server-side `/hub` build can import them); this file re-exports them so
+ * existing `from "../brain-navigation"` imports keep working.
  */
 
-export type BrainModuleId = "goals" | "plan" | "focus" | "act" | "grow" | "analytics";
-
-/** Reserved for a future real signal. Never fabricated — populated only when the
- * app can supply it. `normal` renders no indicator. */
-export type BrainModuleStatus = "normal" | "attention" | "active";
-
-export interface BrainModule {
-  id: BrainModuleId;
-  label: string;
-  /** Existing module route — used only by the explicit "open" action. */
-  href: string;
-  icon: LucideIcon;
-  /**
-   * Angle in degrees clockwise from straight up, for radial placement:
-   *
-   *              GOALS (0°)
-   *      PLAN (-55°)     FOCUS (55°)
-   *              🧠
-   *      ACT (-125°)     GROW (125°)
-   *            ANALYTICS (180°)
-   */
-  angle: number;
-}
-
-export const BRAIN_MODULES: BrainModule[] = [
-  { id: "goals", label: "Goals", href: "/plan/goals", icon: Target, angle: 0 },
-  { id: "plan", label: "Plan", href: "/plan", icon: Compass, angle: -55 },
-  { id: "focus", label: "Focus", href: "/focus", icon: Timer, angle: 55 },
-  { id: "act", label: "Act", href: "/act", icon: CheckSquare, angle: -125 },
-  { id: "grow", label: "Grow", href: "/grow", icon: Sprout, angle: 125 },
-  { id: "analytics", label: "Analytics", href: "/analytics", icon: BarChart3, angle: 180 },
-];
-
-export function brainModule(id: BrainModuleId): BrainModule {
-  const found = BRAIN_MODULES.find((module) => module.id === id);
-  if (!found) throw new Error(`Unknown brain module: ${id}`);
-  return found;
-}
-
-/**
- * Radial position for a node, as percentages of the square stage.
- * `angle` is degrees clockwise from straight up; `radius` is 0–50 (% of half-size).
- */
-export function nodePosition(angle: number, radius: number): { x: number; y: number } {
-  const rad = (angle * Math.PI) / 180;
-  return {
-    x: 50 + radius * Math.sin(rad),
-    y: 50 - radius * Math.cos(rad),
-  };
-}
-
-/**
- * The three states of the spatial navigation:
- *  - `home`          — the brain hub, all six modules equal.
- *  - `transitioning` — a module was chosen; the camera is interpolating.
- *  - `module-active` — the camera has settled; the chosen module dominates.
- */
-export type BrainHubPhase = "home" | "transitioning" | "module-active";
+export {
+  BRAIN_MODULES,
+  brainModule,
+  nodePosition,
+  type BrainHubPhase,
+  type BrainModule,
+  type BrainModuleId,
+  type BrainModuleStatus,
+};
 
 export interface BrainNavigationState {
   /** The module whose node is spatially activated. `null` in `home`. */

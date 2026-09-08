@@ -2,8 +2,6 @@
 
 import { useId, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui";
 import { NAV_SECTIONS } from "@/config/navigation";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useMounted } from "@/hooks/use-mounted";
@@ -21,6 +19,7 @@ import { BrainFallbackList } from "./BrainFallbackList";
 import { BrainModulePreview } from "./BrainModulePreview";
 import { BrainNode } from "./BrainNode";
 import { BrainScene } from "./BrainScene";
+import { ModuleEnvironment } from "./ModuleEnvironment";
 
 interface BrainHubProps {
   /** Where "open the selected module" navigates. Defaults to the module route.
@@ -85,33 +84,36 @@ export function BrainHub({
   // The hover preview is suppressed once a module is engaged — its context takes over.
   const previewId = !engaged ? nav.activeId : null;
 
+  // Engaged: a compact brain stays visible for continuity, with the module
+  // environment below it. The camera transition (Layer B) plays on the brain.
+  if (engaged && selectedModule) {
+    return (
+      <div className={cn("flex flex-col gap-6", className)}>
+        <div
+          aria-hidden="true"
+          className="brain-stage relative mx-auto aspect-square w-28 sm:w-32"
+          data-phase={nav.phase}
+        >
+          <BrainScene
+            activeId={nav.selectedId}
+            selectedId={nav.selectedId}
+            phase={nav.phase}
+            nodeRadius={0}
+            reducedMotion={reducedMotion}
+          />
+        </div>
+        <ModuleEnvironment
+          moduleId={selectedModule.id}
+          phase={nav.phase}
+          onBack={nav.returnHome}
+          onOpenModule={nav.openSelected}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={cn("flex flex-col gap-6", className)}>
-      {engaged && selectedModule ? (
-        <div
-          role="status"
-          className="mastery-glass mastery-glass--gold flex flex-wrap items-center justify-between gap-3 rounded-xl px-4 py-3"
-        >
-          <p className="text-sm">
-            <span className="text-eyebrow">Now in </span>
-            <span className="text-foreground font-semibold">{selectedModule.label}</span>
-            {nav.phase === "transitioning" ? (
-              <span className="text-subtle"> · settling…</span>
-            ) : null}
-          </p>
-          <div className="flex gap-2">
-            <Button size="sm" variant="ghost" onClick={nav.returnHome}>
-              <ArrowLeft aria-hidden="true" />
-              Back to brain
-            </Button>
-            <Button size="sm" onClick={nav.openSelected}>
-              Open {selectedModule.label}
-              <ArrowRight aria-hidden="true" />
-            </Button>
-          </div>
-        </div>
-      ) : null}
-
       {spatial ? (
         <>
           <div

@@ -2,14 +2,22 @@ export {
   BRAIN_MODULES,
   brainModule,
   nodePosition,
-  useBrainNavigation,
   type BrainModule,
   type BrainModuleId,
   type BrainModuleStatus,
   type BrainHubPhase,
-  type BrainNavigationState,
-} from "./brain-navigation";
+} from "./brain-modules";
+export { useBrainNavigation, type BrainNavigationState } from "./brain-navigation";
 export { supportsWebgl } from "./webgl";
+export {
+  MODULE_REGISTRY,
+  moduleDef,
+  submoduleDef,
+  type ModuleDef,
+  type SubmoduleDef,
+} from "./module-registry";
 export { BrainHub } from "./components/BrainHub";
 export { BrainScene } from "./components/BrainScene";
 export { BrainHubView } from "./components/BrainHubView";
+export { ModuleEnvironment } from "./components/ModuleEnvironment";
+export { SubmoduleCard } from "./components/SubmoduleCard";
