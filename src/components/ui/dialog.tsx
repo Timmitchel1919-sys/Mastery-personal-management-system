@@ -23,7 +23,7 @@ const DialogOverlay = forwardRef<
       ref={ref}
       className={cn(
         "bg-overlay fixed inset-0 z-50",
-        "data-[state=open]:[animation:mastery-fade-in_150ms_ease-out] data-[state=closed]:[animation:mastery-fade-out_120ms_ease-in]",
+        "data-[state=open]:animate-[mastery-fade-in_var(--duration-fast)_var(--ease-out)] data-[state=closed]:animate-[mastery-fade-out_var(--duration-instant)_var(--ease-in)]",
         className,
       )}
       {...props}
@@ -42,7 +42,7 @@ export const DialogContent = forwardRef<
         ref={ref}
         className={cn(
           "bg-surface-raised border-border fixed top-1/2 left-1/2 z-50 grid w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-lg border p-6 shadow-lg",
-          "data-[state=open]:[animation:mastery-zoom-in_160ms_ease-out] data-[state=closed]:[animation:mastery-zoom-out_130ms_ease-in]",
+          "data-[state=open]:animate-[mastery-zoom-in_var(--duration-fast)_var(--ease-out)] data-[state=closed]:animate-[mastery-zoom-out_var(--duration-instant)_var(--ease-in)]",
           className,
         )}
         {...props}

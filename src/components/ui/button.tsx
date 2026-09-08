@@ -9,7 +9,8 @@ import { Spinner } from "./spinner";
 export const buttonVariants = cva(
   [
     "inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap",
-    "transition-colors outline-none",
+    "transition-[color,background-color,border-color,opacity,box-shadow,transform] duration-[var(--duration-fast)] ease-[var(--ease-out)] outline-none",
+    "active:translate-y-px motion-reduce:transition-none motion-reduce:active:translate-y-0",
     "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     "disabled:pointer-events-none disabled:opacity-50",
     "[&_svg]:size-4 [&_svg]:shrink-0",

@@ -263,11 +263,21 @@
   --space-card: 1.25rem;
   --space-stack: 1rem;
 
-  /* Motion — restrained, ease-out. */
+  /* Motion — MASTERy motion system (Layer 6). Enter with ease-out, transform
+     with ease-in-out, leave with ease-in. Most UI transitions use `fast`;
+     `emphasis` is reserved for scroll reveals. Durations collapse to ~0 under
+     prefers-reduced-motion (see the global block in @layer base). */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --duration-fast: 120ms;
-  --duration-base: 180ms;
-  --duration-slow: 260ms;
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-emphasis: 450ms;
+  /* Legacy alias — pre-Layer 6 name, still referenced by some components. */
+  --duration-base: var(--duration-normal);
 
   /* Light-resolved semantic families (default). Dark overrides follow. */
   --section: #f1f1f4;
@@ -585,6 +595,53 @@
   }
 }
 
+/* Menus, tooltips, popovers, selects — one shared entrance: fade + a small rise
+   + a hair of scale. Keeps every transient surface feeling identical. */
+@keyframes mastery-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+@keyframes mastery-pop-out {
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+/* Completion feedback (Layer 6) — subtle and professional, never confetti.
+   `.mastery-complete-pop` settles a checkmark/state icon in; `.mastery-highlight`
+   gives a one-shot gold wash when a record is saved or completed. Both are
+   one-shot and are neutralised by the global reduced-motion block. */
+@keyframes mastery-complete-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes mastery-highlight {
+  from {
+    background-color: color-mix(in oklab, var(--color-gold) 22%, transparent);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+.mastery-complete-pop {
+  animation: mastery-complete-pop var(--duration-normal) var(--ease-out);
+}
+.mastery-highlight {
+  animation: mastery-highlight var(--duration-emphasis) var(--ease-out);
+}
+
 /* ── Typography foundation — opt-in classes future layers apply; Tailwind
    font-size utilities still override them when a component needs a one-off. ── */
 @layer components {
@@ -745,8 +802,8 @@
     0 1px 2px rgb(15 23 42 / 0.04),
     0 10px 30px rgb(15 23 42 / 0.06);
   transition:
-    background-color 180ms ease,
-    box-shadow 180ms ease;
+    background-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
 }
 .mastery-nav-card[data-active="true"] {
   background-color: var(--nav-card-active-fill);
@@ -775,7 +832,9 @@
     0 6px 16px rgb(201 151 43 / 0.3);
   position: relative;
   overflow: hidden;
-  transition: filter 150ms ease;
+  transition:
+    filter var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
 }
 .mastery-gold-btn::after {
   content: "";
@@ -789,6 +848,7 @@
 }
 .mastery-gold-btn:active:not(:disabled) {
   filter: brightness(0.96);
+  transform: translateY(1px);
 }
 
 /* Expanded child panel — enter transition only (children unmount on collapse, so the
@@ -804,7 +864,7 @@
   }
 }
 .mastery-expand {
-  animation: mastery-expand 210ms cubic-bezier(0.16, 1, 0.3, 1);
+  animation: mastery-expand var(--duration-normal) var(--ease-out);
 }
 @media (prefers-reduced-motion: reduce) {
   .mastery-expand {
@@ -908,8 +968,8 @@
    ever applied client-side, so a pre-hydration paint shows everything. */
 .mastery-reveal {
   transition:
-    opacity 0.6s var(--ease-out),
-    transform 0.6s var(--ease-out);
+    opacity var(--duration-emphasis) var(--ease-out),
+    transform var(--duration-emphasis) var(--ease-out);
 }
 .mastery-reveal--hidden {
   opacity: 0;
@@ -938,7 +998,7 @@
 }
 @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
   .mastery-orbit-node {
-    animation: mastery-orbit-float 7s ease-in-out infinite;
+    animation: mastery-orbit-float 7s var(--ease-in-out) infinite;
   }
 }
 

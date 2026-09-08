@@ -20,7 +20,7 @@ export const DropdownMenuContent = forwardRef<
         sideOffset={sideOffset}
         className={cn(
           "bg-surface-raised text-foreground border-border z-50 min-w-[10rem] overflow-hidden rounded-md border p-1 shadow-md",
-          "data-[state=open]:[animation:mastery-fade-in_120ms_ease-out]",
+          "data-[state=open]:animate-[mastery-pop-in_var(--duration-fast)_var(--ease-out)]",
           className,
         )}
         {...props}

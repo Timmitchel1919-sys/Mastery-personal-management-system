@@ -18,7 +18,7 @@ export const SheetTitle = DialogPrimitive.Title;
 export const SheetDescription = DialogPrimitive.Description;
 
 const sheetVariants = cva(
-  "bg-surface-raised fixed z-50 flex flex-col shadow-lg outline-none transition-transform",
+  "bg-surface-raised fixed z-50 flex flex-col shadow-lg outline-none transition-transform duration-[var(--duration-normal)] ease-[var(--ease-out)] motion-reduce:transition-none",
   {
     variants: {
       side: {
@@ -44,7 +44,7 @@ export const SheetContent = forwardRef<
 >(function SheetContent({ className, children, side = "left", showClose = true, ...props }, ref) {
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="bg-overlay fixed inset-0 z-50 data-[state=open]:[animation:mastery-fade-in_150ms_ease-out] data-[state=closed]:[animation:mastery-fade-out_120ms_ease-in]" />
+      <DialogPrimitive.Overlay className="bg-overlay fixed inset-0 z-50 data-[state=open]:animate-[mastery-fade-in_var(--duration-fast)_var(--ease-out)] data-[state=closed]:animate-[mastery-fade-out_var(--duration-instant)_var(--ease-in)]" />
       <DialogPrimitive.Content
         ref={ref}
         className={cn(sheetVariants({ side }), className)}

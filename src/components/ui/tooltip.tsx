@@ -19,7 +19,7 @@ export const TooltipContent = forwardRef<
         sideOffset={sideOffset}
         className={cn(
           "bg-foreground text-background z-50 max-w-xs rounded-md px-2.5 py-1.5 text-xs font-medium shadow-md",
-          "data-[state=delayed-open]:[animation:mastery-fade-in_120ms_ease-out]",
+          "data-[state=delayed-open]:animate-[mastery-pop-in_var(--duration-instant)_var(--ease-out)] data-[state=instant-open]:animate-[mastery-pop-in_var(--duration-instant)_var(--ease-out)]",
           className,
         )}
         {...props}
