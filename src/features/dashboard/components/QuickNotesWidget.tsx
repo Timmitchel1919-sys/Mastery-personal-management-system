@@ -140,7 +140,7 @@ export function QuickNotesWidget({ initialNotes }: { initialNotes: QuickNote[] }
                 ) : (
                   <div className="flex items-start gap-2">
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm break-words whitespace-pre-wrap">{note.body}</p>
+                      <p className="text-sm wrap-break-words whitespace-pre-wrap">{note.body}</p>
                       <p className="text-subtle mt-0.5 text-xs">{relativeTime(note.updatedAt)}</p>
                     </div>
                     <div className="flex shrink-0 gap-0.5">

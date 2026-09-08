@@ -52,16 +52,47 @@ describe("DashboardView", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("grace");
   });
 
-  it("shows empty states for features that arrive in later layers", () => {
+  it("makes Today's Focus the primary anchor with an intentional empty state", () => {
+    render(<DashboardView />);
+    expect(screen.getByRole("heading", { name: /today's focus/i })).toBeInTheDocument();
+    expect(screen.getByText("Nothing locked in yet.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /open weekly plan/i })).toHaveAttribute(
+      "href",
+      "/plan/weekly",
+    );
+  });
+
+  it("renders the six core modules around the central Mastery anchor", () => {
+    render(<DashboardView />);
+    expect(screen.getByRole("region", { name: /your mastery/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /structure your day/i })).toHaveAttribute(
+      "href",
+      "/plan",
+    );
+    expect(
+      screen.getByRole("link", { name: /turn direction into measurable outcomes/i }),
+    ).toHaveAttribute("href", "/plan/goals");
+    expect(screen.getByRole("link", { name: /understand your trajectory/i })).toHaveAttribute(
+      "href",
+      "/analytics",
+    );
+  });
+
+  it("keeps the quick-notes widget and shows the timeline empty state", () => {
     render(<DashboardView />);
     expect(screen.getByText("Quick notes")).toBeInTheDocument();
-    expect(screen.getByText("Today's priorities")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /go to goals/i })).toHaveAttribute(
+    expect(screen.getByRole("heading", { name: /today's timeline/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /plan time blocks/i })).toHaveAttribute(
       "href",
-      "/plan/goals",
+      "/focus/time-blocking",
     );
-    // stat tiles render a dash when the metric does not exist yet
+  });
+
+  it("shows performance metrics as dashes until later layers supply real data", () => {
+    render(<DashboardView />);
+    expect(screen.getByRole("heading", { name: /performance/i })).toBeInTheDocument();
     expect(screen.getAllByText("—").length).toBeGreaterThanOrEqual(3);
+    expect(screen.getAllByText("Not tracked yet").length).toBeGreaterThanOrEqual(3);
   });
 
   it("offers a privacy-safe recovery shortcut with no sensitive detail", () => {

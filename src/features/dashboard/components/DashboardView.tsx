@@ -1,24 +1,16 @@
 "use client";
 
-import {
-  BarChart3,
-  CalendarClock,
-  Flame,
-  Gauge,
-  Milestone,
-  Sparkles,
-  Target,
-  Timer,
-} from "lucide-react";
 import { PageContainer } from "@/components/layout";
 import { ErrorState } from "@/components/shared";
 import { Skeleton } from "@/components/ui";
 import { useDashboard } from "../use-dashboard";
-import { GreetingWidget } from "./GreetingWidget";
-import { PlaceholderWidget } from "./PlaceholderWidget";
+import { DailyTimeline } from "./DailyTimeline";
+import { DashboardHeader } from "./DashboardHeader";
+import { ModuleGrid } from "./ModuleGrid";
+import { PerformanceInsights } from "./PerformanceInsights";
 import { QuickNotesWidget } from "./QuickNotesWidget";
 import { RecoveryShortcut } from "./RecoveryShortcut";
-import { StatTile } from "./StatTile";
+import { TodayFocus } from "./TodayFocus";
 
 function resolveIdentity(
   profile: ReturnType<typeof useDashboard>["profile"],
@@ -39,32 +31,44 @@ function resolveIdentity(
   return { displayName, locale, timeZone };
 }
 
-function LoadingGrid() {
+function LoadingState() {
   return (
-    <div className="space-y-6">
-      <Skeleton className="h-9 w-64" />
-      <div className="grid gap-4 sm:grid-cols-3">
-        {[0, 1, 2].map((key) => (
-          <Skeleton key={key} className="h-24" />
-        ))}
+    <div className="space-y-8">
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-40" />
+        <Skeleton className="h-10 w-72" />
+        <Skeleton className="h-4 w-56" />
+      </div>
+      <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+        <Skeleton className="h-44 rounded-2xl" />
+        <Skeleton className="h-44 rounded-2xl" />
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {[0, 1, 2, 3, 4, 5].map((key) => (
-          <Skeleton key={key} className="h-44" />
+          <Skeleton key={key} className="h-32 rounded-xl" />
         ))}
       </div>
     </div>
   );
 }
 
+/**
+ * The Mastery dashboard — a personal operating system, not a widget wall.
+ *
+ * Composition: an executive header, the dominant Today's Focus anchor, the six
+ * core modules arranged around the central "Your Mastery" mark, today's timeline,
+ * and a compact performance read. Every surface has a real-data path and an
+ * intentional empty state; no metric is fabricated. Data and business logic stay
+ * in `useDashboard` / `loadDashboardAggregate` — this layer is composition only.
+ */
 export function DashboardView() {
   const { status, aggregate, error, reload, profile, user } = useDashboard();
   const identity = resolveIdentity(profile, user);
 
   return (
-    <PageContainer size="wide" className="space-y-6">
+    <PageContainer size="wide" className="space-y-8">
       {status === "loading" && !aggregate ? (
-        <LoadingGrid />
+        <LoadingState />
       ) : status === "error" || !aggregate ? (
         <ErrorState
           className="min-h-[50vh]"
@@ -74,97 +78,23 @@ export function DashboardView() {
         />
       ) : (
         <>
-          <GreetingWidget
+          <DashboardHeader
             displayName={identity.displayName}
             locale={identity.locale}
             timeZone={identity.timeZone}
+            aggregate={aggregate}
           />
 
-          <div className="grid gap-4 sm:grid-cols-3">
-            <StatTile
-              label="Focus today"
-              value={aggregate.focusMinutesToday ?? "—"}
-              hint={aggregate.focusMinutesToday === null ? "Focus tracking — Layer 9" : "minutes"}
-              icon={<Timer className="size-4" />}
-            />
-            <StatTile
-              label="Tasks completed"
-              value={aggregate.tasksCompletedToday ?? "—"}
-              hint={aggregate.tasksCompletedToday === null ? "Tasks — Layer 10" : "today"}
-              icon={<Target className="size-4" />}
-            />
-            <StatTile
-              label="Habits logged"
-              value={
-                aggregate.habitsLoggedToday
-                  ? `${aggregate.habitsLoggedToday.done}/${aggregate.habitsLoggedToday.total}`
-                  : "—"
-              }
-              hint={aggregate.habitsLoggedToday === null ? "Habits — Layer 10" : "today"}
-              icon={<Flame className="size-4" />}
-            />
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 lg:grid-cols-[2fr_1fr] lg:items-start">
+            <TodayFocus priorities={aggregate.todaysPriorities} />
             <QuickNotesWidget initialNotes={aggregate.quickNotes} />
-
-            <PlaceholderWidget
-              title="Today's priorities"
-              icon={<CalendarClock className="size-4" />}
-              message="Your weekly plan feeds today's priorities once planning is in place."
-              href="/plan/weekly"
-              linkLabel="Go to weekly plan"
-              plannedLayer={8}
-            />
-            <PlaceholderWidget
-              title="Goal progress"
-              icon={<Target className="size-4" />}
-              message="Progress across your goals will appear here."
-              href="/plan/goals"
-              linkLabel="Go to goals"
-              plannedLayer={8}
-            />
-            <PlaceholderWidget
-              title="Habit streaks"
-              icon={<Flame className="size-4" />}
-              message="Track streaks for spiritual disciplines, health, and routines."
-              href="/act/habits"
-              linkLabel="Go to habits"
-              plannedLayer={10}
-            />
-            <PlaceholderWidget
-              title="Upcoming milestones"
-              icon={<Milestone className="size-4" />}
-              message="Milestones due soon across your goals and projects."
-              href="/plan/milestones"
-              linkLabel="Go to milestones"
-              plannedLayer={8}
-            />
-            <PlaceholderWidget
-              title="Life Score"
-              icon={<Gauge className="size-4" />}
-              message="A transparent score built from your KPIs, with visible weighting."
-              href="/analytics/life-score"
-              linkLabel="Go to Life Score"
-              plannedLayer={12}
-            />
-            <PlaceholderWidget
-              title="KPI overview"
-              icon={<BarChart3 className="size-4" />}
-              message="Key measures across the spiritual, personal, and societal pillars."
-              href="/analytics/kpis"
-              linkLabel="Go to KPIs"
-              plannedLayer={12}
-            />
-            <PlaceholderWidget
-              title="AI Coach"
-              icon={<Sparkles className="size-4" />}
-              message="Ask for planning help grounded in your goals, tasks, and habits."
-              href="/grow/ai-coach"
-              linkLabel="Open AI Coach"
-              plannedLayer={13}
-            />
           </div>
+
+          <ModuleGrid displayName={identity.displayName} />
+
+          <DailyTimeline />
+
+          <PerformanceInsights aggregate={aggregate} />
 
           <div className="max-w-sm">
             <RecoveryShortcut />
