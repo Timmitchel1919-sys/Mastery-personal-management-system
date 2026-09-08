@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { BreadcrumbTrail, PageContainer, PageHeader } from "@/components/layout";
 import { EmptyState, ErrorState } from "@/components/shared";
 import { Button, Skeleton } from "@/components/ui";
+import { NextBestActionCard, pickNextBestTask } from "@/features/actions";
 import { useGoalOptions } from "@/features/goals";
 import { useMilestoneOptions } from "@/features/milestones";
 import { useProjectOptions } from "@/features/projects";
@@ -36,6 +37,12 @@ export function TasksView() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Task | null>(null);
+  const [dismissedNextId, setDismissedNextId] = useState<string | null>(null);
+
+  const nextBest = useMemo(
+    () => (today ? pickNextBestTask(items, today) : null),
+    [items, today],
+  );
 
   const goalTitleById = useMemo(
     () => new Map(goalOptions.map((option) => [option.id, option.title])),
@@ -100,6 +107,19 @@ export function TasksView() {
       ) : (
         <>
           <TaskStats stats={stats} />
+
+          {nextBest && nextBest.task.id !== dismissedNextId ? (
+            <NextBestActionCard
+              title={nextBest.task.title}
+              why={nextBest.why}
+              startLabel="Start now"
+              onStart={() => setStatusFor(nextBest.task, "in-progress")}
+              scheduleLabel="Schedule"
+              onSchedule={() => openEdit(nextBest.task)}
+              onDismiss={() => setDismissedNextId(nextBest.task.id)}
+            />
+          ) : null}
+
           {items.length === 0 ? (
             <EmptyState
               title="No tasks yet"
