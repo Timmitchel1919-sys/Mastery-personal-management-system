@@ -21,3 +21,4 @@ export { BrainScene } from "./components/BrainScene";
 export { BrainHubView } from "./components/BrainHubView";
 export { ModuleEnvironment } from "./components/ModuleEnvironment";
 export { SubmoduleCard } from "./components/SubmoduleCard";
+export { SubmoduleWorkspace } from "./components/SubmoduleWorkspace";
