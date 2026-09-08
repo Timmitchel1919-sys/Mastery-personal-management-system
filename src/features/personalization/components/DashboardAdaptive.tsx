@@ -1,6 +1,7 @@
 "use client";
 
 import { IntelligencePanel } from "@/features/intelligence";
+import { PredictiveDashboardSection } from "@/features/predictions";
 import { usePersonalizationSettings } from "../personalization-store";
 import { PersonalPatternsPanel } from "./PersonalPatternsPanel";
 
@@ -21,6 +22,8 @@ export function DashboardAdaptive() {
         <IntelligencePanel variant="compact" limit={2} />
       ) : null}
       {settings.personalizedRecommendations ? <PersonalPatternsPanel limit={2} /> : null}
+      {/* Self-gates on the `predictiveInsights` switch. */}
+      <PredictiveDashboardSection limit={3} />
     </>
   );
 }

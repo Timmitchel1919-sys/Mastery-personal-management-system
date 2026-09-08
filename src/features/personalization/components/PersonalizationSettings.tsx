@@ -6,7 +6,9 @@ import { SUFFICIENCY_LABEL } from "../personal-signals";
 import type { PersonalizationSettings as Settings } from "../personalization-store";
 import { usePersonalization } from "../use-personalization";
 
-const TOGGLES: { key: keyof Settings; label: string; description: string }[] = [
+type ToggleDef = { key: keyof Settings; label: string; description: string };
+
+const TOGGLES: ToggleDef[] = [
   {
     key: "personalizedRecommendations",
     label: "Personalized recommendations",
@@ -23,6 +25,49 @@ const TOGGLES: { key: keyof Settings; label: string; description: string }[] = [
     description: "Allow recommendations to cite an observed pattern (e.g. a KPI trend) as their reason.",
   },
 ];
+
+const PREDICTION_TOGGLES: ToggleDef[] = [
+  {
+    key: "predictiveInsights",
+    label: "Predictive insights",
+    description: "Show forward-looking signals — deadline risk, overloaded days, stalling goals — derived from your data. Predictions are shown as possibilities, never certainties.",
+  },
+  {
+    key: "deadlineWarnings",
+    label: "Deadline warnings",
+    description: "Flag goals whose recorded progress appears behind pace for their target date.",
+  },
+  {
+    key: "capacityWarnings",
+    label: "Capacity warnings",
+    description: "Flag days whose planned time blocks exceed a typical focus capacity. Mastery never moves a block for you.",
+  },
+  {
+    key: "goalTrajectory",
+    label: "Goal trajectory",
+    description: "Compare a goal's pace against its date range to estimate on-track / at-risk.",
+  },
+];
+
+function ToggleRow({
+  toggle,
+  checked,
+  onChange,
+}: {
+  toggle: ToggleDef;
+  checked: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-4 py-4 first:pt-0">
+      <div className="min-w-0">
+        <p className="text-sm font-medium">{toggle.label}</p>
+        <p className="text-subtle mt-0.5 text-xs">{toggle.description}</p>
+      </div>
+      <Switch checked={checked} onCheckedChange={onChange} aria-label={toggle.label} />
+    </div>
+  );
+}
 
 /**
  * The user's controls over personalization: three switches, a transparent
@@ -46,18 +91,27 @@ export function PersonalizationSettingsCard() {
 
         <div className="divide-border divide-y">
           {TOGGLES.map((toggle) => (
-            <div key={toggle.key} className="flex items-start justify-between gap-4 py-4 first:pt-0">
-              <div className="min-w-0">
-                <p className="text-sm font-medium">{toggle.label}</p>
-                <p className="text-subtle mt-0.5 text-xs">{toggle.description}</p>
-              </div>
-              <Switch
-                checked={settings[toggle.key]}
-                onCheckedChange={(value) => setSetting(toggle.key, value)}
-                aria-label={toggle.label}
-              />
-            </div>
+            <ToggleRow
+              key={toggle.key}
+              toggle={toggle}
+              checked={settings[toggle.key]}
+              onChange={(value) => setSetting(toggle.key, value)}
+            />
           ))}
+        </div>
+
+        <div className="space-y-1">
+          <h3 className="text-eyebrow">Predictions</h3>
+          <div className="divide-border divide-y">
+            {PREDICTION_TOGGLES.map((toggle) => (
+              <ToggleRow
+                key={toggle.key}
+                toggle={toggle}
+                checked={settings[toggle.key]}
+                onChange={(value) => setSetting(toggle.key, value)}
+              />
+            ))}
+          </div>
         </div>
 
         <div className="space-y-3">

@@ -22,12 +22,24 @@ export interface PersonalizationSettings {
   adaptiveDashboard: boolean;
   /** Whether recommendations may cite an observed behavioural pattern. */
   behaviorRecommendations: boolean;
+  /** Master switch for forward-looking predictive signals (Layer 12). */
+  predictiveInsights: boolean;
+  /** Whether goals nearing their target date may raise a deadline signal. */
+  deadlineWarnings: boolean;
+  /** Whether overloaded days may raise a capacity signal. */
+  capacityWarnings: boolean;
+  /** Whether goal pace vs. target date may raise a trajectory signal. */
+  goalTrajectory: boolean;
 }
 
 export const DEFAULT_SETTINGS: PersonalizationSettings = {
   personalizedRecommendations: true,
   adaptiveDashboard: true,
   behaviorRecommendations: true,
+  predictiveInsights: true,
+  deadlineWarnings: true,
+  capacityWarnings: true,
+  goalTrajectory: true,
 };
 
 // ── storage helpers ─────────────────────────────────────────────────────────
@@ -36,21 +48,12 @@ function readSettings(): PersonalizationSettings {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (!raw) return DEFAULT_SETTINGS;
-    const parsed = JSON.parse(raw) as Partial<PersonalizationSettings>;
-    return {
-      personalizedRecommendations:
-        typeof parsed.personalizedRecommendations === "boolean"
-          ? parsed.personalizedRecommendations
-          : DEFAULT_SETTINGS.personalizedRecommendations,
-      adaptiveDashboard:
-        typeof parsed.adaptiveDashboard === "boolean"
-          ? parsed.adaptiveDashboard
-          : DEFAULT_SETTINGS.adaptiveDashboard,
-      behaviorRecommendations:
-        typeof parsed.behaviorRecommendations === "boolean"
-          ? parsed.behaviorRecommendations
-          : DEFAULT_SETTINGS.behaviorRecommendations,
-    };
+    const parsed = JSON.parse(raw) as Partial<Record<keyof PersonalizationSettings, unknown>>;
+    const result = { ...DEFAULT_SETTINGS };
+    for (const key of Object.keys(DEFAULT_SETTINGS) as (keyof PersonalizationSettings)[]) {
+      if (typeof parsed[key] === "boolean") result[key] = parsed[key] as boolean;
+    }
+    return result;
   } catch {
     return DEFAULT_SETTINGS;
   }
