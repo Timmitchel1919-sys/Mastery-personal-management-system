@@ -23,6 +23,302 @@ Living build tracker. Updated at the end of every layer.
 
 ## Layer log
 
+### 2026-09-10 — Layer J: Predictive intelligence & proactive guidance
+
+Layer J turns the deterministic intelligence stack into forward-looking, evidence-based
+signals that help the user spot future risk, overload, or stalled momentum before it
+becomes a problem. Predictions are explicitly hedged and remain presentation-only; they
+never act as commands or autonomous execution.
+
+**Created:**
+- `src/features/predictions/prediction-model.ts` — deterministic predictive signal engine
+  for goal trajectory, deadline risk, schedule overload, stalled high-priority goals, and
+  habit trend shifts.
+- `src/features/predictions/components/PredictionCard.tsx` — user-facing prediction card with
+  hedged language, confidence label, evidence, recommendation, and dismiss feedback.
+- `src/features/predictions/components/PredictionCard.test.tsx` — card-level tests covering
+  hedged wording, fact exposure, and dismiss behavior.
+- `src/features/predictions/prediction-model.test.ts` — model-level coverage for scoring,
+  confidence thresholds, and signal generation logic.
+- `src/features/predictions/use-predictions.ts` — composes real goal/task/time-block/habit
+  data into grouped predictive signals filtered by user personalization settings.
+
+**Modified:**
+- `src/features/intelligence/components/IntelligencePanel.tsx` — keeps the predictive section
+  aligned with the rest of the intelligence stack without forcing execution.
+- `src/features/brain-hub/*` / `src/features/analytics/*` — preserves the existing integration
+  of intelligence state into module and analytics surfaces without making predictions
+  authoritative.
+- `src/features/predictions/index.ts` — public exports for the predictive layer.
+
+**Verification:**
+- `npm run typecheck` ✅
+- `npm run lint` ✅
+- `npm test` ✅ (project test suite; includes `PredictionCard` and predictive model coverage)
+- `npm run build` ✅ (50 static routes)
+
+**Manual test instructions:**
+1. Open a workspace with goals/tasks/time blocks/habits already recorded and load the
+   intelligence/predictive view.
+2. Confirm each forecast card is clearly labeled as a prediction and includes a clear
+   “Why?” evidence list.
+3. Verify the confidence label is qualitative (`High confidence`, `Moderate confidence`,
+   `Limited data`) rather than a fabricated percentage.
+4. Dismiss a card and confirm it disappears from the current filtered view.
+5. Confirm the recommendation remains informational, never automatic, and the app never
+   auto-executes from a prediction alone.
+
+**Known limitations:**
+- Predictive guidance is intentionally conservative and requires enough comparable historical
+  data to surface a signal; low-data states remain intentionally quiet rather than guessing.
+- It is presentation-only and does not authorize action execution on its own.
+
+### 2026-09-10 — Layer H: AI personal insights
+
+Layer H adds an optional AI explanation path on top of Layer G deterministic intelligence.
+AI remains interpretation-only: no direct writes, no fabricated facts, and safe fallback to
+deterministic insights when AI is unavailable.
+
+**Created:**
+- `src/features/intelligence/ai-personal-insight-schema.ts` — strict request/response
+  schemas for AI personal insight context + validated structured output contract.
+- `src/features/intelligence/ai-personal-insight-context.ts` — deterministic
+  context-builder and cache-key generation from existing Layer G insights.
+- `src/features/intelligence/ai-personal-insight-client.ts` — callable client for
+  `generatePersonalInsight`.
+- `src/features/intelligence/use-ai-personal-insight.ts` — controlled AI generation hook
+  (explicit trigger, no auto-call, session cache, deterministic fallback).
+- `src/features/intelligence/ai-personal-insight-schema.test.ts`
+- `src/features/intelligence/ai-personal-insight-context.test.ts`
+- `src/features/intelligence/use-ai-personal-insight.test.ts`
+- `functions/src/ai/personal-insight/contracts.ts` — server-side request/model/response
+  schemas for Layer H callable.
+- `functions/src/ai/personal-insight/handler.ts` — authenticated callable handler using
+  existing provider abstraction; validates structured output, fact references, numeric
+  grounding, and usage counters.
+- `functions/src/ai/generate-personal-insight.ts` — new callable endpoint.
+- `functions/tests/ai/personal-insight-handler.test.ts` — server-side safety/grounding
+  tests for Layer H handler.
+
+**Modified:**
+- `src/features/intelligence/components/IntelligencePanel.tsx` — adds optional
+  `MASTERY Insight` AI section in full mode (explicit generate button, loading/error
+  states, deterministic fallback intact).
+- `src/features/intelligence/index.ts` — exports Layer H AI hook + schemas.
+- `functions/src/index.ts` — exports `generatePersonalInsight` callable.
+
+**Verification:**
+- `npm run typecheck` ✅
+- `npm run lint` ✅
+- `npm test` ✅ (160 files, 853 tests)
+- `npm run build` ✅ (50 static routes)
+- `npm --prefix functions run typecheck` ✅
+- `npm --prefix functions run lint` ✅
+- `npm --prefix functions run test` ✅ (17 files, 103 tests)
+
+**Manual test instructions:**
+1. Sign in and open `/analytics` (full intelligence panel).
+2. In **MASTERY Insight**, click **Generate AI insight**; deterministic cards remain visible
+   while AI generation runs.
+3. Confirm generated AI card separates fact / interpretation / recommendation and shows
+   evidence lines sourced from deterministic facts.
+4. Refresh and regenerate with unchanged intelligence; confirm cached response is reused in
+   the same session.
+5. Induce low-data state (no deterministic insights) and confirm AI generation is disabled
+   with honest deterministic empty-state messaging.
+6. If callable/provider fails, confirm panel shows
+   "AI insight temporarily unavailable" and deterministic insights remain fully usable.
+
+**Known limitations:**
+- Layer H AI endpoint is written/tested but not deployed in this Spark-plan environment,
+  so production callable use still depends on the existing Blaze-upgrade path.
+- Numeric grounding validation is intentionally conservative (rejects unsupported numeric
+  tokens in AI prose); this may reject otherwise useful phrasing until context evolves.
+
+### 2026-09-09 — Layer G: Advanced intelligence UX
+
+Deterministic intelligence is now promoted into first-class product surfaces (analytics,
+module environments, and Brain Hub state overlays) using real repository + analytics data.
+No fabricated analytics were introduced and the renderer remains presentation-only.
+
+**Created:**
+- `src/features/intelligence/mastery-intelligence.ts` — rebuilt intelligence model and
+  deterministic insight engine (progress/attention/pattern/alignment/recommendation) with
+  severity/confidence/signal metadata and module-attention mapping.
+- `src/features/intelligence/use-intelligence.ts` — intelligence adapter hook that composes
+  analytics + real repository snapshots (goals/plans/tasks/deep-work/journal/learning),
+  emits grouped insight slices, and supports module-scoped filtering.
+
+**Modified:**
+- `src/features/intelligence/components/IntelligencePanel.tsx` — sectioned intelligence UX
+  (`Today/Progress/Attention/Patterns/Recommendations`), module-scoped mode, compact mode,
+  dismissal persistence, and explicit insufficient-data state copy.
+- `src/features/intelligence/index.ts` — exports updated intelligence model/types.
+- `src/features/analytics/components/AnalyticsView.tsx` — surfaces full intelligence panel
+  in analytics.
+- `src/features/brain-hub/components/ModuleEnvironment.tsx` — embeds compact
+  module-scoped intelligence within module environments.
+- `src/features/brain-hub/components/BrainHubView.tsx` — merges intelligence module
+  attention into brain module statuses (attention overlay at the state layer, not renderer).
+- `src/features/intelligence/mastery-intelligence.test.ts` — rewritten deterministic
+  acceptance coverage.
+- `src/features/intelligence/components/IntelligencePanel.test.tsx` — updated for sectioned
+  rendering and revised insight model.
+- `src/features/brain-hub/components/ModuleEnvironment.test.tsx` and
+  `src/features/brain-hub/components/BrainHub.test.tsx` — isolate module-environment tests
+  from auth-coupled intelligence internals via component-level mocks.
+
+**Verification:**
+- `npm run typecheck` ✅
+- `npm run lint` ✅
+- `npm test` ✅ (157 files, 845 tests)
+- `npm run build` ✅ (50 static routes)
+
+**Manual test instructions:**
+1. Sign in and open `/analytics` — intelligence sections render with deterministic
+   fact/interpretation/recommendation cards when real data exists.
+2. Open `/hub`, select a module, and confirm module environment shows compact
+   module-scoped intelligence under submodules.
+3. In `/hub`, compare module statuses before/after creating attention-worthy data
+   (for example overdue tasks or slipping focus) and verify affected module can surface
+   attention status.
+4. Dismiss an intelligence card and refresh — dismissal persists locally for that viewer.
+5. In low-data accounts, verify panel shows "Not enough data yet" instead of weak/fake AI.
+
+**Known limitations:**
+- Intelligence refresh remains periodic/focus-triggered rather than real-time listeners.
+- Module scoping currently filters by `relatedModule/global` tags from deterministic rules,
+  so cross-domain insight attribution stays intentionally conservative.
+
+### 2026-09-09 — Layer F: 3D system polish & intelligence integration
+
+Brain Hub now consumes a centralized, data-derived system state so the six module nodes
+reflect real repository signals (active, attention, progress, completed, unavailable)
+without putting business logic in the renderer.
+
+**Created:**
+- `src/features/brain-hub/brain-state.ts` — centralized Brain System state model: module
+  signals, visual-state derivation, overall activity derivation, and neutral/unavailable
+  fallback constructors.
+- `src/features/brain-hub/use-brain-system-state.ts` — app-state adapter hook that fetches
+  bounded real data from existing repositories (goals/plans/focus/tasks/grow/kpis), derives
+  module signals, emits one-shot event pulses when signatures change, and degrades to neutral
+  unavailable state when data cannot load.
+- `src/features/brain-hub/brain-state.test.ts` — unit tests for state derivation and neutral
+  fallback behavior.
+- `src/components/marketing/LandingBrainExperience.test.tsx` — verifies landing brain keeps
+  exploration on-page and routes explicit open to existing auth flow.
+
+**Modified:**
+- `src/features/brain-hub/components/BrainHub.tsx` — now accepts `systemState`, keeps
+  navigation state separate, passes derived module signals to nodes/scene/fallback list,
+  adds visibility-aware motion reduction.
+- `src/features/brain-hub/components/BrainHubView.tsx` — wires `useBrainSystemState` into
+  the authenticated `/hub` experience, surfaces signal source/activity, and adds manual
+  refresh.
+- `src/features/brain-hub/components/BrainScene.tsx` — visual polish + signal response:
+  per-module connector emphasis, system relationship links, overall activity lighting, and
+  status-aware connector color accents.
+- `src/features/brain-hub/components/BrainNode.tsx` — expanded module state rendering
+  (attention/progress/completed/unavailable), optional progress strip, event pulse marker,
+  and attention SR text.
+- `src/features/brain-hub/components/BrainModulePreview.tsx` — now shows status/progress/
+  attention metadata in hover/keyboard preview cards.
+- `src/features/brain-hub/components/BrainFallbackList.tsx` — non-3D list now surfaces
+  module statuses so accessibility/fallback navigation still communicates state.
+- `src/features/brain-hub/brain-modules.ts` — `BrainModuleStatus` expanded from
+  `normal|attention|active` to include `progress|completed|unavailable`.
+- `src/features/brain-hub/index.ts` — exports brain-state model + hook.
+- `src/app/globals.css` — refined brain visual tokens/animations for overall activity,
+  relationship links, status-specific node treatment, and one-shot real-event pulse.
+
+**Verification:**
+- `npm run typecheck` ✅
+- `npm run lint` ✅
+- `npm test` ✅ (157 files, 845 tests)
+- `npm run build` ✅ (50 static routes)
+
+**Manual test instructions:**
+1. Sign in and open `/hub` — header strip shows `System activity` and `Signal source`; no
+   fake values appear when data is unavailable.
+2. Verify module nodes vary by real state (attention/progress/completed/active) and fallback
+   list labels mirror those states.
+3. Select a module → module environment opens; return home with Back/Escape; active/selected
+   state stays synchronized.
+4. Make a real data change in any represented domain (e.g., create/update a task or goal),
+   return to `/hub`, click **Refresh signals** — affected node emits a brief pulse.
+5. Enable reduced motion or switch tab away/back — unnecessary brain motion reduces while
+   navigation remains usable.
+6. Open `/` (landing) and use the Brain preview — selection remains on-page and explicit
+   open routes to existing auth (`/register?module=...`).
+
+**Known limitations:**
+- Layer F uses bounded periodic/focus refresh plus manual refresh; there is no real-time
+  listener stream for instant cross-route updates (intentional to preserve read discipline).
+- Progress/status coverage is derived from representative real collections per module, not
+  every possible submodule dataset.
+
+### 2026-09-09 — Layer E: Landing experience & interactive product preview
+
+Landing was upgraded from a static marketing composition into an interactive product
+experience that reuses the app's Brain Hub architecture and module registry.
+
+**Created:**
+- `src/components/marketing/LandingBrainExperience.tsx` — landing host for the real Brain
+  Hub interaction model in preview mode (module selection stays on-page; explicit open goes
+  to auth).
+
+**Modified:**
+- `src/app/page.tsx` — landing composition now emphasizes the interactive brain + systems +
+  cycle + operating-system explanation + interactive preview + final CTA; metadata expanded
+  with Open Graph.
+- `src/components/marketing/Hero.tsx` — hero now centers on the Brain Hub preview instead of
+  the prior orbit-only visual.
+- `src/components/marketing/MarketingNav.tsx` — section links updated to
+  Experience/Systems/How it works/Preview and auth labels aligned to Sign In/Get Started.
+- `src/components/marketing/ModulesGrid.tsx` — six-system overview redesigned into a spatial
+  brain-connected composition (desktop) with an accessible sequence fallback (mobile/tablet).
+- `src/components/marketing/SystemFlow.tsx` — operating cycle clarified as
+  Define→Plan→Focus→Act→Grow→Analyze→Improve.
+- `src/components/marketing/OneSystem.tsx` — repositioned as the Personal Operating System
+  section with decision-intelligence framing.
+- `src/components/marketing/ProductPreview.tsx` — now an interactive, data-driven read-only
+  product walkthrough using real module metadata/routes and existing auth routes for CTA.
+- `src/components/marketing/CtaSection.tsx` — final CTA now includes Start with MASTERY +
+  Sign In.
+- `src/components/marketing/MarketingFooter.tsx` — footer anchors aligned to the new
+  landing sections.
+- `src/components/marketing/marketing-modules.ts` — module definitions expanded into a
+  landing registry (short/long descriptions, preview bullets, auth CTA route) sourced from
+  existing Brain Hub + module registry data.
+
+**Verification:**
+- `npm run typecheck` ✅
+- `npm run lint` ✅
+- `npm test` ✅ (155 files, 840 tests)
+- `npm run build` ✅ (50 static routes)
+
+**Manual test instructions:**
+1. Open `/` on desktop: hero shows the interactive Brain Hub as the primary visual; selecting
+   a node opens module context without route navigation.
+2. In the hero Brain preview, use keyboard tab/focus + Enter on module nodes and Escape to
+   return home.
+3. Click an explicit module-open CTA from the hero/module preview: flow routes to existing
+   auth (`/register` or `/login`), not fake routes.
+4. Scroll sections in order: Systems, How it works, Personal Operating System, Interactive
+   Product Preview, Final CTA.
+5. In Product Preview, switch modules; verify content and submodule labels update from real
+   registry data and links point to real app/auth routes.
+6. Test light and dark themes and a mobile viewport: navigation drawer works, section links
+   remain reachable, and content remains readable.
+7. Enable `prefers-reduced-motion`: reveal/brain motion reduces while structure stays fully
+   accessible.
+
+**Known limitations:**
+- Landing still uses mostly static copy (i18n backlog remains open project-wide).
+- The hero Brain uses the same CSS/WebGL-capability architecture as the app but remains a
+  procedural renderer (no Three.js/WebGL scene engine yet).
+
 ### 2026-09-07 — User-requested UI/theming polish (maintenance patch)
 
 Dark-theme visual polish and shell ergonomics requested by the owner; no domain-layer logic
