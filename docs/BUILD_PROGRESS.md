@@ -21,6 +21,51 @@ Living build tracker. Updated at the end of every layer.
 
 ---
 
+## Active work — Layer N: Personal Command Center
+
+**Scope:** a unified operational cockpit at `/command` that answers five questions — what
+matters now, what is happening, what is at risk, what needs a decision, what to do next —
+by projecting state that other layers already derive. No new data model, no LLM dependency,
+no repository access from presentation.
+
+**Changed / added files:**
+- `src/features/command-center/command-center-state.ts` (+ `.test.ts`) — pure
+  `buildCommandCenter` reducer: Now, Today, attention queue (severity-ordered), decision
+  queue, risk center (predictions + deterministic warnings), progress (reused module
+  metrics), strategic-alignment chains, deterministic executive brief, degradation list.
+- `src/features/command-center/use-command-center.ts` — composes `useIntelligence`,
+  `usePredictions`, `useBrainSystemState`, `useDecisions`.
+- `src/features/command-center/components/CommandCenterView.tsx` (+ `.test.tsx`).
+- `src/features/command-center/index.ts`.
+- `src/app/(app)/command/page.tsx` — the `/command` route.
+- `src/config/navigation.ts` — `COMMAND_CENTER_ITEM`.
+- `src/components/layout/sidebar-nav.tsx` — sidebar entry below Brain Hub (both rails).
+- `docs/CHANGELOG.md`.
+
+**Verification:** `npm run typecheck` ✅ · `npm run lint` ✅ (0/0) · `npm test` ✅ · `npm run build` ✅
+
+**Manual test steps:**
+1. Sign in, open **Command Center** from the sidebar (below Brain Hub) or visit `/command`.
+2. With a fresh account: the orientation empty state shows with an "Open the Brain Hub" CTA.
+3. With activity: the executive brief, Now panel + brain orientation, attention queue,
+   Today, decision queue and risk center populate; Progress and Strategic alignment are
+   collapsed `<details>` sections.
+4. Turn predictions off in Settings → the risk center drops prediction-derived items and a
+   "Predictions are turned off" note appears in the partial-signals banner.
+5. Every attention / risk / decision / today item links into the module that owns it;
+   quick actions navigate (no duplicated forms). "Refresh" re-pulls all derived sources.
+6. Keyboard: every actionable element is a real `<button>`/`<a>` and is tab-reachable;
+   `prefers-reduced-motion` is honoured (no bespoke animation added).
+
+**Known limitations:**
+- Strategic-alignment chains are built from intelligence recommendations + module links;
+  a full vision→goal→plan→task trace waits on richer cross-module relationship data.
+- The executive brief is deterministic only; an optional AI rendering can layer on later
+  behind the existing human-in-the-loop insight flow.
+- Decisions remain client-side (localStorage), inherited from the decisions layer.
+
+---
+
 ## Active work — Decision workspace
 
 **Scope:** add a lightweight decision-support space for comparing options, weighting criteria, and surfacing a transparent recommendation with evidence-backed scoring.
@@ -55,6 +100,17 @@ Living build tracker. Updated at the end of every layer.
 ---
 
 ## Layer log
+
+### 2026-09-10 — Layer N: Personal Command Center
+
+Added `/command` — a unified operational view over already-derived state (intelligence,
+predictions, brain-system-state, decisions). Pure `buildCommandCenter` reducer +
+`useCommandCenter` composer + `CommandCenterView`. Panels: executive brief (deterministic,
+grounded), Now, brain orientation, attention queue (severity-ordered), Today, decision
+queue, risk center, and progressive-disclosure Progress / Strategic-alignment, plus
+navigational quick actions. Sidebar entry below Brain Hub. No new data model, no LLM
+dependency, no repository access from presentation; graceful degradation when any source
+fails. 15 new tests (10 reducer + 5 view). typecheck / lint / test / build green.
 
 ### 2026-09-10 — Layer L: Outcome-learning loop & transparent adaptation
 

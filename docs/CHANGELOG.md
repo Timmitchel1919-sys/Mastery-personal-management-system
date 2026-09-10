@@ -6,6 +6,48 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer N — Personal Command Center — 2026-09-10
+
+**Added**
+- `src/features/command-center/command-center-state.ts` — a pure, deterministic reducer
+  (`buildCommandCenter`) that folds already-derived state (intelligence, predictions,
+  brain-system-state, decisions) into one cockpit view: Now context, Today, a
+  severity-ordered attention queue, a decision queue, an aggregated risk center, reused
+  progress metrics, strategic-alignment chains, and a grounded executive brief. It issues
+  no queries and fabricates no facts.
+- `src/features/command-center/command-center-state.test.ts` — 10 cases: no-data mode,
+  attention ordering + insight/prediction dedupe, decision-queue filtering + overdue
+  ordering, risk aggregation, predictions-disabled handling, progress reuse (no composite
+  score), alignment from real relationships only, deterministic brief fallback, full
+  graceful degradation, Now promotion.
+- `src/features/command-center/use-command-center.ts` — composes the existing derived-state
+  hooks and exposes `{ status, state, brainState, reload }`; a failing source degrades the
+  cockpit rather than breaking it.
+- `src/features/command-center/components/CommandCenterView.tsx` + `.test.tsx` — the primary
+  screen: executive brief, Now + brain orientation, attention queue, Today, decision queue,
+  risk center, and progressive-disclosure Progress / Strategic-alignment sections, plus
+  navigational quick actions. Loading / empty / degraded / AI-failure states covered.
+- `src/app/(app)/command/page.tsx` — the `/command` route.
+- `COMMAND_CENTER_ITEM` in `src/config/navigation.ts`, wired into the sidebar below Brain
+  Hub (expanded + collapsed rails).
+
+**Changed**
+- Nothing removed. The six modules, dashboard, Brain Hub, and every intelligence layer are
+  untouched; the Command Center only reads their derived output.
+
+**Safety / grounding**
+- No new data model, no LLM dependency, no direct repository access from presentation.
+- Severity is functional, not decorative; decisions are never auto-resolved; quick actions
+  navigate to the module that owns the form rather than duplicating it.
+- The executive brief is `source: "deterministic"` and `grounded: true`; every field is a
+  projection of current MASTERY data.
+
+**Verified**
+- `npm run typecheck`
+- `npm run lint`
+- `npm test`
+- `npm run build`
+
 ### Decision workspace — 2026-09-10
 
 **Added**

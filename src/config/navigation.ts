@@ -79,6 +79,13 @@ export const BRAIN_HUB_ITEM: NavItem = {
   description: "The Mastery brain — spatial module navigation",
 };
 
+export const COMMAND_CENTER_ITEM: NavItem = {
+  label: "Command Center",
+  href: "/command",
+  icon: Gauge,
+  description: "Unified operational view — now, attention, risk, decisions, next action",
+};
+
 export const NAV_SECTIONS: NavSection[] = [
   {
     id: "plan",
@@ -225,6 +232,7 @@ export const ALL_NAV_ITEMS: NavItem[] = (() => {
   const collected: NavItem[] = [
     DASHBOARD_ITEM,
     BRAIN_HUB_ITEM,
+    COMMAND_CENTER_ITEM,
     ...NAV_SECTIONS.flatMap((section) => [
       {
         label: section.label,

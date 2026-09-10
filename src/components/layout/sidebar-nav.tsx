@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
 import {
   BRAIN_HUB_ITEM,
+  COMMAND_CENTER_ITEM,
   DASHBOARD_ITEM,
   NAV_SECTIONS,
   SYSTEM_ITEMS,
@@ -201,6 +202,7 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
   const systemItems = SYSTEM_ITEMS.filter((item) => item.href !== "/notifications");
   const dashboardActive = isNavItemActive(pathname, DASHBOARD_ITEM.href);
   const brainHubActive = isNavItemActive(pathname, BRAIN_HUB_ITEM.href);
+  const commandCenterActive = isNavItemActive(pathname, COMMAND_CENTER_ITEM.href);
 
   return (
     <nav aria-label={t("nav.primary")} className="flex flex-1 flex-col gap-2 overflow-y-auto p-3">
@@ -237,6 +239,25 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
             item={BRAIN_HUB_ITEM}
             label={label(BRAIN_HUB_ITEM.href, BRAIN_HUB_ITEM.label)}
             active={brainHubActive}
+            onNavigate={onNavigate}
+          />
+        </NavCard>
+      )}
+
+      {collapsed ? (
+        <NavLink
+          item={COMMAND_CENTER_ITEM}
+          label={label(COMMAND_CENTER_ITEM.href, COMMAND_CENTER_ITEM.label)}
+          active={commandCenterActive}
+          collapsed
+          onNavigate={onNavigate}
+        />
+      ) : (
+        <NavCard active={commandCenterActive}>
+          <NavCardLink
+            item={COMMAND_CENTER_ITEM}
+            label={label(COMMAND_CENTER_ITEM.href, COMMAND_CENTER_ITEM.label)}
+            active={commandCenterActive}
             onNavigate={onNavigate}
           />
         </NavCard>
