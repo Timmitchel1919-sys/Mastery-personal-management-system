@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button, Skeleton } from "@/components/ui";
 import { EmptyState, ErrorState } from "@/components/shared";
+import { IntelligencePanel } from "@/features/intelligence";
 import type { BrainHubPhase, BrainModuleId } from "../brain-navigation";
 import { moduleDef } from "../module-registry";
 import { SubmoduleCard } from "./SubmoduleCard";
@@ -89,13 +90,18 @@ export function ModuleEnvironment({
           }
         />
       ) : (
-        <ul className="mastery-expand grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {mod.submodules.map((submodule) => (
-            <li key={submodule.id} className="min-w-0">
-              <SubmoduleCard submodule={submodule} />
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul className="mastery-expand grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {mod.submodules.map((submodule) => (
+              <li key={submodule.id} className="min-w-0">
+                <SubmoduleCard submodule={submodule} />
+              </li>
+            ))}
+          </ul>
+          <div className="mt-2">
+            <IntelligencePanel variant="compact" moduleId={moduleId} limit={2} />
+          </div>
+        </>
       )}
     </section>
   );

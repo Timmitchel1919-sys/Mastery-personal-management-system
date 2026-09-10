@@ -31,6 +31,35 @@ export {
   type StudySessionFormValues,
 } from "./schema";
 export { summarizeLearning, studyMinutesForItem, type LearningStats } from "./learning-stats";
+export {
+  analyzePlanLearning,
+  buildLearningInsights,
+  calculateLearningConfidence,
+  compareExpectedVsActual,
+  correctLearningPattern,
+  createLearningEvent,
+  detectLearningPatterns,
+  dismissPattern,
+  isLearningAuthorizationValid,
+  recordDecisionOutcome,
+  recordPredictionOutcome,
+  recordRecommendationFeedback,
+  resetLearning,
+  type DecisionOutcome,
+  type LearningConfidence,
+  type LearningEvent,
+  type LearningEventType,
+  type LearningInsight,
+  type LearningPattern,
+  type LearningPatternCategory,
+  type LearningPatternStatus,
+  type LearningSourceType,
+  type PlanLearningResult,
+  type PlanLearningSample,
+  type PredictionOutcome,
+  type RecommendationFeedback,
+  type RecommendationFeedbackStatus,
+} from "./learning-engine";
 export { learningItemRepository, listActiveLearningItems } from "./learning-item-repository";
 export { studySessionRepository, listRecentStudySessions } from "./study-session-repository";
 export { useLearning } from "./use-learning";

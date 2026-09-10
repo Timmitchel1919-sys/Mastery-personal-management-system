@@ -4,6 +4,9 @@ import { describe, expect, it, vi } from "vitest";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }), usePathname: () => "/hub" }));
+vi.mock("@/features/intelligence", () => ({
+  IntelligencePanel: () => <div data-testid="module-intelligence-panel" />,
+}));
 
 import { BrainHub } from "./BrainHub";
 

@@ -5,14 +5,19 @@ import { ModulesGrid } from "@/components/marketing/ModulesGrid";
 import { SystemFlow } from "@/components/marketing/SystemFlow";
 import { OneSystem } from "@/components/marketing/OneSystem";
 import { ProductPreview } from "@/components/marketing/ProductPreview";
-import { Philosophy } from "@/components/marketing/Philosophy";
 import { CtaSection } from "@/components/marketing/CtaSection";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 
 export const metadata: Metadata = {
   title: "Mastery — Master Your Life",
   description:
-    "Mastery is a personal operating system for planning, focus, execution, growth, and measurable progress — six modules working as one system.",
+    "MASTERY is an AI-powered personal operating system: Goals, Plan, Focus, Act, Grow, and Analytics connected through an interactive Brain Hub.",
+  openGraph: {
+    title: "Mastery — Master Your Life",
+    description:
+      "Experience the MASTERY Personal Operating System before sign in: Brain Hub navigation, six connected systems, and a real product preview.",
+    type: "website",
+  },
 };
 
 export default function LandingPage() {
@@ -28,7 +33,6 @@ export default function LandingPage() {
       <SystemFlow />
       <OneSystem />
       <ProductPreview />
-      <Philosophy />
       <CtaSection />
       <MarketingFooter />
     </main>

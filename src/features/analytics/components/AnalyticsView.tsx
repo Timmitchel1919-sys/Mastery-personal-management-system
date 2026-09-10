@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AlertTriangle, ArrowRight, CheckCircle2, Gauge } from "lucide-react";
 import { BreadcrumbTrail, PageContainer, PageHeader } from "@/components/layout";
 import { EmptyState, ErrorState, MetricCard } from "@/components/mastery";
+import { IntelligencePanel } from "@/features/intelligence";
 import {
   Card,
   CardContent,
@@ -158,8 +159,10 @@ export function AnalyticsView() {
             </Link>
           }
         />
-      ) : (
+        ) : (
         <>
+          <IntelligencePanel />
+
           {/* KEY INSIGHT */}
           <InsightCard insight={analytics.insight} />
 

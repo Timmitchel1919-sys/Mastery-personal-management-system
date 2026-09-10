@@ -4,6 +4,9 @@ import { describe, expect, it, vi } from "vitest";
 import { ModuleEnvironment } from "./ModuleEnvironment";
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/hub" }));
+vi.mock("@/features/intelligence", () => ({
+  IntelligencePanel: () => <div data-testid="module-intelligence-panel" />,
+}));
 
 function setup(over: Partial<Parameters<typeof ModuleEnvironment>[0]> = {}) {
   const onBack = vi.fn();

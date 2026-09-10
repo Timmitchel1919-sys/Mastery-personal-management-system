@@ -6,6 +6,7 @@ export { generatePlanningRecommendations } from "./ai/generate-planning-recommen
 export { generateGoalBreakdown } from "./ai/generate-goal-breakdown";
 export { generateReflectionQuestions } from "./ai/generate-reflection-questions";
 export { analyzeExecutionPatterns } from "./ai/analyze-execution-patterns";
+export { generatePersonalInsight } from "./ai/generate-personal-insight";
 export { generateWeeklySummary } from "./scheduled/generate-weekly-summary";
 export { recordRecoverySetback } from "./recovery/record-recovery-setback";
 export { recoveryCoachQuery } from "./recovery/recovery-coach-query";

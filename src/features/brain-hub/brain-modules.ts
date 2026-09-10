@@ -11,8 +11,17 @@ import { BarChart3, CheckSquare, Compass, Sprout, Target, Timer, type LucideIcon
 
 export type BrainModuleId = "goals" | "plan" | "focus" | "act" | "grow" | "analytics";
 
-/** Reserved for a future real signal. Never fabricated. `normal` renders nothing. */
-export type BrainModuleStatus = "normal" | "attention" | "active";
+/**
+ * Visual status driven by real app signals. `normal` means neutral / no strong signal.
+ * The renderer reads this only; data collection stays outside the renderer.
+ */
+export type BrainModuleStatus =
+  | "normal"
+  | "active"
+  | "attention"
+  | "progress"
+  | "completed"
+  | "unavailable";
 
 /**
  * The three states of the spatial navigation:

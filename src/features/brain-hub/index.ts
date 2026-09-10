@@ -16,6 +16,17 @@ export {
   type ModuleDef,
   type SubmoduleDef,
 } from "./module-registry";
+export {
+  buildBrainSystemState,
+  deriveModuleStatus,
+  deriveOverallActivity,
+  makeNeutralBrainSystemState,
+  type BrainModuleSignal,
+  type BrainModuleVisual,
+  type BrainOverallActivity,
+  type BrainSystemState,
+} from "./brain-state";
+export { useBrainSystemState } from "./use-brain-system-state";
 export { BrainHub } from "./components/BrainHub";
 export { BrainScene } from "./components/BrainScene";
 export { BrainHubView } from "./components/BrainHubView";

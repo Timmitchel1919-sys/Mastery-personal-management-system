@@ -7,7 +7,9 @@ import {
   nodePosition,
   type BrainHubPhase,
   type BrainModuleId,
+  type BrainModuleStatus,
 } from "../brain-navigation";
+import type { BrainOverallActivity, BrainModuleVisual } from "../brain-state";
 
 interface BrainSceneProps {
   activeId: BrainModuleId | null;
@@ -17,6 +19,8 @@ interface BrainSceneProps {
   nodeRadius: number;
   /** Disable the drift / pulse / impulse animation regardless of the media query. */
   reducedMotion: boolean;
+  overallActivity?: BrainOverallActivity;
+  statusById?: Partial<Record<BrainModuleId, BrainModuleVisual>>;
 }
 
 /**
@@ -33,6 +37,8 @@ export function BrainScene({
   phase,
   nodeRadius,
   reducedMotion,
+  overallActivity = "idle",
+  statusById,
 }: BrainSceneProps) {
   const engaged = phase !== "home" && selectedId != null;
 
@@ -56,8 +62,41 @@ export function BrainScene({
       : "transform var(--duration-slow) var(--ease-in-out)",
   };
 
+  const links = BRAIN_MODULES.map((module, index) => {
+    const next = BRAIN_MODULES[(index + 1) % BRAIN_MODULES.length];
+    return { from: module.id, to: next?.id ?? module.id };
+  });
+
+  const activePivot = selectedId ?? activeId;
+  const attentionModuleIds = new Set(
+    BRAIN_MODULES.filter((module) => statusById?.[module.id]?.status === "attention").map(
+      (module) => module.id,
+    ),
+  );
+
+  function connectorOpacity(moduleId: BrainModuleId): number {
+    const status = statusById?.[moduleId]?.status;
+    const hot = moduleId === selectedId || moduleId === activeId;
+    if (hot) return 0.95;
+    if (status === "attention") return 0.58;
+    if (status === "active" || status === "progress") return 0.48;
+    if (status === "completed") return 0.4;
+    return engaged ? 0.16 : overallActivity === "active" ? 0.3 : 0.24;
+  }
+
+  function statusStroke(status: BrainModuleStatus | undefined): string | undefined {
+    if (status === "attention") return "var(--color-warning)";
+    if (status === "completed") return "var(--color-success)";
+    if (status === "active" || status === "progress") return "var(--color-gold-soft)";
+    return undefined;
+  }
+
   return (
-    <div aria-hidden="true" className="brain-stage pointer-events-none absolute inset-0">
+    <div
+      aria-hidden="true"
+      className="brain-stage pointer-events-none absolute inset-0"
+      data-overall-activity={overallActivity}
+    >
       <div className="brain-camera absolute inset-0" style={cameraStyle}>
         {/* Neural web — connectors from the core to each node. */}
         <svg
@@ -71,6 +110,7 @@ export function BrainScene({
             const isHot = module.id === activeId || isSelected;
             const dimmed = engaged && !isSelected;
             const impulse = !reducedMotion && (isHot || (engaged && isSelected));
+            const status = statusById?.[module.id]?.status;
             return (
               <g key={module.id}>
                 <line
@@ -80,7 +120,8 @@ export function BrainScene({
                   y2={y}
                   className="brain-connector"
                   strokeWidth={isHot ? 1.1 : 0.6}
-                  strokeOpacity={dimmed ? 0.14 : isHot ? 0.95 : 0.35}
+                  stroke={statusStroke(status)}
+                  strokeOpacity={dimmed ? 0.14 : connectorOpacity(module.id)}
                   vectorEffect="non-scaling-stroke"
                 />
                 {impulse ? (
@@ -104,6 +145,32 @@ export function BrainScene({
               </g>
             );
           })}
+
+          {/* System relationships around the brain: goals→plan→focus→act→grow→analytics→goals */}
+          {nodeRadius > 0
+            ? links.map((link) => {
+                const from = brainModule(link.from);
+                const to = brainModule(link.to);
+                const fromPos = nodePosition(from.angle, nodeRadius);
+                const toPos = nodePosition(to.angle, nodeRadius);
+                const connectedToPivot = activePivot === link.from || activePivot === link.to;
+                const attention =
+                  attentionModuleIds.has(link.from) || attentionModuleIds.has(link.to);
+                return (
+                  <line
+                    key={`${link.from}-${link.to}`}
+                    x1={fromPos.x}
+                    y1={fromPos.y}
+                    x2={toPos.x}
+                    y2={toPos.y}
+                    className="brain-system-link"
+                    strokeOpacity={connectedToPivot ? 0.62 : attention ? 0.46 : 0.2}
+                    strokeWidth={connectedToPivot ? 1.2 : 0.8}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                );
+              })
+            : null}
         </svg>
 
         {/* The brain core. */}

@@ -18,10 +18,10 @@ import { InstallAppButton } from "@/components/pwa/install-app-button";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
-  { href: "#product", label: "Product" },
-  { href: "#modules", label: "Modules" },
+  { href: "#experience", label: "Experience" },
+  { href: "#systems", label: "Systems" },
   { href: "#how-it-works", label: "How it works" },
-  { href: "#philosophy", label: "Philosophy" },
+  { href: "#preview", label: "Preview" },
 ];
 
 /**
@@ -68,7 +68,7 @@ export function MarketingNav() {
 
         <div className="hidden items-center gap-2 lg:flex">
           <Button asChild variant="ghost" size="sm">
-            <Link href="/login">Log In</Link>
+            <Link href="/login">Sign In</Link>
           </Button>
           <Button asChild size="sm" className="px-4">
             <Link href="/register">Get Started</Link>
@@ -101,7 +101,7 @@ export function MarketingNav() {
             </nav>
             <div className="border-border mt-auto flex flex-col gap-2 border-t p-4">
               <Button asChild variant="outline">
-                <Link href="/login">Log In</Link>
+                <Link href="/login">Sign In</Link>
               </Button>
               <Button asChild>
                 <Link href="/register">Get Started</Link>

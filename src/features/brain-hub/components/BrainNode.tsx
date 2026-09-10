@@ -6,6 +6,9 @@ import { nodePosition, type BrainModule, type BrainModuleStatus } from "../brain
 const STATUS_META: Record<Exclude<BrainModuleStatus, "normal">, { label: string; dot: string }> = {
   attention: { label: "Needs attention", dot: "bg-warning" },
   active: { label: "Active now", dot: "bg-success" },
+  progress: { label: "Progress available", dot: "bg-primary" },
+  completed: { label: "Completed", dot: "bg-success" },
+  unavailable: { label: "Status unavailable", dot: "bg-border-strong" },
 };
 
 interface BrainNodeProps {
@@ -17,6 +20,12 @@ interface BrainNodeProps {
   status?: BrainModuleStatus;
   /** Node radius as a % of the stage half-size. */
   radius: number;
+  /** Optional progress derived from real module data (0-100). */
+  progress?: number | null;
+  /** Optional attention count derived from real module data. */
+  attentionCount?: number;
+  /** Brief pulse when a real data signature changes. */
+  recentEvent?: boolean;
   /** id of the preview element to associate while this node is hovered/focused. */
   previewId?: string;
   previewOpen?: boolean;
@@ -37,6 +46,9 @@ export function BrainNode({
   dimmed,
   status,
   radius,
+  progress,
+  attentionCount,
+  recentEvent,
   previewId,
   previewOpen,
   onSelect,
@@ -46,6 +58,7 @@ export function BrainNode({
   const Icon = module.icon;
   const { x, y } = nodePosition(module.angle, radius);
   const statusMeta = status && status !== "normal" ? STATUS_META[status] : null;
+  const progressValue = typeof progress === "number" ? Math.max(0, Math.min(100, progress)) : null;
 
   return (
     <button
@@ -60,6 +73,8 @@ export function BrainNode({
       onFocus={onActivate}
       onBlur={onDeactivate}
       style={{ left: `${x}%`, top: `${y}%` }}
+      data-status={status && status !== "normal" ? status : undefined}
+      data-recent-event={recentEvent || undefined}
       className={cn(
         "brain-node bg-surface-raised/85 border-border text-foreground focus-visible:ring-ring absolute z-10 flex min-h-11 -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 rounded-2xl border px-3 py-2.5 backdrop-blur-sm outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-background)]",
         dimmed && "brain-node--dimmed",
@@ -81,6 +96,14 @@ export function BrainNode({
         ) : null}
       </span>
       <span className="text-xs font-semibold tracking-tight">{module.label}</span>
+      {progressValue !== null ? (
+        <span className="bg-border-subtle mt-0.5 h-1 w-11 overflow-hidden rounded-full" aria-hidden="true">
+          <span className="bg-primary block h-full rounded-full" style={{ width: `${progressValue}%` }} />
+        </span>
+      ) : null}
+      {attentionCount && attentionCount > 0 ? (
+        <span className="sr-only">{attentionCount} items need attention</span>
+      ) : null}
     </button>
   );
 }

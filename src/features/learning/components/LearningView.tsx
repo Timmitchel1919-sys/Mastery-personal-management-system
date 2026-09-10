@@ -12,6 +12,7 @@ import { learningItemInputFromForm, studySessionInputFromForm, type LearningItem
 import { LearningItemCard } from "./LearningItemCard";
 import { LearningItemDialog } from "./LearningItemDialog";
 import { LearningStats } from "./LearningStats";
+import { LearningImprovementPanel } from "./LearningImprovementPanel";
 import { LogSessionDialog } from "./LogSessionDialog";
 import { RecentSessionsList } from "./RecentSessionsList";
 
@@ -100,6 +101,7 @@ export function LearningView() {
       ) : (
         <>
           <LearningStats stats={stats} />
+          <LearningImprovementPanel />
 
           {items.length === 0 ? (
             <EmptyState

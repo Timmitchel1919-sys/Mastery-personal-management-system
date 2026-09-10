@@ -22,6 +22,7 @@ import {
   Milestone,
   NotebookPen,
   Route,
+  Scale,
   Settings,
   ShieldCheck,
   Sparkles,
@@ -170,6 +171,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Life Score", href: "/analytics/life-score", icon: Gauge, plannedLayer: 12 },
       { label: "Reports", href: "/analytics/reports", icon: NotebookPen, plannedLayer: 16 },
       { label: "Trends", href: "/analytics/trends", icon: TrendingUp, plannedLayer: 12 },
+      { label: "Decisions", href: "/decisions", icon: Scale, plannedLayer: 12 },
     ],
   },
   {

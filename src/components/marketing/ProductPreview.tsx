@@ -1,116 +1,144 @@
-import { CheckCircle2, Circle, Sparkles } from "lucide-react";
-import { ProgressRing, SectionHeader } from "@/components/ui";
+"use client";
+
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { ArrowRight, Lock, Workflow } from "lucide-react";
+import { Button, SectionHeader } from "@/components/ui";
+import { MODULE_REGISTRY, type BrainModuleId } from "@/features/brain-hub";
 import { Reveal } from "./Reveal";
-
-const TASKS = [
-  { label: "Morning training block", done: true },
-  { label: "Deep work — product spec", done: true },
-  { label: "Weekly review", done: true },
-  { label: "Read — 20 pages", done: false },
-  { label: "Plan tomorrow", done: false },
-];
-
-const LIFE_AREAS = [
-  { label: "Spiritual", caption: "Purpose", value: 70 },
-  { label: "Personal", caption: "Growth", value: 60 },
-  { label: "Societal", caption: "Impact", value: 45 },
-];
+import { MARKETING_MODULES, MARKETING_MODULE_BY_ID } from "./marketing-modules";
 
 /**
- * A conceptual look at the product — not a screenshot, but real Mastery UI
- * primitives (rings, bars, task rows) inside a glass frame with a slight
- * perspective tilt and layered gold lighting.
+ * Read-only product walkthrough using real module metadata and real routes.
+ * This section intentionally does not emulate writable app state.
  */
 export function ProductPreview() {
+  const [selectedId, setSelectedId] = useState<BrainModuleId>(MARKETING_MODULES[0]?.id ?? "goals");
+  const selectedModule = useMemo(() => MARKETING_MODULE_BY_ID[selectedId], [selectedId]);
+  const moduleRegistry = MODULE_REGISTRY[selectedId];
+
   return (
-    <section id="product" className="mx-auto max-w-6xl px-4 py-24 sm:py-32">
+    <section id="preview" className="mx-auto max-w-6xl px-4 py-24 sm:py-32">
       <Reveal>
         <SectionHeader
-          eyebrow="The product"
-          heading="Your day, in one view."
-          description="Priorities, progress, and the three life dimensions — read at a glance, updated as you work."
+          eyebrow="Interactive Product Preview"
+          heading="Explore the real MASTERY environment"
+          description="Select a system to preview how Brain Hub leads to module context, submodule paths, and workspace execution."
         />
       </Reveal>
 
       <Reveal delay={120} className="mt-14">
-        <div className="[perspective:1600px]">
-          <div className="mastery-glass mastery-glass--gold rounded-3xl p-3 sm:p-4 lg:[transform:rotateX(3deg)]">
-            <div className="bg-surface/60 rounded-2xl p-4 sm:p-6">
-              <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2">
-                <div>
-                  <p className="text-foreground text-base font-semibold tracking-tight">
-                    Good morning.
-                  </p>
-                  <p className="text-subtle text-xs">Discipline today. A greater tomorrow.</p>
-                </div>
-                <p className="text-subtle text-xs">Today · 5 priorities</p>
-              </div>
-
-              <div className="grid gap-4 lg:grid-cols-3">
-                <div className="mastery-card flex flex-col items-center gap-3 p-5 text-center">
-                  <p className="text-eyebrow">Today&apos;s Focus</p>
-                  <ProgressRing value={60} label="3 / 5" />
-                  <p className="text-muted text-xs">tasks complete</p>
-                </div>
-
-                <div className="mastery-card p-5 lg:col-span-2">
-                  <p className="text-eyebrow mb-3">Priorities</p>
-                  <ul className="flex flex-col gap-2">
-                    {TASKS.map((task) => (
-                      <li key={task.label} className="flex items-center gap-2.5 text-sm">
-                        {task.done ? (
-                          <CheckCircle2
-                            className="text-primary size-4 shrink-0"
-                            aria-hidden="true"
-                          />
-                        ) : (
-                          <Circle className="text-subtle size-4 shrink-0" aria-hidden="true" />
-                        )}
-                        <span className={task.done ? "text-muted line-through" : "text-foreground"}>
-                          {task.label}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="mastery-card p-5 lg:col-span-2">
-                  <p className="text-eyebrow mb-3">Life dimensions</p>
-                  <ul className="flex flex-col gap-3">
-                    {LIFE_AREAS.map((area) => (
-                      <li key={area.label} className="flex items-center gap-3 text-sm">
-                        <span className="w-16 shrink-0">
-                          <span className="text-foreground block font-medium">{area.label}</span>
-                          <span className="text-subtle block text-xs">{area.caption}</span>
-                        </span>
-                        <span className="bg-surface h-1.5 flex-1 overflow-hidden rounded-full">
-                          <span
-                            className="bg-primary block h-full rounded-full"
-                            style={{ width: `${area.value}%` }}
-                          />
-                        </span>
-                        <span className="text-muted w-8 shrink-0 text-right text-xs tabular-nums">
-                          {area.value}%
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="mastery-card p-5">
-                  <p className="text-eyebrow mb-2 flex items-center gap-1.5">
-                    <Sparkles className="size-3.5" aria-hidden="true" />
-                    Weekly insight
-                  </p>
-                  <p className="text-muted text-sm leading-relaxed">
-                    Your focus sessions run longest before 10am — schedule tomorrow&apos;s deep
-                    work then.
-                  </p>
-                </div>
-              </div>
+        <div className="grid gap-6 lg:grid-cols-[0.88fr_1.12fr]">
+          <div className="mastery-glass rounded-2xl p-4 sm:p-5">
+            <p className="text-eyebrow">Select a system</p>
+            <div className="mt-3 flex flex-col gap-2" role="tablist" aria-label="Mastery systems">
+              {MARKETING_MODULES.map((module) => {
+                const Icon = module.icon;
+                const selected = selectedId === module.id;
+                return (
+                  <button
+                    key={module.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={selected}
+                    aria-controls={`preview-panel-${module.id}`}
+                    id={`preview-tab-${module.id}`}
+                    onClick={() => setSelectedId(module.id)}
+                    className="mastery-card data-[selected=true]:border-border-gold data-[selected=true]:bg-section flex items-start gap-3 rounded-xl p-3 text-left"
+                    data-selected={selected || undefined}
+                  >
+                    <span className="bg-gold-subtle text-accent inline-flex size-8 shrink-0 items-center justify-center rounded-lg">
+                      <Icon className="size-4" aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="text-foreground block text-sm font-semibold tracking-tight">
+                        {module.name}
+                      </span>
+                      <span className="text-muted block text-xs leading-relaxed">{module.blurb}</span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
+
+          <article
+            id={`preview-panel-${selectedId}`}
+            role="tabpanel"
+            aria-labelledby={`preview-tab-${selectedId}`}
+            className="mastery-glass mastery-glass--gold rounded-2xl p-4 sm:p-6"
+          >
+            <div className="border-border-subtle mb-4 flex flex-wrap items-center gap-2 border-b pb-4">
+              <span className="text-subtle text-xs font-semibold tracking-[0.09em] uppercase">
+                Brain Hub
+              </span>
+              <span className="text-subtle text-xs">/</span>
+              <span className="text-foreground text-xs font-semibold tracking-[0.09em] uppercase">
+                {selectedModule.name}
+              </span>
+              <span className="text-subtle text-xs">/</span>
+              <span className="text-muted text-xs">Workspace Preview</span>
+              <span className="border-border-subtle bg-section text-subtle ml-auto inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs">
+                <Lock className="size-3" aria-hidden="true" />
+                Read-only
+              </span>
+            </div>
+
+            <h3 className="text-foreground text-xl font-semibold tracking-tight">{selectedModule.name}</h3>
+            <p className="text-muted mt-2 text-sm leading-relaxed">{selectedModule.longDescription}</p>
+
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <section className="mastery-card rounded-xl p-4">
+                <p className="text-eyebrow mb-2 flex items-center gap-1.5">
+                  <Workflow className="size-3.5" aria-hidden="true" />
+                  Start Here
+                </p>
+                <ul className="space-y-2">
+                  {moduleRegistry.submodules.slice(0, 4).map((submodule) => (
+                    <li key={submodule.id} className="flex items-start gap-2 text-sm">
+                      <span className="bg-border-strong mt-1.5 inline-block size-1.5 shrink-0 rounded-full" />
+                      <span className="text-muted leading-relaxed">{submodule.title}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+
+              <section className="mastery-card rounded-xl p-4">
+                <p className="text-eyebrow mb-2">What this system does</p>
+                <ul className="space-y-2">
+                  {selectedModule.previewBullets.map((bullet) => (
+                    <li key={bullet} className="flex items-start gap-2 text-sm">
+                      <span className="bg-border-strong mt-1.5 inline-block size-1.5 shrink-0 rounded-full" />
+                      <span className="text-muted leading-relaxed">{bullet}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Button asChild size="sm">
+                <Link href={selectedModule.ctaHref}>
+                  Start with MASTERY
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+              </Button>
+              <Button asChild size="sm" variant="outline">
+                <Link href="/login">Sign In</Link>
+              </Button>
+              <Button asChild size="sm" variant="ghost">
+                <Link href={moduleRegistry.href}>Open {selectedModule.name} route</Link>
+              </Button>
+            </div>
+          </article>
         </div>
+      </Reveal>
+
+      <Reveal delay={180} className="mt-6">
+        <p className="text-subtle text-center text-xs leading-relaxed">
+          Preview links use real routes. Protected module routes may redirect to the existing
+          authentication flow when signed out.
+        </p>
       </Reveal>
     </section>
   );

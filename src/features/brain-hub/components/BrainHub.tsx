@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { NAV_SECTIONS } from "@/config/navigation";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -14,6 +14,7 @@ import {
   type BrainModuleId,
   type BrainModuleStatus,
 } from "../brain-navigation";
+import type { BrainOverallActivity, BrainSystemState } from "../brain-state";
 import { supportsWebgl } from "../webgl";
 import { BrainFallbackList } from "./BrainFallbackList";
 import { BrainModulePreview } from "./BrainModulePreview";
@@ -25,9 +26,8 @@ interface BrainHubProps {
   /** Where "open the selected module" navigates. Defaults to the module route.
    * Layer C replaces this with the full module environment. */
   onOpen?: (module: BrainModule) => void;
-  /** Real per-module status, keyed by id. Omit entirely if the app has none —
-   * nothing is fabricated. */
-  statusById?: Partial<Record<BrainModuleId, BrainModuleStatus>>;
+  /** Real module signals from app state. Omit entirely for neutral rendering. */
+  systemState?: BrainSystemState;
   initialSelectedId?: BrainModuleId | null;
   className?: string;
 }
@@ -57,7 +57,7 @@ const PREVIEW_ITEMS: Record<BrainModuleId, string[]> = BRAIN_MODULES.reduce(
  */
 export function BrainHub({
   onOpen,
-  statusById,
+  systemState,
   initialSelectedId = null,
   className,
 }: BrainHubProps) {
@@ -67,6 +67,7 @@ export function BrainHub({
   const isDesktop = useMediaQuery("(min-width: 1024px)", true);
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)", false);
   const previewBaseId = useId();
+  const [pageVisible, setPageVisible] = useState(true);
 
   const nav = useBrainNavigation({
     initialSelectedId,
@@ -78,11 +79,27 @@ export function BrainHub({
     () => mounted && isWide && supportsWebgl(),
     [mounted, isWide],
   );
+  const sceneReducedMotion = reducedMotion || !pageVisible;
   const nodeRadius = isDesktop ? NODE_RADIUS_DESKTOP : NODE_RADIUS_TABLET;
   const engaged = nav.phase !== "home" && nav.selectedId != null;
   const selectedModule = nav.selectedId ? brainModule(nav.selectedId) : null;
   // The hover preview is suppressed once a module is engaged — its context takes over.
   const previewId = !engaged ? nav.activeId : null;
+  const overallActivity: BrainOverallActivity = systemState?.overallActivity ?? "idle";
+  const statusById = useMemo(
+    () =>
+      Object.fromEntries(
+        BRAIN_MODULES.map((module) => [module.id, systemState?.modules[module.id]?.status]),
+      ) as Partial<Record<BrainModuleId, BrainModuleStatus>>,
+    [systemState],
+  );
+
+  useEffect(() => {
+    const onVisibilityChange = () => setPageVisible(document.visibilityState === "visible");
+    onVisibilityChange();
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, []);
 
   // Engaged: a compact brain stays visible for continuity, with the module
   // environment below it. The camera transition (Layer B) plays on the brain.
@@ -93,13 +110,16 @@ export function BrainHub({
           aria-hidden="true"
           className="brain-stage relative mx-auto aspect-square w-28 sm:w-32"
           data-phase={nav.phase}
+          data-overall-activity={overallActivity}
         >
           <BrainScene
             activeId={nav.selectedId}
             selectedId={nav.selectedId}
             phase={nav.phase}
             nodeRadius={0}
-            reducedMotion={reducedMotion}
+            reducedMotion={sceneReducedMotion}
+            overallActivity={overallActivity}
+            statusById={systemState?.modules}
           />
         </div>
         <ModuleEnvironment
@@ -120,6 +140,7 @@ export function BrainHub({
             role="group"
             aria-label="Mastery Brain — spatial module navigation"
             data-phase={nav.phase}
+            data-overall-activity={overallActivity}
             className="relative mx-auto aspect-square w-full max-w-136"
           >
             <BrainScene
@@ -127,7 +148,9 @@ export function BrainHub({
               selectedId={nav.selectedId}
               phase={nav.phase}
               nodeRadius={nodeRadius}
-              reducedMotion={reducedMotion}
+              reducedMotion={sceneReducedMotion}
+              overallActivity={overallActivity}
+              statusById={systemState?.modules}
             />
             {BRAIN_MODULES.map((module) => (
               <BrainNode
@@ -136,7 +159,10 @@ export function BrainHub({
                 radius={nodeRadius}
                 selected={nav.selectedId === module.id}
                 dimmed={engaged && nav.selectedId !== module.id}
-                status={statusById?.[module.id]}
+                status={systemState?.modules[module.id]?.status}
+                progress={systemState?.modules[module.id]?.progress ?? null}
+                attentionCount={systemState?.modules[module.id]?.attentionCount ?? 0}
+                recentEvent={systemState?.modules[module.id]?.recentEvent ?? false}
                 previewId={`${previewBaseId}-${module.id}`}
                 previewOpen={previewId === module.id}
                 onSelect={() => nav.enterModule(module.id)}
@@ -150,25 +176,38 @@ export function BrainHub({
                 module={brainModule(previewId)}
                 items={PREVIEW_ITEMS[previewId]}
                 radius={nodeRadius}
+                status={systemState?.modules[previewId]?.status}
+                progress={systemState?.modules[previewId]?.progress ?? null}
+                attentionCount={systemState?.modules[previewId]?.attentionCount ?? 0}
               />
             ) : null}
           </div>
-          <BrainFallbackList selectedId={nav.selectedId} onSelect={nav.enterModule} />
+          <BrainFallbackList
+            selectedId={nav.selectedId}
+            onSelect={nav.enterModule}
+            statusById={statusById}
+          />
         </>
       ) : (
         <div className="flex flex-col items-center gap-6">
-          <div className="brain-stage relative aspect-square w-40 sm:w-48">
+          <div
+            className="brain-stage relative aspect-square w-40 sm:w-48"
+            data-overall-activity={overallActivity}
+          >
             <BrainScene
               activeId={nav.activeId}
               selectedId={nav.selectedId}
               phase={nav.phase}
               nodeRadius={0}
-              reducedMotion={reducedMotion}
+              reducedMotion={sceneReducedMotion}
+              overallActivity={overallActivity}
+              statusById={systemState?.modules}
             />
           </div>
           <BrainFallbackList
             selectedId={nav.selectedId}
             onSelect={nav.enterModule}
+            statusById={statusById}
             primary
             className="w-full max-w-md"
           />

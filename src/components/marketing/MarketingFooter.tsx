@@ -5,10 +5,10 @@ const NAV_GROUPS: { heading: string; links: { label: string; href: string }[] }[
   {
     heading: "Product",
     links: [
-      { label: "Overview", href: "#product" },
-      { label: "Modules", href: "#modules" },
+      { label: "Experience", href: "#experience" },
+      { label: "Systems", href: "#systems" },
       { label: "How it works", href: "#how-it-works" },
-      { label: "Philosophy", href: "#philosophy" },
+      { label: "Preview", href: "#preview" },
     ],
   },
   {

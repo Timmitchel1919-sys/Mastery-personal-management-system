@@ -13,14 +13,20 @@ import { IntelligencePanel } from "./IntelligencePanel";
 
 const insight: MasteryInsight = {
   id: "metric-focus",
-  title: "Focus hours is trending the right way",
-  fact: "Focus hours rose 20% over the 30 days (10 h → 12 h).",
-  interpretation: "Your data suggests the recent change is working.",
+  type: "PROGRESS",
+  title: "Focus hours is improving",
+  summary: "Focus hours changed +20% over the 30 days.",
+  detail: "10 h -> 12 h across 6 entries.",
   recommendation: "Consider keeping the current structure in place.",
+  severity: "low",
+  confidence: "medium",
   signal: "moderate",
+  source: ["kpis"],
+  relatedModule: "analytics",
+  createdAt: "2026-09-09T00:00:00.000Z",
+  actions: [{ label: "Open KPIs", href: "/analytics/kpis" }],
+  status: "active",
   evidence: ["6 entries this period"],
-  action: { label: "Open KPIs", href: "/analytics/kpis" },
-  kind: "positive",
 };
 
 beforeEach(() => {
@@ -30,13 +36,33 @@ beforeEach(() => {
   } catch {
     // ignore
   }
-  value = { status: "ready", error: null, reload, hasAnyData: true, insights: [insight] };
+  value = {
+    status: "ready",
+    error: null,
+    reload,
+    hasAnyData: true,
+    insights: [insight],
+    today: [insight],
+    progress: [],
+    attention: [],
+    patterns: [],
+    recommendations: [],
+    moduleAttention: {
+      goals: { count: 0, topSeverity: null },
+      plan: { count: 0, topSeverity: null },
+      focus: { count: 0, topSeverity: null },
+      act: { count: 0, topSeverity: null },
+      grow: { count: 0, topSeverity: null },
+      analytics: { count: 0, topSeverity: null },
+    },
+  };
 });
 
 describe("IntelligencePanel", () => {
   it("renders an insight with distinct fact / interpretation / recommendation", async () => {
     render(<IntelligencePanel />);
     expect(await screen.findByText(insight.title)).toBeInTheDocument();
+    expect(screen.getByText("Today")).toBeInTheDocument();
     expect(screen.getByText("Fact")).toBeInTheDocument();
     expect(screen.getByText("Interpretation")).toBeInTheDocument();
     expect(screen.getByText("Recommendation")).toBeInTheDocument();
@@ -48,9 +74,17 @@ describe("IntelligencePanel", () => {
   });
 
   it("shows an insufficient-data message when there are no insights", async () => {
-    value = { ...value, insights: [] };
+    value = {
+      ...value,
+      insights: [],
+      today: [],
+      progress: [],
+      attention: [],
+      patterns: [],
+      recommendations: [],
+    };
     render(<IntelligencePanel />);
-    expect(await screen.findByText(/not enough activity data yet/i)).toBeInTheDocument();
+    expect(await screen.findByText(/not enough data yet/i)).toBeInTheDocument();
   });
 
   it("dismisses an insight on request", async () => {

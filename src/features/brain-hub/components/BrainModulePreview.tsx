@@ -1,6 +1,7 @@
 "use client";
 
 import { nodePosition, type BrainModule } from "../brain-navigation";
+import type { BrainModuleStatus } from "../brain-modules";
 
 interface BrainModulePreviewProps {
   id: string;
@@ -9,6 +10,9 @@ interface BrainModulePreviewProps {
   items: string[];
   /** Node radius as a % of the stage half-size — the preview sits just outside it. */
   radius: number;
+  status?: BrainModuleStatus;
+  progress?: number | null;
+  attentionCount?: number;
 }
 
 /**
@@ -17,7 +21,15 @@ interface BrainModulePreviewProps {
  * It is `role="tooltip"` and referenced by the node's `aria-describedby`, so it
  * reaches keyboard users too, and it disappears with the pointer / focus.
  */
-export function BrainModulePreview({ id, module, items, radius }: BrainModulePreviewProps) {
+export function BrainModulePreview({
+  id,
+  module,
+  items,
+  radius,
+  status,
+  progress,
+  attentionCount = 0,
+}: BrainModulePreviewProps) {
   const { x, y } = nodePosition(module.angle, radius);
   // Nudge the card away from the core so it doesn't cover the node.
   const outward = nodePosition(module.angle, Math.min(radius + 12, 50));
@@ -32,6 +44,15 @@ export function BrainModulePreview({ id, module, items, radius }: BrainModulePre
       data-anchor-y={y}
     >
       <p className="text-eyebrow mb-1.5">{module.label}</p>
+      {status && status !== "normal" ? (
+        <p className="text-subtle mb-1 text-[0.6875rem] font-semibold uppercase">{status}</p>
+      ) : null}
+      {typeof progress === "number" ? (
+        <p className="text-subtle mb-1 text-[0.6875rem] tabular-nums">Progress {Math.round(progress)}%</p>
+      ) : null}
+      {attentionCount > 0 ? (
+        <p className="text-warning mb-1 text-[0.6875rem]">{attentionCount} need attention</p>
+      ) : null}
       {items.length > 0 ? (
         <ul className="text-muted space-y-0.5 text-xs">
           {items.slice(0, 5).map((item) => (

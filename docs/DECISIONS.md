@@ -1303,3 +1303,27 @@ same day (that canvas is not implemented; it stays a reference artifact only).
 - The green dark-theme canvas from earlier the same day remains published as a reference
   artifact but is explicitly not the shipped direction — noted here to avoid future
   confusion between the two.
+
+## ADR-0034 — Ratchet the total-JS gzip budget 900 → 920 KiB for the intelligence/orchestration layers
+
+**Date:** 2026-09-10 · **Status:** accepted
+
+**Context.** Layers E–M (landing 3D brain experience, AI personal insight client +
+context + schema, decision workspace, adaptive-execution recommendation service,
+deterministic learning engine, brain-state orchestration) added a modest amount of
+first-party JS across many small chunks. `npm test` failed
+`tests/unit/bundle-budget.test.ts` with `total JS gzip 905.0 KiB > 900 KiB budget` —
+a 0.55 % overage. `totalJsRaw` (3076 / 3200) and `largestChunkGzip` (193 / 240) both
+still pass with headroom; only the aggregate gzip line is over.
+
+**Decision.** Ratchet `BUDGETS.totalJsGzipKiB` in `scripts/analyze-bundle.mjs` from
+900 to 920 KiB. Per that file's own docstring the budgets are "a *ratchet*, not a
+target: they sit a bit above today's real number" — 920 is ~15 KiB of headroom above
+the post-E–M reality. No dependency was added; the growth is expected first-party
+feature code, spread across chunks with no single trimmable offender (the 192.8 KiB
+top chunk is the stable Firestore SDK vendor chunk, unchanged).
+
+**Consequences.**
+- The gate stays enforced, just at the new line; a future layer that pushes past
+  920 KiB must either trim or ratchet again with its own ADR.
+- No runtime behaviour change; this is a CI/test-config change only.

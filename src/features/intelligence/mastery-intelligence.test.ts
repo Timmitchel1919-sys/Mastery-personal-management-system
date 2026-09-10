@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { MetricSummary, PeriodComparison } from "@/features/analytics/analytics-insights";
+import type { Goal } from "@/features/goals/schema";
+import type { Plan } from "@/features/plans/schema";
+import type { Task } from "@/features/tasks/schema";
 import { buildIntelligence } from "./mastery-intelligence";
 
 function comparison(over: Partial<PeriodComparison> = {}): PeriodComparison {
@@ -33,78 +36,207 @@ const flat: PeriodComparison = {
   sampleSize: 0,
 };
 
+function goal(over: Partial<Goal> & { id: string; title: string }): Goal {
+  const { id, title, ...rest } = over;
+  return {
+    id,
+    userId: "u1",
+    status: "active",
+    version: 1,
+    createdAt: "2026-09-01T00:00:00.000Z",
+    updatedAt: "2026-09-01T00:00:00.000Z",
+    createdBy: "u1",
+    updatedBy: "u1",
+    archivedAt: null,
+    title,
+    description: "",
+    pillarIds: ["personal"],
+    parentPlanId: null,
+    startDate: null,
+    targetDate: null,
+    goalStatus: "in-progress",
+    priority: "high",
+    progress: 40,
+    measurementType: "percent",
+    targetValue: null,
+    currentValue: null,
+    unit: "%",
+    reviewFrequency: "weekly",
+    notes: "",
+    ...rest,
+  };
+}
+
+function plan(over: Partial<Plan> & { id: string; title: string }): Plan {
+  const { id, title, ...rest } = over;
+  return {
+    id,
+    userId: "u1",
+    status: "active",
+    version: 1,
+    createdAt: "2026-09-01T00:00:00.000Z",
+    updatedAt: "2026-09-01T00:00:00.000Z",
+    createdBy: "u1",
+    updatedBy: "u1",
+    archivedAt: null,
+    horizon: "week",
+    title,
+    objective: "",
+    desiredOutcomes: [],
+    keyMeasures: [],
+    startDate: null,
+    endDate: null,
+    planStatus: "active",
+    progress: 20,
+    reviewNotes: "",
+    pillarIds: ["personal"],
+    parentId: null,
+    ...rest,
+  };
+}
+
+function task(over: Partial<Task> & { id: string; title: string }): Task {
+  const { id, title, ...rest } = over;
+  return {
+    id,
+    userId: "u1",
+    status: "active",
+    version: 1,
+    createdAt: "2026-09-01T00:00:00.000Z",
+    updatedAt: "2026-09-01T00:00:00.000Z",
+    createdBy: "u1",
+    updatedBy: "u1",
+    archivedAt: null,
+    title,
+    description: "",
+    taskStatus: "todo",
+    priority: "high",
+    startDate: null,
+    dueDate: null,
+    pillarIds: ["personal"],
+    goalId: null,
+    projectId: null,
+    milestoneId: null,
+    parentTaskId: null,
+    recurrence: null,
+    estimatedMinutes: 30,
+    actualMinutes: 0,
+    energyRequirement: "medium",
+    context: "",
+    tags: [],
+    notes: "",
+    completedAt: null,
+    resolutionReason: "",
+    ...rest,
+  };
+}
+
 describe("buildIntelligence", () => {
-  it("returns nothing when there is no data at all", () => {
-    expect(
-      buildIntelligence({ metrics: [], lifeScore: flat, periodLabel: "30 days", hasAnyData: false }),
-    ).toEqual([]);
-  });
-
-  it("returns nothing when movements are below the meaningful threshold", () => {
-    const tiny = metric({ id: "sleep", comparison: comparison({ changePct: 2 }) });
-    expect(
-      buildIntelligence({ metrics: [tiny], lifeScore: flat, periodLabel: "30 days", hasAnyData: true }),
-    ).toEqual([]);
-  });
-
-  it("splits a metric read into fact / interpretation / recommendation", () => {
-    const [insight] = buildIntelligence({
-      metrics: [metric({ id: "focus", label: "Focus hours", unit: "h", higherIsBetter: true })],
-      lifeScore: flat,
-      periodLabel: "30 days",
-      hasAnyData: true,
-    });
-    expect(insight?.kind).toBe("positive");
-    expect(insight?.fact).toContain("Focus hours rose 20%");
-    expect(insight?.interpretation).toMatch(/your data suggests/i);
-    expect(insight?.recommendation).toMatch(/consider/i);
-    expect(insight?.action).toEqual({ label: "Open KPIs", href: "/analytics/kpis" });
-  });
-
-  it("treats a rising lower-is-better metric as an attention item", () => {
-    const [insight] = buildIntelligence({
-      metrics: [metric({ id: "debt", label: "Debt", higherIsBetter: false })],
-      lifeScore: flat,
-      periodLabel: "30 days",
-      hasAnyData: true,
-    });
-    expect(insight?.kind).toBe("attention");
-    expect(insight?.title).toContain("slipping");
-  });
-
-  it("grades the signal by sample size and orders attention before positive", () => {
-    const strongBad = metric({
-      id: "debt",
-      label: "Debt",
-      higherIsBetter: false,
-      comparison: comparison({ sampleSize: 9 }),
-    });
-    const weakGood = metric({
-      id: "reading",
-      label: "Reading",
-      comparison: comparison({ sampleSize: 3 }),
-    });
-    const result = buildIntelligence({
-      metrics: [weakGood, strongBad],
-      lifeScore: flat,
-      periodLabel: "30 days",
-      hasAnyData: true,
-    });
-    expect(result.map((i) => i.kind)).toEqual(["attention", "positive"]);
-    expect(result[0]?.signal).toBe("strong");
-    expect(result[1]?.signal).toBe("limited");
-  });
-
-  it("adds a Life Score insight when the score moved at least 3 points", () => {
+  it("1. no data -> no fabricated insight", () => {
     const result = buildIntelligence({
       metrics: [],
-      lifeScore: comparison({ current: 62, previous: 70, changeAbs: -8, changePct: -11, direction: "down", sampleSize: 4 }),
+      lifeScore: flat,
+      periodLabel: "30 days",
+      hasAnyData: false,
+      goals: [],
+      plans: [],
+      tasks: [],
+      deepWorkSessions: [],
+      journalEntries: [],
+      learningItems: [],
+    });
+    expect(result.insights).toEqual([]);
+  });
+
+  it("2. valid progress -> emits progress insight", () => {
+    const result = buildIntelligence({
+      metrics: [metric({ id: "focus", label: "Focus hours" })],
+      lifeScore: flat,
       periodLabel: "30 days",
       hasAnyData: true,
+      goals: [],
+      plans: [],
+      tasks: [],
+      deepWorkSessions: [],
+      journalEntries: [],
+      learningItems: [],
     });
-    expect(result).toHaveLength(1);
-    expect(result[0]?.id).toBe("life-score");
-    expect(result[0]?.kind).toBe("attention");
-    expect(result[0]?.signal).toBe("moderate");
+    expect(result.progress.some((insight) => insight.type === "PROGRESS")).toBe(true);
+  });
+
+  it("3. unfinished overdue/blocked items -> attention insight", () => {
+    const result = buildIntelligence({
+      metrics: [],
+      lifeScore: flat,
+      periodLabel: "30 days",
+      hasAnyData: true,
+      goals: [],
+      plans: [],
+      tasks: [
+        task({ id: "t1", title: "Overdue", dueDate: "2026-09-01" }),
+        task({ id: "t2", title: "Blocked", taskStatus: "blocked" }),
+      ],
+      deepWorkSessions: [],
+      journalEntries: [],
+      learningItems: [],
+      nowIsoDate: "2026-09-10",
+    });
+    expect(result.attention.some((insight) => insight.relatedModule === "act")).toBe(true);
+  });
+
+  it("4+5. goal-plan alignment and no-support detection", () => {
+    const supportedGoal = goal({ id: "g1", title: "Supported", parentPlanId: "p1" });
+    const unsupportedGoal = goal({ id: "g2", title: "Unsupported", parentPlanId: null });
+
+    const result = buildIntelligence({
+      metrics: [],
+      lifeScore: flat,
+      periodLabel: "30 days",
+      hasAnyData: true,
+      goals: [supportedGoal, unsupportedGoal],
+      plans: [plan({ id: "p1", title: "Plan 1" })],
+      tasks: [],
+      deepWorkSessions: [],
+      journalEntries: [],
+      learningItems: [],
+    });
+
+    expect(result.insights.some((insight) => insight.id === "goals-aligned")).toBe(true);
+    expect(result.insights.some((insight) => insight.id === "goals-no-support")).toBe(true);
+  });
+
+  it("6. insufficient history -> no false pattern insight", () => {
+    const result = buildIntelligence({
+      metrics: [],
+      lifeScore: flat,
+      periodLabel: "30 days",
+      hasAnyData: true,
+      goals: [],
+      plans: [],
+      tasks: [],
+      deepWorkSessions: [],
+      journalEntries: [],
+      learningItems: [],
+    });
+    expect(result.patterns).toEqual([]);
+  });
+
+  it("7+8. module-specific insight maps into module attention for brain integration", () => {
+    const result = buildIntelligence({
+      metrics: [],
+      lifeScore: flat,
+      periodLabel: "30 days",
+      hasAnyData: true,
+      goals: [],
+      plans: [],
+      tasks: [task({ id: "t1", title: "Blocked", taskStatus: "blocked" })],
+      deepWorkSessions: [],
+      journalEntries: [],
+      learningItems: [],
+      nowIsoDate: "2026-09-10",
+    });
+
+    expect(result.moduleAttention.act.count).toBeGreaterThan(0);
+    expect(result.moduleAttention.goals.count).toBe(0);
   });
 });

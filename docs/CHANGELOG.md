@@ -6,6 +6,56 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Decision workspace — 2026-09-10
+
+**Added**
+- A decision-support workspace under `/decisions` with weighted criteria, option comparison, and a transparent recommendation model.
+- `src/features/decisions/schema.ts` for typed decision domain shapes and validation-compatible data contracts.
+- `src/features/decisions/decision-model.ts` for scoring, reversibility assessment, and evidence-grounded recommendation logic.
+- `src/features/decisions/use-decisions.ts` for client-side decision state, persistence, and option selection handling.
+- `src/features/decisions/DecisionWorkspace.tsx` for a lightweight UI that compares options against real goal and prediction context.
+
+**Changed**
+- Added the decision route to the application navigation and app shell routing.
+- Kept the decision model explicitly non-executing and advisory: it informs human choice but does not auto-apply actions.
+
+**Safety / grounding**
+- The recommendation is based on weighted criteria, not fabricated certainty.
+- Evidence and uncertainty remain visible in the interface.
+- The decision layer is informational-only and does not mutate tasks, plans, or other execution records without explicit user approval.
+
+**Verified**
+- `npm run typecheck`
+- `npm run lint`
+- `npm test`
+- `npm run build`
+
+### Layer L — Outcome-learning loop & transparent adaptation — 2026-09-10
+
+**Added**
+- `src/features/learning/learning-engine.ts` for outcome-based learning, confidence,
+  pattern detection, recommendation feedback, prediction/decision tracking, and user-led
+  reset/correction flows.
+- `src/features/learning/learning-engine.test.ts` covering expected-vs-actual variance,
+  low-data handling, confidence thresholds, feedback capture, and reset/correction behavior.
+- `src/features/learning/components/LearningImprovementPanel.tsx` to surface transparent,
+  non-autonomous improvement guidance with honest empty-state messaging.
+
+**Changed**
+- Integrated the learning panel into `LearningView` without auto-executing recommendations or
+  silently changing the underlying user plan state.
+- Kept the learning logic strict and explicit: every output is evidence-backed, user-visible,
+  and safely bounded when history is insufficient.
+
+**Safety / grounding**
+- The learning tool only records outcomes and surfaces inferred patterns; it never learns a
+  hidden user profile or auto-applies actions.
+- Reset, dismiss, and correction actions are explicit and reversible.
+
+**Verified**
+- `npm run typecheck`
+- `npm test -- --run src/features/learning/learning-engine.test.ts`
+
 ### Layer J — Predictive intelligence & proactive guidance — 2026-09-10
 
 **Added**

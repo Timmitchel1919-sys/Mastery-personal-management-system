@@ -21,7 +21,85 @@ Living build tracker. Updated at the end of every layer.
 
 ---
 
+## Active work — Decision workspace
+
+**Scope:** add a lightweight decision-support space for comparing options, weighting criteria, and surfacing a transparent recommendation with evidence-backed scoring.
+
+**Changed files:**
+- `src/features/decisions/decision-model.ts`
+- `src/features/decisions/schema.ts`
+- `src/features/decisions/use-decisions.ts`
+- `src/features/decisions/DecisionWorkspace.tsx`
+- `src/features/decisions/index.ts`
+- `src/app/(app)/decisions/page.tsx`
+- `src/config/navigation.ts`
+- `src/features/decisions/decision-model.test.ts`
+
+**Verification:**
+- `npm run typecheck` ✅
+- `npm run lint` ✅
+- `npm test` ✅
+- `npm run build` ✅
+
+**Manual test steps:**
+1. Open `/decisions` from the analytics area or the navigation menu.
+2. Confirm the workspace loads a seeded decision, displays the criteria panel, and renders option cards with scores.
+3. Change a criterion weight and confirm the recommendation updates based on the weighted comparison.
+4. Select a preferred option and confirm the UI marks it as chosen without triggering any automatic action beyond the local decision state.
+5. Verify the recommendation remains hedged and evidence-backed rather than treated as a guaranteed outcome.
+
+**Known limitations:**
+- The current decision workspace is a client-side decision aid; it does not persist to server-side repositories yet.
+- It is intentionally informational and advisory; it does not auto-apply plans or execute tasks.
+
+---
+
 ## Layer log
+
+### 2026-09-10 — Layer L: Outcome-learning loop & transparent adaptation
+
+Layer L adds a deterministic learning loop that compares expected outcomes to actual results,
+tracks user feedback, and surfaces transparent adaptation guidance without letting the app
+make autonomous decisions. The learning engine stays explicit, evidence-based, and user-led.
+
+**Created:**
+- `src/features/learning/learning-engine.ts` — learning-event creation, expected-vs-actual
+  comparison, confidence scoring, pattern detection, recommendation feedback, prediction/
+  decision tracking, plan-learning analysis, and user-controlled reset/correction flows.
+- `src/features/learning/learning-engine.test.ts` — regression coverage for variance,
+  insufficient-data handling, confidence thresholds, recommendation feedback, decision/
+  prediction outcomes, plan-learning adaptation, and user correction/reset flows.
+- `src/features/learning/components/LearningImprovementPanel.tsx` — transparent learning
+  panel that surfaces outcome-based improvement guidance or an honest neutral state.
+- `src/features/learning/components/LearningView.tsx` — integrates the panel into the
+  Learning experience.
+- `src/features/learning/index.ts` — barrel exports for the new learning engine and UI.
+
+**Modified:**
+- Preserved the existing learning schema, app patterns, and deterministic intelligence model;
+  the new loop is presentation-only and does not auto-write plan, goal, or task state.
+
+**Verification:**
+- `npm run typecheck` ✅
+- `npm test -- --run src/features/learning/learning-engine.test.ts` ✅ (9/9 tests)
+
+**Manual test instructions:**
+1. Open the Learning or intelligence view and confirm the improvement panel loads without
+   fabricated results when no outcome history exists.
+2. Create or simulate a few learning events with expected/actual values and verify the
+   variance and confidence output updates accordingly.
+3. Check that a low-data state stays explicit, returns “not enough history,” and avoids
+   false certainty.
+4. Record recommendation feedback and confirm it is preserved without mutating the source
+   recommendation automatically.
+5. Review the reset/dismiss/correct flows and confirm they remain visible, user-controlled,
+   and reversible.
+
+**Known limitations:**
+- The learning loop is currently a deterministic, presentation-only layer and does not yet
+  persist to Firebase repositories or trigger application actions automatically.
+- It intentionally remains conservative when evidence is weak and does not infer hidden
+  user profiles or silently adapt the system.
 
 ### 2026-09-10 — Layer J: Predictive intelligence & proactive guidance
 

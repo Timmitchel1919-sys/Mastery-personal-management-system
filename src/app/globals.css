@@ -1137,6 +1137,26 @@
   transition: stroke-opacity var(--duration-fast) var(--ease-out);
 }
 
+.brain-system-link {
+  stroke: color-mix(in oklab, var(--color-gold-soft) 42%, transparent);
+  transition:
+    stroke-opacity var(--duration-fast) var(--ease-out),
+    stroke-width var(--duration-fast) var(--ease-out);
+}
+
+.brain-stage[data-overall-activity="active"] .brain-core {
+  box-shadow:
+    inset 0 2px 6px rgb(255 255 255 / 0.06),
+    inset 0 -18px 40px rgb(0 0 0 / 0.45),
+    0 0 72px color-mix(in oklab, var(--color-gold) 22%, transparent);
+}
+.brain-stage[data-overall-activity="attention"] .brain-core {
+  box-shadow:
+    inset 0 2px 6px rgb(255 255 255 / 0.06),
+    inset 0 -18px 40px rgb(0 0 0 / 0.45),
+    0 0 84px color-mix(in oklab, var(--color-warning) 18%, transparent);
+}
+
 .brain-node {
   transition:
     transform var(--duration-fast) var(--ease-out),
@@ -1156,11 +1176,42 @@
     inset 0 0 0 1px color-mix(in oklab, var(--color-primary) 40%, transparent),
     0 0 24px color-mix(in oklab, var(--color-gold) 26%, transparent);
 }
+.brain-node[data-status="attention"] {
+  border-color: color-mix(in oklab, var(--color-warning) 40%, var(--color-border));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--color-warning) 28%, transparent),
+    var(--shadow-md);
+}
+.brain-node[data-status="progress"] {
+  border-color: color-mix(in oklab, var(--color-primary) 38%, var(--color-border));
+}
+.brain-node[data-status="completed"] {
+  border-color: color-mix(in oklab, var(--color-success) 36%, var(--color-border));
+}
+.brain-node[data-status="unavailable"] {
+  opacity: 0.78;
+}
+
+@keyframes brain-node-event {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-gold-soft) 34%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 12px color-mix(in oklab, var(--color-gold-soft) 0%, transparent);
+  }
+}
+.brain-node[data-recent-event="true"] {
+  animation: brain-node-event 1.8s ease-out 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .brain-node,
   .brain-node:hover,
   .brain-node:focus-visible {
     transform: none;
+  }
+  .brain-node[data-recent-event="true"] {
+    animation: none;
   }
 }
 

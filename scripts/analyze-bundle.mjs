@@ -22,8 +22,11 @@ const STATIC_DIR = join(OUT_DIR, "_next", "static");
 
 /** Budgets in kibibytes. */
 export const BUDGETS = {
-  /** Sum of the gzip size of every JS asset. */
-  totalJsGzipKiB: 900,
+  /** Sum of the gzip size of every JS asset. Ratcheted 900 → 920 for the
+   * intelligence / orchestration layers (E–M): landing brain experience, AI
+   * personal insight, decisions, adaptive execution, learning engine,
+   * brain-state. Actual after those layers: ~905 KiB. See ADR-0034. */
+  totalJsGzipKiB: 920,
   /** Sum of the raw (uncompressed) size of every JS asset. */
   totalJsRawKiB: 3200,
   /** Gzip size of the single largest JS chunk (the Firestore SDK chunk today). */

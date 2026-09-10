@@ -1,4 +1,5 @@
 import { SectionHeader } from "@/components/ui";
+import type { BrainModuleId } from "@/features/brain-hub";
 import { MARKETING_MODULES } from "./marketing-modules";
 import { Reveal } from "./Reveal";
 
@@ -9,7 +10,7 @@ import { Reveal } from "./Reveal";
  */
 
 // Even hexagon placement around the centre (percent coords, viewBox 0 0 100 100).
-const RING: { id: string; x: number; y: number }[] = [
+const RING: { id: BrainModuleId; x: number; y: number }[] = [
   { id: "plan", x: 50, y: 8 },
   { id: "goals", x: 87, y: 30 },
   { id: "focus", x: 87, y: 70 },
@@ -22,14 +23,21 @@ const MODULE_BY_ID = new Map(MARKETING_MODULES.map((pillar) => [pillar.id, pilla
 
 export function OneSystem() {
   return (
-    <section className="bg-section/40 py-24 sm:py-32">
+    <section id="operating-system" className="bg-section/40 py-24 sm:py-32">
       <div className="mx-auto max-w-5xl px-4">
         <Reveal>
           <SectionHeader
-            eyebrow="One system"
-            heading="Everything connected."
-            description="Planning, goals, focus, execution, growth, and analytics are not six apps bolted together — they are one system that shares a single source of truth."
+            eyebrow="Personal Operating System"
+            heading="Not another task manager."
+            description="Your goals, actions, growth, and decisions belong to one system. The brain keeps context connected so every action is traceable to intention."
           />
+        </Reveal>
+
+        <Reveal delay={70} className="mx-auto mt-8 max-w-3xl">
+          <p className="text-muted text-center text-base leading-relaxed sm:text-lg">
+            MASTERY does not make decisions for you. MASTERY makes your decisions better by
+            connecting direction, execution, and feedback in one operating model.
+          </p>
         </Reveal>
 
         <Reveal delay={100} className="mt-16">
@@ -77,7 +85,7 @@ export function OneSystem() {
             {/* centre */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
               <div className="mastery-glass mastery-glass--gold rounded-2xl px-5 py-3 text-center">
-                <span className="text-eyebrow">Mastery</span>
+                <span className="text-eyebrow">Decision Hub</span>
               </div>
             </div>
 
@@ -101,6 +109,29 @@ export function OneSystem() {
                 </div>
               );
             })}
+          </div>
+        </Reveal>
+
+        <Reveal delay={130} className="mt-12">
+          <div className="grid gap-4 md:grid-cols-3">
+            <article className="mastery-glass rounded-2xl p-4">
+              <p className="text-eyebrow">Shared context</p>
+              <p className="text-muted mt-2 text-sm leading-relaxed">
+                Goals, plans, and execution data live in one system instead of disconnected tools.
+              </p>
+            </article>
+            <article className="mastery-glass rounded-2xl p-4">
+              <p className="text-eyebrow">Execution clarity</p>
+              <p className="text-muted mt-2 text-sm leading-relaxed">
+                Focus and action layers keep daily work tied to long-range priorities.
+              </p>
+            </article>
+            <article className="mastery-glass rounded-2xl p-4">
+              <p className="text-eyebrow">Intelligence loop</p>
+              <p className="text-muted mt-2 text-sm leading-relaxed">
+                Analytics turns behavior into insight so each new cycle starts smarter.
+              </p>
+            </article>
           </div>
         </Reveal>
       </div>
