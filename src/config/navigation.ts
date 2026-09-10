@@ -86,6 +86,13 @@ export const COMMAND_CENTER_ITEM: NavItem = {
   description: "Unified operational view — now, attention, risk, decisions, next action",
 };
 
+export const STRATEGY_ITEM: NavItem = {
+  label: "Strategy",
+  href: "/strategy",
+  icon: Compass,
+  description: "Adaptive strategy engine — alignment, drift, options, trade-offs, reviews",
+};
+
 export const NAV_SECTIONS: NavSection[] = [
   {
     id: "plan",
@@ -233,6 +240,7 @@ export const ALL_NAV_ITEMS: NavItem[] = (() => {
     DASHBOARD_ITEM,
     BRAIN_HUB_ITEM,
     COMMAND_CENTER_ITEM,
+    STRATEGY_ITEM,
     ...NAV_SECTIONS.flatMap((section) => [
       {
         label: section.label,

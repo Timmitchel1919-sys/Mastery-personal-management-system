@@ -17,6 +17,7 @@ import { BreadcrumbTrail, PageContainer, PageHeader } from "@/components/layout"
 import { EmptyState } from "@/components/shared";
 import { Button, GlassCard, Progress, Skeleton } from "@/components/ui";
 import { BrainHub } from "@/features/brain-hub";
+import { StrategySignalsPanel } from "@/features/strategy";
 import { cn } from "@/lib/utils";
 import {
   COMMAND_SEVERITY_LABEL,
@@ -371,6 +372,9 @@ export function CommandCenterView() {
               </ul>
             )}
           </Panel>
+
+          {/* LEVEL 7 (Strategy) — high-relevance strategic signal only */}
+          <StrategySignalsPanel />
 
           {/* LEVEL 5 (Progress) — progressive disclosure */}
           <details className="mastery-panel rounded-2xl p-5 [&_summary]:cursor-pointer">

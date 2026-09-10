@@ -1327,3 +1327,28 @@ top chunk is the stable Firestore SDK vendor chunk, unchanged).
 - The gate stays enforced, just at the new line; a future layer that pushes past
   920 KiB must either trim or ratchet again with its own ADR.
 - No runtime behaviour change; this is a CI/test-config change only.
+
+## ADR-0035 — Ratchet the JS bundle budgets for the Command Center and Strategy Engine (Layers N–O)
+
+**Date:** 2026-09-10 · **Status:** accepted
+
+**Context.** Layer N (Personal Command Center) and Layer O (Adaptive Personal
+Strategy Engine) each add a new derived-state view plus its pure reducer, hook, and
+tests — first-party feature JS, no new dependency. After both, `npm test` failed
+`tests/unit/bundle-budget.test.ts` with `total JS gzip 940.3 KiB > 920 KiB budget`
+(the ADR-0034 line). `largestChunkGzip` is unchanged (192.8 / 240 — the stable
+Firestore SDK vendor chunk); `totalJsRaw` had crept to ~3197 / 3200 with effectively
+no headroom left.
+
+**Decision.** Ratchet `BUDGETS` in `scripts/analyze-bundle.mjs`:
+`totalJsGzipKiB` 920 → 960 and `totalJsRawKiB` 3200 → 3300. Consistent with the
+script's own docstring ("a *ratchet*, not a target: they sit a bit above today's
+real number") and with ADR-0034. The growth is expected first-party code spread
+across many small chunks with no single trimmable offender.
+
+**Consequences.**
+- The gate stays enforced at the new lines; a future layer past 960 KiB gzip must
+  trim or ratchet again with its own ADR.
+- No runtime behaviour change — CI/test-config only.
+- The raw budget now has ~100 KiB of headroom again; revisit if a heavy dependency
+  ever lands (that is what the `largestChunkGzip` line is really guarding).

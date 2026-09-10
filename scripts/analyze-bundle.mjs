@@ -22,13 +22,15 @@ const STATIC_DIR = join(OUT_DIR, "_next", "static");
 
 /** Budgets in kibibytes. */
 export const BUDGETS = {
-  /** Sum of the gzip size of every JS asset. Ratcheted 900 → 920 for the
-   * intelligence / orchestration layers (E–M): landing brain experience, AI
-   * personal insight, decisions, adaptive execution, learning engine,
-   * brain-state. Actual after those layers: ~905 KiB. See ADR-0034. */
-  totalJsGzipKiB: 920,
-  /** Sum of the raw (uncompressed) size of every JS asset. */
-  totalJsRawKiB: 3200,
+  /** Sum of the gzip size of every JS asset. Ratcheted 900 → 920 (ADR-0034, layers
+   * E–M) → 960 for the Command Center (Layer N) and Adaptive Strategy Engine
+   * (Layer O): two new derived-state views + their pure reducers, first-party JS
+   * across many small chunks, no dependency added. Actual after O: ~940 KiB.
+   * See ADR-0035. */
+  totalJsGzipKiB: 960,
+  /** Sum of the raw (uncompressed) size of every JS asset. Raised 3200 → 3300
+   * alongside the gzip ratchet (raw sat at ~3197 with no headroom). See ADR-0035. */
+  totalJsRawKiB: 3300,
   /** Gzip size of the single largest JS chunk (the Firestore SDK chunk today). */
   largestChunkGzipKiB: 240,
 };

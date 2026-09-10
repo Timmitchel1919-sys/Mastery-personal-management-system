@@ -21,6 +21,58 @@ Living build tracker. Updated at the end of every layer.
 
 ---
 
+## Active work — Layer O: Adaptive Personal Strategy Engine
+
+**Scope:** a strictly advisory strategy layer at `/strategy` that answers "where am I /
+where am I headed / what is changing / what are my options / what should I consider" by
+analysing state the earlier layers already derive. No new prediction/decision/learning
+engine; no repository access from presentation; nothing is applied automatically.
+
+**Changed / added files:**
+- `src/features/strategy/strategy-engine.ts` (+ `.test.ts`, 21 cases) — pure `buildStrategy`
+  (context, alignment, drift, goal health, bottlenecks, opportunities, trade-offs, five
+  scenarios, strategic debt, change detection, allocation, portfolio, structured
+  recommendations), `analyzeWhatIf` (FACT/ESTIMATE/ASSUMPTION), `buildStrategicReview`
+  (weekly / monthly KEEP·CHANGE·STOP·START / quarterly questions).
+- `src/features/strategy/use-strategy.ts` — composes useGoals + one batched plan read +
+  useIntelligence / usePredictions / useDecisions / useBrainSystemState.
+- `src/features/strategy/components/StrategyView.tsx` (+ `.test.tsx`, 6 cases).
+- `src/features/strategy/components/StrategySignalsPanel.tsx` — compact Command Center
+  surface (top signal only; null when nothing high-relevance).
+- `src/features/strategy/index.ts`; `src/app/(app)/strategy/page.tsx`.
+- `src/config/navigation.ts` — `STRATEGY_ITEM`; `src/components/layout/sidebar-nav.tsx` —
+  sidebar entry below Command Center (both rails).
+- `src/features/command-center/components/CommandCenterView.tsx` (+ test mock) — renders the
+  strategy signals panel.
+- `docs/CHANGELOG.md`.
+
+**Verification:** `npm run typecheck` ✅ · `npm run lint` ✅ (0/0) · `npm test` ✅ · `npm run build` ✅
+
+**Manual test steps:**
+1. Sign in, open **Strategy** from the sidebar (below Command Center) or visit `/strategy`.
+2. With no goals: an empty state invites you to open Goals. With goals: context strip,
+   recommendations (each REVIEW-only, with observation / evidence / option / benefit /
+   downside / confidence), alignment, drift (neutral language), goal health, bottlenecks,
+   opportunities, trade-offs, five scenarios, what-if, and the strategic review.
+3. Toggle the review cadence (weekly / monthly / quarterly) — monthly adds KEEP·CHANGE·
+   STOP·START; quarterly adds strategic questions the user answers.
+4. Pick a what-if option → FACT / ESTIMATE / ASSUMPTION stay in separate columns.
+5. Turn predictions off in Settings → the advisory banner notes it and scenario horizons
+   read "limited data".
+6. Open the Command Center → a small "Strategic signals" panel shows the top drift /
+   recommendation with an "Open Strategy" link (absent when nothing is high-relevance).
+7. Keyboard: all controls are real buttons / radios / links and tab-reachable; no bespoke
+   motion added.
+
+**Known limitations:**
+- Change detection is sparse until more history/audit data accrues — the view says so.
+- Learning-pattern integration currently reads the intelligence pattern feed;
+  the Layer L outcome-event store is a typed extension point, not yet populated.
+- Strategy → AI Workforce proposal flow is not wired (no AI Workforce service in the repo);
+  recommendations stay REVIEW-only, which already satisfies the safety contract.
+
+---
+
 ## Active work — Layer N: Personal Command Center
 
 **Scope:** a unified operational cockpit at `/command` that answers five questions — what
@@ -100,6 +152,20 @@ no repository access from presentation.
 ---
 
 ## Layer log
+
+### 2026-09-10 — Layer O: Adaptive Personal Strategy Engine
+
+Added `/strategy` — a strictly advisory analysis over already-derived state (goals, plans,
+intelligence, predictions, decisions, brain-system-state). Pure `buildStrategy` reducer +
+`analyzeWhatIf` + `buildStrategicReview` (weekly / monthly / quarterly) + `useStrategy`
+composer + `StrategyView`. Surfaces alignment, strategic drift (neutral language), goal
+health (signal-derived, not scored), bottlenecks, evidence-backed opportunities,
+trade-offs, five scenarios with horizon downgrade sans predictions, aged strategic debt,
+change detection, allocation notes, a portfolio table, and structured recommendations that
+are always REVIEW — never auto-APPLY. A small `StrategySignalsPanel` surfaces the single
+top signal in the Command Center. Sidebar entry below Command Center. No new
+prediction/decision/learning engine; no repository access from presentation. 27 new tests
+(21 engine + 6 view). typecheck / lint / test / build green.
 
 ### 2026-09-10 — Layer N: Personal Command Center
 

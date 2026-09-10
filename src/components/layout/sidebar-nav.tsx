@@ -9,6 +9,7 @@ import {
   BRAIN_HUB_ITEM,
   COMMAND_CENTER_ITEM,
   DASHBOARD_ITEM,
+  STRATEGY_ITEM,
   NAV_SECTIONS,
   SYSTEM_ITEMS,
   isNavItemActive,
@@ -203,6 +204,7 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
   const dashboardActive = isNavItemActive(pathname, DASHBOARD_ITEM.href);
   const brainHubActive = isNavItemActive(pathname, BRAIN_HUB_ITEM.href);
   const commandCenterActive = isNavItemActive(pathname, COMMAND_CENTER_ITEM.href);
+  const strategyActive = isNavItemActive(pathname, STRATEGY_ITEM.href);
 
   return (
     <nav aria-label={t("nav.primary")} className="flex flex-1 flex-col gap-2 overflow-y-auto p-3">
@@ -258,6 +260,25 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
             item={COMMAND_CENTER_ITEM}
             label={label(COMMAND_CENTER_ITEM.href, COMMAND_CENTER_ITEM.label)}
             active={commandCenterActive}
+            onNavigate={onNavigate}
+          />
+        </NavCard>
+      )}
+
+      {collapsed ? (
+        <NavLink
+          item={STRATEGY_ITEM}
+          label={label(STRATEGY_ITEM.href, STRATEGY_ITEM.label)}
+          active={strategyActive}
+          collapsed
+          onNavigate={onNavigate}
+        />
+      ) : (
+        <NavCard active={strategyActive}>
+          <NavCardLink
+            item={STRATEGY_ITEM}
+            label={label(STRATEGY_ITEM.href, STRATEGY_ITEM.label)}
+            active={strategyActive}
             onNavigate={onNavigate}
           />
         </NavCard>

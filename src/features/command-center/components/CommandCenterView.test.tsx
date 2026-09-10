@@ -9,6 +9,7 @@ let value: { status: "loading" | "ready"; state: CommandCenterState; brainState:
 vi.mock("next/navigation", () => ({ usePathname: () => "/command", useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("../use-command-center", () => ({ useCommandCenter: () => value }));
 vi.mock("@/features/brain-hub", () => ({ BrainHub: () => <div data-testid="brain-hub" /> }));
+vi.mock("@/features/strategy", () => ({ StrategySignalsPanel: () => <div data-testid="strategy-signals" /> }));
 
 import { CommandCenterView } from "./CommandCenterView";
 

@@ -6,6 +6,55 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer O — Adaptive Personal Strategy Engine — 2026-09-10
+
+**Added**
+- `src/features/strategy/strategy-engine.ts` — a pure, deterministic, strictly advisory
+  analysis over already-derived state (goals, plans, intelligence, predictions, decisions,
+  brain-system-state). `buildStrategy` produces a strategic context, per-goal alignment,
+  strategic-drift signals (neutral language), goal health (from signals, not scores),
+  bottlenecks, evidence-backed opportunities, trade-offs, the five scenarios
+  (current-course / accelerate / defer / reduce / restructure) with horizon downgrade when
+  predictions are absent, strategic debt (aged), change detection, resource-allocation
+  notes, a portfolio view, and structured recommendations
+  (title / observation / evidence / option / benefit / downside / confidence / userAction —
+  always REVIEW, never auto-APPLY). `analyzeWhatIf` keeps FACT / ESTIMATE / ASSUMPTION
+  separate; `buildStrategicReview` produces weekly / monthly (KEEP·CHANGE·STOP·START) /
+  quarterly (strategic questions) summaries with hedged causal language.
+- `src/features/strategy/strategy-engine.test.ts` — 21 cases across context, alignment,
+  drift, goal health, bottlenecks, opportunities, trade-offs, scenarios, what-if,
+  recommendation structure, strategic debt, change detection, graceful degradation, and
+  the three review cadences.
+- `src/features/strategy/use-strategy.ts` — composes the existing hooks + one batched plan
+  read; exposes `{ status, state, review, whatIf, reload }`.
+- `src/features/strategy/components/StrategyView.tsx` + `.test.tsx` — the `/strategy` screen:
+  context strip, recommendations, alignment, drift, goal health, bottlenecks,
+  opportunities, trade-offs, scenarios, interactive what-if, strategic review
+  (weekly/monthly/quarterly), and progressive-disclosure portfolio / strategic debt /
+  changes / allocation.
+- `src/features/strategy/components/StrategySignalsPanel.tsx` — a deliberately small
+  Command Center surface: the single most relevant strategic signal + a link into
+  `/strategy`; renders nothing when there is no high-relevance item.
+- `src/app/(app)/strategy/page.tsx`; `STRATEGY_ITEM` in `src/config/navigation.ts` wired
+  into the sidebar below Command Center; the signals panel added to `CommandCenterView`.
+
+**Changed**
+- Nothing removed. No new prediction, decision, or learning engine — Layer O consumes
+  Layers J / K / L output. No repository access from presentation.
+
+**Safety / grounding**
+- Strictly advisory: never changes a goal, deletes a plan, re-prioritises an objective, or
+  executes anything. Every recommendation's `userAction` is `REVIEW`.
+- Confidence is `high | medium | low | insufficient-data` — no fake precision; the engine
+  says "insufficient data" rather than guessing, and scenario horizons downgrade to
+  `limited-data` without predictions.
+
+**Verified**
+- `npm run typecheck`
+- `npm run lint`
+- `npm test`
+- `npm run build`
+
 ### Layer N — Personal Command Center — 2026-09-10
 
 **Added**
