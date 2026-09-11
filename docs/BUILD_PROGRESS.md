@@ -21,6 +21,72 @@ Living build tracker. Updated at the end of every layer.
 
 ---
 
+## Active work — Layer S: Continuous Adaptation & Personal Operating Intelligence
+
+**Scope:** a closed-loop synthesis layer at `/adaptation` — observe → interpret → evaluate
+→ recommend, over Layers J/K/L/O/P/Q/R's own output (no re-derivation, no duplicate
+engine). Signals, health indicators, and evidence-backed adaptation proposals; never
+auto-applies; never touches stable values, vision, or major goals.
+
+**Changed / added files:**
+- `src/features/adaptation/adaptation-model.ts` (+ `.test.ts`, 25 cases) — `buildSignals`
+  (11 types, 5 severities, deduplicated, synthesised from Strategy/Predictions/Twin/
+  Context, nothing fabricated), `buildPlanHealth` / `buildProjectHealth` / `buildFocusHealth`
+  / `buildSystemHealth` (goal health reused from Strategy, not duplicated),
+  `buildAdaptationProposals` (11 adaptation types, always `requiresApproval`, confidence +
+  evidence + assumptions + limitations), `isProposalStale`, `detectProposalConflicts`,
+  `prioritizeProposals` (documented severity × confidence formula), `buildNotifications`
+  (capped, high-signal only), `buildDailyBrief`.
+- `src/features/adaptation/use-adaptation.ts` — composes useStrategy / usePredictions /
+  useDigitalTwin / useKnowledgeContext / useDecisions / useAutonomy + one batched plan read.
+- `src/features/adaptation/components/AdaptationCenterView.tsx` (+ `.test.tsx`, 6 cases) —
+  the `/adaptation` screen.
+- `src/features/adaptation/components/AdaptationSignalsPanel.tsx` (+ `.test.tsx`, 3 cases) —
+  compact Command Center surface.
+- `src/features/adaptation/index.ts`; `src/app/(app)/adaptation/page.tsx`.
+- `src/config/navigation.ts` — `ADAPTATION_ITEM`; `src/components/layout/sidebar-nav.tsx` —
+  sidebar entry below Trust Center (both rails).
+- `src/features/command-center/components/CommandCenterView.tsx` — adaptation-signals strip
+  (+ test mock).
+- `docs/CHANGELOG.md`.
+
+**Verification:** `npm run typecheck` ✅ · `npm run lint` ✅ (0/0) · `npm test` ✅ · `npm run build` ✅
+
+**Manual test steps:**
+1. Sign in, open **Adaptation** from the sidebar (below Trust Center) or visit
+   `/adaptation`. Today's brief summarises priorities/deadlines/conflicts/risks from real
+   signals; weekly/monthly review links to Strategy rather than duplicating it.
+2. The Signals list shows every detected signal, most severe first, each with its source
+   module and evidence.
+3. Adaptation proposals show WHAT changed / WHY / EVIDENCE / EXPECTED IMPACT / RISKS /
+   ALTERNATIVES / CONFIDENCE. "Approve → Trust Center" enqueues a prepared draft in
+   `/operations` (nothing executes automatically); "Simulate first" links to `/simulation`;
+   "Dismiss" hides it (persisted per device).
+4. Two opposing proposals (e.g. reduce scope vs increase focus on the same area) surface a
+   "Conflicting adaptations" alert instead of both being offered as safe to apply together.
+5. Command Center shows a compact adaptation strip (top signal + proposal count) only when
+   there is something worth surfacing.
+6. With Intelligence or Predictions erroring: a "system state degraded" banner appears but
+   deterministic signals/proposals keep working.
+7. Keyboard: every control is a real button/link; status changes are plain text, not
+   color-only.
+
+**Known limitations:**
+- Pattern detection is snapshot-based (counts as evidence of repetition — e.g. "3 overdue
+  tasks") rather than a stored time series of past reschedules/deferrals; a dedicated event
+  log would sharpen `BEHAVIORAL_PATTERN_SIGNAL` further.
+- "Approve" maps every proposal to a `PREPARE_PLAN_DRAFT` Trust Center action rather than a
+  type-specific autonomy action, since Layer R's catalog doesn't yet have a 1:1 entry for
+  every adaptation type (e.g. REALLOCATE, SIMPLIFY) — always safe and approval-eligible,
+  but not yet type-precise.
+- AI Workforce / IntelligenceProvider abstraction is not introduced — no such runtime
+  exists in the repo yet; the deterministic engine already satisfies "must work without
+  AI," so this is additive when an AI Workforce runtime lands.
+- 3D Brain adaptation-state visuals (STABLE/ANALYZING/SIMULATING/ADAPTING/…) are left to a
+  later pass; the 2D Adaptation center is the complete, accessible required path.
+
+---
+
 ## Active work — Layer R: Autonomous Personal Operations
 
 **Scope:** a bounded, transparent, auditable execution layer at `/operations` (the Trust
@@ -343,6 +409,19 @@ no repository access from presentation.
 ---
 
 ## Layer log
+
+### 2026-09-11 — Layer S: Continuous Adaptation & Personal Operating Intelligence
+
+Added `/adaptation` — a closed-loop synthesis over Layers J/K/L/O/P/Q/R's own output (no
+duplicate engine). Pure `adaptation-model.ts` (11 signal types / 5 severities, plan/project/
+focus/system health — goal health reused from Strategy, 11 adaptation types with
+always-approval proposals, staleness + conflict detection, a documented priority formula,
+capped notifications, a daily brief) + `useAdaptation` composer + `AdaptationCenterView` +
+compact `AdaptationSignalsPanel` in the Command Center. Approving a proposal routes into
+the existing Layer R policy/approval pipeline rather than a new execution path; nothing
+auto-applies; stable values and major goals are never touched. Sidebar entry below Trust
+Center. 34 new tests (25 model + 6 center view + 3 signals panel). typecheck / lint / test
+/ build green.
 
 ### 2026-09-10 — Layer R: Autonomous Personal Operations
 

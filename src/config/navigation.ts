@@ -114,6 +114,13 @@ export const OPERATIONS_ITEM: NavItem = {
   description: "Autonomous operations — autonomy level, permissions, approvals, execution history",
 };
 
+export const ADAPTATION_ITEM: NavItem = {
+  label: "Adaptation",
+  href: "/adaptation",
+  icon: Activity,
+  description: "Continuous adaptation — signals, health, and evidence-backed proposals",
+};
+
 export const NAV_SECTIONS: NavSection[] = [
   {
     id: "plan",
@@ -265,6 +272,7 @@ export const ALL_NAV_ITEMS: NavItem[] = (() => {
     KNOWLEDGE_ITEM,
     SIMULATION_ITEM,
     OPERATIONS_ITEM,
+    ADAPTATION_ITEM,
     ...NAV_SECTIONS.flatMap((section) => [
       {
         label: section.label,

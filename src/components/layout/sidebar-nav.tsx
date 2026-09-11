@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
 import {
+  ADAPTATION_ITEM,
   BRAIN_HUB_ITEM,
   COMMAND_CENTER_ITEM,
   DASHBOARD_ITEM,
@@ -211,6 +212,7 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
   const knowledgeActive = isNavItemActive(pathname, KNOWLEDGE_ITEM.href);
   const simulationActive = isNavItemActive(pathname, SIMULATION_ITEM.href);
   const operationsActive = isNavItemActive(pathname, OPERATIONS_ITEM.href);
+  const adaptationActive = isNavItemActive(pathname, ADAPTATION_ITEM.href);
 
   return (
     <nav aria-label={t("nav.primary")} className="flex flex-1 flex-col gap-2 overflow-y-auto p-3">
@@ -342,6 +344,25 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
             item={OPERATIONS_ITEM}
             label={label(OPERATIONS_ITEM.href, OPERATIONS_ITEM.label)}
             active={operationsActive}
+            onNavigate={onNavigate}
+          />
+        </NavCard>
+      )}
+
+      {collapsed ? (
+        <NavLink
+          item={ADAPTATION_ITEM}
+          label={label(ADAPTATION_ITEM.href, ADAPTATION_ITEM.label)}
+          active={adaptationActive}
+          collapsed
+          onNavigate={onNavigate}
+        />
+      ) : (
+        <NavCard active={adaptationActive}>
+          <NavCardLink
+            item={ADAPTATION_ITEM}
+            label={label(ADAPTATION_ITEM.href, ADAPTATION_ITEM.label)}
+            active={adaptationActive}
             onNavigate={onNavigate}
           />
         </NavCard>

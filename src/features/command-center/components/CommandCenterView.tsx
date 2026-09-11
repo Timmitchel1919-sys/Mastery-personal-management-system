@@ -16,6 +16,7 @@ import {
 import { BreadcrumbTrail, PageContainer, PageHeader } from "@/components/layout";
 import { EmptyState } from "@/components/shared";
 import { Button, GlassCard, Progress, Skeleton } from "@/components/ui";
+import { AdaptationSignalsPanel } from "@/features/adaptation";
 import { PendingApprovalsPanel } from "@/features/autonomy";
 import { BrainHub } from "@/features/brain-hub";
 import { RelevantContextPanel } from "@/features/context";
@@ -247,7 +248,7 @@ export function CommandCenterView() {
                 </span>
                 .
               </p>
-              <BrainHub systemState={brainState} className="min-h-[280px]" />
+              <BrainHub systemState={brainState} className=" " />
             </section>
           </div>
 
@@ -377,6 +378,9 @@ export function CommandCenterView() {
 
           {/* LEVEL 7 (Strategy) — high-relevance strategic signal only */}
           <StrategySignalsPanel />
+
+          {/* Continuous adaptation — top signal + proposals awaiting review */}
+          <AdaptationSignalsPanel />
 
           {/* Autonomous operations — pending approvals / running / failed */}
           <PendingApprovalsPanel />

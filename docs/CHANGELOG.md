@@ -6,6 +6,64 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer S — Continuous Adaptation & Personal Operating Intelligence — 2026-09-11
+
+**Added**
+- `src/features/adaptation/adaptation-model.ts` — a pure synthesis layer that closes the
+  loop (observe → interpret → evaluate → recommend) over Layers J/K/L/O/P/Q/R's own output
+  — it never re-derives what they already compute. `buildSignals` turns Strategy's drift /
+  goal health / bottlenecks, raw Predictions, the Digital Twin's capacity + historical
+  calibration, and Knowledge context conflicts into a deduplicated, severity-ranked
+  `Signal[]` (11 types, 5 severities, every one traceable to real evidence).
+  `buildPlanHealth` / `buildProjectHealth` / `buildFocusHealth` / `buildSystemHealth` are
+  new indicator models (goal health is reused as-is from Strategy — no competing score).
+  `buildAdaptationProposals` turns significant signals (HIGH/CRITICAL, or MEDIUM with
+  evidence — never one insignificant event) into evidence-backed, always-`requiresApproval`
+  proposals across 11 adaptation types, each with confidence / evidence / assumptions /
+  limitations. `isProposalStale` (signal no longer holds, or past a 24h validity window),
+  `detectProposalConflicts` (opposing adaptation types are surfaced, never both applied),
+  and `prioritizeProposals` (a documented severity × confidence formula, not arbitrary
+  order) round out the proposal pipeline. `buildNotifications` (capped at 5, only
+  HIGH/CRITICAL signals and pending proposals — never one per minor signal) and
+  `buildDailyBrief` (priorities / deadlines / conflicts / risks / recommended actions)
+  complete the digest layer; weekly/monthly review stays Strategy's `buildStrategicReview`,
+  reused rather than duplicated.
+- `src/features/adaptation/adaptation-model.test.ts` — 25 cases across signal synthesis +
+  dedupe + severity ordering, the four health models, proposal generation/structure,
+  staleness, conflicts, prioritisation, notification capping, and the daily brief.
+- `src/features/adaptation/use-adaptation.ts` — composes Strategy / Predictions / the
+  Digital Twin / Knowledge context / Decisions / Autonomy's pause flag + one batched plan
+  read into the signal → health → proposal → digest pipeline.
+- `src/features/adaptation/components/AdaptationCenterView.tsx` (+ `.test.tsx`, 6 cases) —
+  the `/adaptation` screen: today's brief, conflicting-adaptations alert, proposal review
+  cards (what changed / why / evidence / expected impact / risks / alternatives /
+  confidence, with Approve → Trust Center / Simulate first / Dismiss), the signal feed, and
+  a system-vs-user state overview.
+- `src/features/adaptation/components/AdaptationSignalsPanel.tsx` (+ `.test.tsx`, 3 cases) —
+  a deliberately small Command Center surface (top signal + proposal count); renders
+  nothing when there is nothing worth surfacing.
+- `src/app/(app)/adaptation/page.tsx`; `ADAPTATION_ITEM` in the sidebar below Trust Center.
+- Command Center gets the adaptation-signals strip.
+
+**Changed**
+- Nothing removed. No new orchestration layer; Approve routes a proposal into the existing
+  Layer R policy → approval → execution pipeline as a `PREPARE_PLAN_DRAFT` (always
+  approval-eligible; nothing executes automatically) rather than inventing a parallel
+  execution path.
+
+**Safety / grounding**
+- Adaptation only ever touches adaptive operations (schedules, allocation, priorities,
+  workflow) — it never proposes changing a goal's identity, a stable value, or the user's
+  vision; `MODIFY_STRATEGIC_GOAL`-class changes stay out of the automatable set.
+- Every proposal is reviewable and `requiresApproval: true`; nothing is ever auto-applied.
+  Confidence is `high | medium | low`, never fabricated precision.
+
+**Verified**
+- `npm run typecheck`
+- `npm run lint`
+- `npm test`
+- `npm run build`
+
 ### Layer R — Autonomous Personal Operations — 2026-09-10
 
 **Added**
