@@ -11,6 +11,7 @@ vi.mock("../use-command-center", () => ({ useCommandCenter: () => value }));
 vi.mock("@/features/brain-hub", () => ({ BrainHub: () => <div data-testid="brain-hub" /> }));
 vi.mock("@/features/strategy", () => ({ StrategySignalsPanel: () => <div data-testid="strategy-signals" /> }));
 vi.mock("@/features/context", () => ({ RelevantContextPanel: () => <div data-testid="relevant-context" /> }));
+vi.mock("@/features/autonomy", () => ({ PendingApprovalsPanel: () => <div data-testid="pending-approvals" /> }));
 
 import { CommandCenterView } from "./CommandCenterView";
 

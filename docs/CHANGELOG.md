@@ -6,6 +6,67 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer R — Autonomous Personal Operations — 2026-09-10
+
+**Added**
+- `src/features/autonomy/autonomy-model.ts` — a deterministic policy + lifecycle + safety
+  engine. Six bounded autonomy levels (OBSERVE → PROHIBITED); an 18-type action catalog
+  tagging risk / required capability / reversibility / whether it is internally
+  executable, with money / deletion / security / legal / medical actions permanently
+  `prohibited`; `evaluatePolicy` (ALLOW / DENY / REQUIRE_APPROVAL — hard denials first,
+  least-privilege capability check, high-risk always needs approval, low-risk auto-execute
+  only when explicitly allow-listed at level ≥ 3); a 12-state lifecycle
+  (PROPOSED → … → COMPLETED, with REJECTED/CANCELLED/FAILED/EXPIRED/ROLLED_BACK) via a pure
+  state machine; `checkAutomationSafety` (circular-dependency detection, chain-depth limit,
+  idempotency-key duplicate rejection, per-hour rate limit, prerequisite-failure blocking);
+  `runOpsAction` + `verifyOpsAction` (only the 7 safe internal action types actually run —
+  summarise / brief / prepare-draft / reminder / recalc-analytics / classify — and nothing
+  is ever assumed successful without a checkable verified state); `evaluateAutomationRule`
+  (WHEN/THEN rules that can never propose a strategic-goal change or a prohibited action);
+  `minimizeContextForExecutor` (per-action-type allow-list, never the whole context);
+  `summarizeTelemetry` (honest execution/approval/automation/rollback rates).
+- `src/features/autonomy/autonomy-model.test.ts` — 34 cases across classification, policy
+  decisions, lifecycle transitions, safety guards, execution + verification, retry policy,
+  automation rules, context minimisation, telemetry.
+- `src/features/autonomy/use-autonomy.ts` (+ `.test.ts`, 9 cases) — the runtime: policy +
+  rules + emergency-stop flag + queue + history in localStorage; `enqueue` runs the safety
+  check then the policy engine before anything is queued; `execute` refuses to run while
+  paused, runs + verifies, and records history; `approve` / `reject` / `cancel` / `rollback`
+  drive the same state machine.
+- `src/features/autonomy/components/ApprovalCard.tsx` (+ `.test.tsx`) — the standardised
+  approval gate: action / why / affected data / expected result / risk / reversibility /
+  executor, with explicit Approve / Reject / Edit.
+- `src/features/autonomy/components/TrustCenterView.tsx` (+ `.test.tsx`) — the `/operations`
+  screen: autonomy-level picker, per-action-type permission matrix (allow / approval /
+  block — prohibited and non-internal types can't be set to allow), a global
+  pause-all-automations control, pending approvals, the execution queue (run / cancel /
+  roll back), automation rules (add / toggle / delete), and execution history.
+- `src/features/autonomy/components/PendingApprovalsPanel.tsx` — a compact Command Center
+  strip (pending / running / failed counts + a Trust Center link); renders nothing when
+  there is no autonomous activity.
+- `src/app/(app)/operations/page.tsx`; `OPERATIONS_ITEM` in the sidebar below Simulation.
+- Command Center gets the pending-approvals strip.
+
+**Changed**
+- Nothing removed. No new orchestration layer, no new AI Workforce/agent runtime — the
+  engine reuses the existing `@/features/actions` `ActionSource` type and slots into the
+  documented Strategy → Simulation → Policy → Approval → Execution flow.
+
+**Safety / grounding**
+- Money movement, deletions, security/authentication changes, legal commitments and
+  medical decisions are hard-coded `prohibited` — the policy engine denies them
+  unconditionally, at every autonomy level, regardless of user configuration.
+- AI/automation can propose; it can never authorize its own action — every action passes
+  through the deterministic policy engine, and execution never runs while automations are
+  paused (emergency stop).
+- Execution results are verified, not assumed; failures never silently retry.
+
+**Verified**
+- `npm run typecheck`
+- `npm run lint`
+- `npm test`
+- `npm run build`
+
 ### Layer Q — Personal Digital Twin & Simulation Engine — 2026-09-10
 
 **Added**

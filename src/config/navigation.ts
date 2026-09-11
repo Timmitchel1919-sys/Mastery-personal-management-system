@@ -107,6 +107,13 @@ export const SIMULATION_ITEM: NavItem = {
   description: "Personal digital twin — sandbox what-if scenarios, compare, then decide",
 };
 
+export const OPERATIONS_ITEM: NavItem = {
+  label: "Trust Center",
+  href: "/operations",
+  icon: ShieldCheck,
+  description: "Autonomous operations — autonomy level, permissions, approvals, execution history",
+};
+
 export const NAV_SECTIONS: NavSection[] = [
   {
     id: "plan",
@@ -257,6 +264,7 @@ export const ALL_NAV_ITEMS: NavItem[] = (() => {
     STRATEGY_ITEM,
     KNOWLEDGE_ITEM,
     SIMULATION_ITEM,
+    OPERATIONS_ITEM,
     ...NAV_SECTIONS.flatMap((section) => [
       {
         label: section.label,

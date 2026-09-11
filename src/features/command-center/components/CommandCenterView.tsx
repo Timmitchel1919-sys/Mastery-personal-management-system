@@ -16,6 +16,7 @@ import {
 import { BreadcrumbTrail, PageContainer, PageHeader } from "@/components/layout";
 import { EmptyState } from "@/components/shared";
 import { Button, GlassCard, Progress, Skeleton } from "@/components/ui";
+import { PendingApprovalsPanel } from "@/features/autonomy";
 import { BrainHub } from "@/features/brain-hub";
 import { RelevantContextPanel } from "@/features/context";
 import { StrategySignalsPanel } from "@/features/strategy";
@@ -246,7 +247,7 @@ export function CommandCenterView() {
                 </span>
                 .
               </p>
-              <BrainHub systemState={brainState} className="min-h-70p" />
+              <BrainHub systemState={brainState} className="min-h-[280px]" />
             </section>
           </div>
 
@@ -376,6 +377,9 @@ export function CommandCenterView() {
 
           {/* LEVEL 7 (Strategy) — high-relevance strategic signal only */}
           <StrategySignalsPanel />
+
+          {/* Autonomous operations — pending approvals / running / failed */}
+          <PendingApprovalsPanel />
 
           {/* Knowledge — a compact, scoped "what history is relevant" strip */}
           <RelevantContextPanel scope={{ module: "dashboard" }} limit={3} compact />

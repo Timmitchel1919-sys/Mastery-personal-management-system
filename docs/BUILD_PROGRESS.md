@@ -21,6 +21,72 @@ Living build tracker. Updated at the end of every layer.
 
 ---
 
+## Active work — Layer R: Autonomous Personal Operations
+
+**Scope:** a bounded, transparent, auditable execution layer at `/operations` (the Trust
+Center). MASTERY moves from understand→analyze→recommend toward
+understand→plan→prepare→execute→verify→learn→improve, but only within explicit user
+policy: six autonomy levels, an 18-type action catalog with hard-coded prohibitions
+(money, deletion, security, legal, medical), a deterministic ALLOW/DENY/REQUIRE_APPROVAL
+policy engine, a 12-state verified lifecycle, and a global emergency stop.
+
+**Changed / added files:**
+- `src/features/autonomy/autonomy-model.ts` (+ `.test.ts`, 34 cases) — autonomy levels,
+  action catalog, `evaluatePolicy`, the lifecycle state machine, `checkAutomationSafety`
+  (loop/duplicate/rate-limit/dependency guards), `runOpsAction` + `verifyOpsAction` (7 safe
+  internal types actually execute + verify; everything else stays prepared-only),
+  `evaluateAutomationRule`, `minimizeContextForExecutor`, `summarizeTelemetry`.
+- `src/features/autonomy/use-autonomy.ts` (+ `.test.ts`, 9 cases) — localStorage runtime:
+  policy, rules, emergency-stop flag, live queue, history; `enqueue` → safety check →
+  policy engine → PROPOSED/QUEUED/WAITING_APPROVAL/REJECTED; `execute` verifies before
+  COMPLETED and refuses to run while paused.
+- `src/features/autonomy/components/ApprovalCard.tsx` (+ `.test.tsx`, 3 cases).
+- `src/features/autonomy/components/TrustCenterView.tsx` (+ `.test.tsx`, 6 cases) — the
+  `/operations` screen.
+- `src/features/autonomy/components/PendingApprovalsPanel.tsx` — compact Command Center
+  strip.
+- `src/features/autonomy/index.ts`; `src/app/(app)/operations/page.tsx`.
+- `src/config/navigation.ts` — `OPERATIONS_ITEM`; `src/components/layout/sidebar-nav.tsx` —
+  sidebar entry below Simulation (both rails).
+- `src/features/command-center/components/CommandCenterView.tsx` — pending-approvals strip
+  (+ test mock).
+- `docs/CHANGELOG.md`.
+
+**Verification:** `npm run typecheck` ✅ · `npm run lint` ✅ (0/0) · `npm test` ✅ · `npm run build` ✅
+
+**Manual test steps:**
+1. Sign in, open **Trust Center** from the sidebar (below Simulation) or visit
+   `/operations`. Pick an autonomy level; note the description of each.
+2. In Agent permissions, try to set "Move money" or "Permanently delete a goal" to
+   *allow* — the control is disabled; those types can never auto-run.
+3. Set "Summarise today" to *allow*, raise autonomy to level 3, click "Propose 'Summarise
+   today'" — it queues immediately; "Run now" executes and verifies it (shows a ✓ result).
+4. Lower autonomy or leave an action off the allow-list, propose one — it lands in
+   **Pending approvals** as an `ApprovalCard` (action / why / affected data / expected
+   result / risk / reversibility / executor); Approve queues it, Reject records it.
+5. Click **Pause all automations** — a banner appears and "Run now" on a queued action
+   now refuses with "Automations are paused."; Resume restores it.
+6. Add an automation rule (e.g. TIME_MORNING → Prepare briefing); toggle and delete it.
+7. Execution history lists every outcome with its policy decision and verification mark.
+8. Open the Command Center → the "Autonomous operations" strip shows counts and links back
+   here (absent when nothing is pending/running/failed and nothing is paused).
+9. Keyboard: every control is a real button/switch/select; permission buttons use
+   `aria-pressed`.
+
+**Known limitations:**
+- Policy, rules, queue and history are per-device (localStorage), consistent with the
+  decisions / context / twin layers; server-side authorization + a real AI Workforce
+  executor runtime are the natural next step (no such runtime exists in the repo yet).
+- Only 7 low-risk action types are internally executable in this build (summaries, briefs,
+  drafts, reminders, analytics recalculation, classification); everything else is
+  correctly routed to REQUIRE_APPROVAL / prepared-only, never fabricated as "done".
+- Rollback is a status transition (ROLLED_BACK) for reversible actions — there is no real
+  external state to undo yet, since nothing here mutates a domain repository.
+- 3D Brain execution-state visualisation (READY/THINKING/EXECUTING/…) is left to a later
+  pass; the 2D Trust Center is the required non-3D, fully accessible path.
+
+---
+
 ## Active work — Layer Q: Personal Digital Twin & Simulation Engine
 
 **Scope:** a deterministic sandbox at `/simulation` that represents the user's operational
@@ -277,6 +343,21 @@ no repository access from presentation.
 ---
 
 ## Layer log
+
+### 2026-09-10 — Layer R: Autonomous Personal Operations
+
+Added `/operations` (Trust Center) — a bounded, transparent, auditable execution layer.
+Pure `autonomy-model.ts` (6 autonomy levels, 18-type action catalog with hard-coded
+prohibitions, `evaluatePolicy` ALLOW/DENY/REQUIRE_APPROVAL, a 12-state verified lifecycle
+state machine, loop/duplicate/rate-limit/dependency safety guards, deterministic execution
++ verification for 7 safe internal action types, WHEN/THEN automation rules, context
+minimisation, honest telemetry) + `useAutonomy` localStorage runtime (policy, rules,
+emergency stop, queue, history) + `TrustCenterView` + reusable `ApprovalCard` + compact
+`PendingApprovalsPanel` in the Command Center. Money, deletion, security, legal and medical
+actions are permanently prohibited regardless of policy; AI/automation can propose but
+never self-authorize; nothing executes while paused; nothing is assumed successful without
+verification. Sidebar entry below Simulation. 52 new tests (34 model + 9 store + 3 approval
+card + 6 trust-center). typecheck / lint / test / build green.
 
 ### 2026-09-10 — Layer Q: Personal Digital Twin & Simulation Engine
 
