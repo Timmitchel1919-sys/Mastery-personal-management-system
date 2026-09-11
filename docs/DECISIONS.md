@@ -1352,3 +1352,30 @@ across many small chunks with no single trimmable offender.
 - No runtime behaviour change — CI/test-config only.
 - The raw budget now has ~100 KiB of headroom again; revisit if a heavy dependency
   ever lands (that is what the `largestChunkGzip` line is really guarding).
+
+## ADR-0036 — Ratchet the JS bundle budgets for the Knowledge and Simulation layers (P–Q)
+
+**Date:** 2026-09-10 · **Status:** accepted
+
+**Context.** Layer P (Knowledge & Personal Context Engine, `/knowledge`) and Layer Q
+(Personal Digital Twin & Simulation Engine, `/simulation`) each add a new
+derived-state view plus its pure reducer, hook, store, and tests — first-party
+feature JS, no new dependency. After Q, `node scripts/analyze-bundle.mjs` reports
+`total JS gzip 989.7 KiB > 960 KiB` and `total JS raw 3373 KiB > 3300 KiB` (the
+ADR-0035 lines). `largestChunkGzip` is unchanged (192.8 / 240 — the stable
+Firestore SDK vendor chunk).
+
+**Decision.** Ratchet `BUDGETS` in `scripts/analyze-bundle.mjs`:
+`totalJsGzipKiB` 960 → 1020 and `totalJsRawKiB` 3300 → 3500. Consistent with the
+script's docstring ("a *ratchet*, not a target") and with ADR-0034 / ADR-0035.
+The growth is expected first-party code spread across many small chunks with no
+single trimmable offender.
+
+**Consequences.**
+- The gate stays enforced at the new lines; a future layer past 1020 KiB gzip
+  must trim or ratchet again with its own ADR.
+- No runtime behaviour change — CI/test-config only.
+- The N-layer intelligence build (N–Q) has now added ~85 KiB gzip of view code
+  in one session; if the trend continues, the next review should look at
+  route-level code-splitting for the `(app)` intelligence views rather than
+  ratcheting a fifth time.

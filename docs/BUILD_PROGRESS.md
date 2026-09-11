@@ -21,6 +21,70 @@ Living build tracker. Updated at the end of every layer.
 
 ---
 
+## Active work — Layer Q: Personal Digital Twin & Simulation Engine
+
+**Scope:** a deterministic sandbox at `/simulation` that represents the user's operational
+state, lets them draft what-if scenarios, simulates potential consequences, and compares
+scenarios — all advisory. The real MASTERY state is never touched until the user explicitly
+applies a scenario (a separate, confirmed step). No Monte Carlo; no new prediction/decision
+engine; the twin references existing entities, never copies them.
+
+**Changed / added files:**
+- `src/features/twin/digital-twin.ts` (+ `.test.ts`, 19 cases) — `buildBaseline`
+  (operational state, every metric tagged FACT/ESTIMATE/PROJECTION/ASSUMPTION),
+  `runSimulation` (9 scenario ops → full output contract, projections labelled,
+  insufficient-data guard), `calibrateFromHistory` (actual vs estimated minutes, no "why"),
+  `defaultAssumptions`, `compareScenarios`, `buildApplyPreview` (confirmation summary, no
+  mutation).
+- `src/features/twin/scenario-store.ts` (+ `.test.ts`, 4 cases) — per-viewer localStorage
+  scenario library with status + version + duplicate-as-next-version.
+- `src/features/twin/use-digital-twin.ts` — composes useGoals / useTasks / usePredictions /
+  useDecisions + one batched plan read; memoised simulate / compare / applyPreview.
+- `src/features/twin/components/SimulationView.tsx` (+ `.test.tsx`, 6 cases) — SIMULATION-
+  mode banner, baseline panel, scenario editor, result panel, scenario library, comparison
+  table, apply confirmation dialog.
+- `src/features/twin/index.ts`; `src/app/(app)/simulation/page.tsx`.
+- `src/config/navigation.ts` — `SIMULATION_ITEM`; `src/components/layout/sidebar-nav.tsx` —
+  sidebar entry below Knowledge Hub (both rails).
+- `src/features/strategy/components/StrategySignalsPanel.tsx` + `StrategyView.tsx` — links
+  into `/simulation`.
+- `docs/CHANGELOG.md`.
+
+**Verification:** `npm run typecheck` ✅ · `npm run lint` ✅ (0/0) · `npm test` ✅ · `npm run build` ✅
+
+**Manual test steps:**
+1. Sign in, open **Simulation** from the sidebar (below Knowledge Hub) or visit
+   `/simulation`. A persistent "SIMULATION MODE — nothing here changes your real data"
+   banner is shown; "Exit simulation" returns to the Command Center.
+2. The baseline panel shows current operational state; each number carries a Fact /
+   Estimate / Assumption tag, plus a one-line capacity read and any historical calibration.
+3. In the scenario editor: name it, pick a horizon, add changes (op + target + amount),
+   edit the labelled assumptions, and Run simulation → the result panel shows baseline vs
+   projected (projections tagged), plus outcomes / risks / trade-offs / limitations and a
+   confidence level.
+4. Save the scenario → it appears in the library with status DRAFT and version 1;
+   Duplicate makes v2 without overwriting v1.
+5. Select one or more saved scenarios with "Compare" → a delta table appears (scrolls
+   horizontally on narrow screens).
+6. "Apply…" opens a confirmation dialog summarising what would change; confirming records
+   the scenario as APPLIED for the audit trail — it does not mutate goals / plans / tasks.
+7. With no goals/plans/tasks: an "Insufficient data for reliable simulation" state shows;
+   you can still draft a scenario and enter assumptions.
+8. Keyboard: every control is a real input / select / button; the dialog traps focus.
+
+**Known limitations:**
+- Scenarios live in localStorage (per device), like decisions / context notes; a
+  server-scoped store + real transactional apply is a later migration.
+- "Apply" records an APPLIED status only; the underlying record changes are still made in
+  each module with its existing form + authorization — deliberately, so no unaudited
+  mutation path is introduced.
+- No Monte Carlo / probabilistic modelling — the spec says only if the data justifies it,
+  and it does not yet.
+- 3D Brain "simulation mode" visual is left to a later pass; the 2D simulation surface is
+  the required non-3D path and is complete.
+
+---
+
 ## Active work — Layer P: Knowledge & Personal Context Engine
 
 **Scope:** a unified, reference-based context layer at `/knowledge` that answers "what
@@ -213,6 +277,19 @@ no repository access from presentation.
 ---
 
 ## Layer log
+
+### 2026-09-10 — Layer Q: Personal Digital Twin & Simulation Engine
+
+Added `/simulation` — a deterministic sandbox over the user's operational state. Pure
+`digital-twin.ts` (`buildBaseline` / `runSimulation` / `calibrateFromHistory` /
+`compareScenarios` / `buildApplyPreview`) + `useScenarioLibrary` localStorage store +
+`useDigitalTwin` composer + `SimulationView`. Nine scenario ops, every projected value
+labelled `projection`, FACT/ESTIMATE/ASSUMPTION tags on the baseline, historical
+calibration that never concludes why, insufficient-data guard, comparison table, and an
+apply confirmation that records APPLIED status without mutating real records. Sidebar entry
+below Knowledge Hub; cross-links from the Command Center and Strategy view. No Monte Carlo,
+no new prediction/decision engine. 29 new tests (19 model + 4 store + 6 view). typecheck /
+lint / test / build green.
 
 ### 2026-09-10 — Layer P: Knowledge & Personal Context Engine
 

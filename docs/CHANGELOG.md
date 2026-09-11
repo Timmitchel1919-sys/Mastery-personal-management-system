@@ -6,6 +6,58 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer Q — Personal Digital Twin & Simulation Engine — 2026-09-10
+
+**Added**
+- `src/features/twin/digital-twin.ts` — a pure, deterministic sandbox. `buildBaseline`
+  derives the user's operational state (active goals/projects, planned focus hours,
+  upcoming deadlines, blocked items, open decisions, capacity) by reference and tags every
+  headline number FACT / ESTIMATE / PROJECTION / ASSUMPTION. `runSimulation` applies
+  scenario changes (ADD / REMOVE / DEFER / ACCELERATE / REDUCE / RESCHEDULE / REPRIORITIZE
+  / PAUSE / COMPLETE) to a copy of the metric set and returns the full contract — baseline,
+  projected, changes, affected areas, outcomes, risks, trade-offs, assumptions, confidence,
+  limitations — with every projected value tagged `projection` and "Insufficient data for
+  reliable simulation." when the baseline is empty. `calibrateFromHistory` compares done
+  tasks' actual vs estimated minutes (never concludes *why*); `defaultAssumptions` seeds
+  the estimate-to-actual factor from it but keeps it editable (an explicit assumption still
+  wins). `compareScenarios` builds a delta table; `buildApplyPreview` produces the
+  confirmation summary — it does not mutate anything.
+- `src/features/twin/digital-twin.test.ts` — 19 cases: baseline representation + kind
+  tagging, over-commitment, historical calibration, projection bounding, deadline easing,
+  risk flagging, insufficient-data confidence, assumption precedence, comparison deltas,
+  apply-preview.
+- `src/features/twin/scenario-store.ts` (+ `.test.ts`, 4 cases) — per-viewer localStorage
+  scenario library: create (DRAFT / v1), update, status transitions, duplicate as next
+  version (no overwrite), delete.
+- `src/features/twin/use-digital-twin.ts` — composes the domain hooks + one batched plan
+  read; memoised `simulate` / `compare` / `applyPreview`; nothing mutates real data.
+- `src/features/twin/components/SimulationView.tsx` (+ `.test.tsx`, 6 cases) — the
+  `/simulation` screen: a persistent SIMULATION-mode banner, baseline panel, scenario
+  editor (changes + editable assumptions + horizon), result panel (baseline vs projected,
+  outcomes / risks / trade-offs / limitations), scenario library (simulate / compare /
+  duplicate / archive / apply), a comparison table, and an apply confirmation dialog that
+  records status APPLIED for the audit trail without touching real records.
+- `src/app/(app)/simulation/page.tsx`; `SIMULATION_ITEM` in the sidebar below Knowledge Hub.
+- Cross-links: the Command Center's strategy-signals line and the Strategy view's review
+  section now link into `/simulation`.
+
+**Changed**
+- Nothing removed. No new prediction / decision / learning engine; no Monte Carlo (the data
+  does not justify it). The twin references existing entities, never copies them.
+
+**Safety / grounding**
+- All simulation is user-scoped and deterministic. Projections are labelled as model
+  output, never predictions. Applying a scenario is a separate, explicit, confirmed step;
+  in this build it records an APPLIED status for auditability and the underlying
+  goal/plan/task changes are still made in their own modules with the existing forms and
+  authorization.
+
+**Verified**
+- `npm run typecheck`
+- `npm run lint`
+- `npm test`
+- `npm run build`
+
 ### Layer P — Knowledge & Personal Context Engine — 2026-09-10
 
 **Added**

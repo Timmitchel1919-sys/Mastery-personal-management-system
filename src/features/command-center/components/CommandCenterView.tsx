@@ -246,7 +246,7 @@ export function CommandCenterView() {
                 </span>
                 .
               </p>
-              <BrainHub systemState={brainState} className="min-h-[280px]" />
+              <BrainHub systemState={brainState} className="min-h-70p" />
             </section>
           </div>
 

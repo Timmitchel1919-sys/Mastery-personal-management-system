@@ -50,7 +50,11 @@ export function StrategySignalsPanel() {
       ) : null}
 
       <p className="text-subtle text-xs">
-        Advisory only. Review the full picture and options in Strategy.
+        Advisory only. Review the full picture and options in Strategy, or{" "}
+        <Link href="/simulation" className="text-primary hover:underline">
+          model a what-if in Simulation
+        </Link>
+        .
       </p>
     </section>
   );

@@ -553,6 +553,14 @@ export function StrategyView() {
             limit={6}
           />
 
+          <p className="text-subtle text-xs">
+            Want to test one of these options before committing?{" "}
+            <Link href="/simulation" className="text-primary hover:underline">
+              Open Simulation
+            </Link>{" "}
+            to model it against your current state.
+          </p>
+
           {/* Portfolio (progressive disclosure) */}
           <Panel
             id="portfolio"

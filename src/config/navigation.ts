@@ -100,6 +100,13 @@ export const KNOWLEDGE_ITEM: NavItem = {
   description: "Your searchable MASTERY knowledge — notes, lessons, context, project history",
 };
 
+export const SIMULATION_ITEM: NavItem = {
+  label: "Simulation",
+  href: "/simulation",
+  icon: Workflow,
+  description: "Personal digital twin — sandbox what-if scenarios, compare, then decide",
+};
+
 export const NAV_SECTIONS: NavSection[] = [
   {
     id: "plan",
@@ -249,6 +256,7 @@ export const ALL_NAV_ITEMS: NavItem[] = (() => {
     COMMAND_CENTER_ITEM,
     STRATEGY_ITEM,
     KNOWLEDGE_ITEM,
+    SIMULATION_ITEM,
     ...NAV_SECTIONS.flatMap((section) => [
       {
         label: section.label,

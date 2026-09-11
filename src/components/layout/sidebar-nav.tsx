@@ -10,6 +10,7 @@ import {
   COMMAND_CENTER_ITEM,
   DASHBOARD_ITEM,
   KNOWLEDGE_ITEM,
+  SIMULATION_ITEM,
   STRATEGY_ITEM,
   NAV_SECTIONS,
   SYSTEM_ITEMS,
@@ -207,6 +208,7 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
   const commandCenterActive = isNavItemActive(pathname, COMMAND_CENTER_ITEM.href);
   const strategyActive = isNavItemActive(pathname, STRATEGY_ITEM.href);
   const knowledgeActive = isNavItemActive(pathname, KNOWLEDGE_ITEM.href);
+  const simulationActive = isNavItemActive(pathname, SIMULATION_ITEM.href);
 
   return (
     <nav aria-label={t("nav.primary")} className="flex flex-1 flex-col gap-2 overflow-y-auto p-3">
@@ -300,6 +302,25 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
             item={KNOWLEDGE_ITEM}
             label={label(KNOWLEDGE_ITEM.href, KNOWLEDGE_ITEM.label)}
             active={knowledgeActive}
+            onNavigate={onNavigate}
+          />
+        </NavCard>
+      )}
+
+      {collapsed ? (
+        <NavLink
+          item={SIMULATION_ITEM}
+          label={label(SIMULATION_ITEM.href, SIMULATION_ITEM.label)}
+          active={simulationActive}
+          collapsed
+          onNavigate={onNavigate}
+        />
+      ) : (
+        <NavCard active={simulationActive}>
+          <NavCardLink
+            item={SIMULATION_ITEM}
+            label={label(SIMULATION_ITEM.href, SIMULATION_ITEM.label)}
+            active={simulationActive}
             onNavigate={onNavigate}
           />
         </NavCard>
