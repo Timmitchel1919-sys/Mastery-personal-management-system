@@ -44,6 +44,8 @@ export const COMMAND_CATALOG: CommandDefinition[] = [
   { id: "finish-on-time", phrases: ["will i finish this project on time", "will i finish on time", "project on time"], label: "Will I finish on time?", description: "Open project forecasts in Predictions", intent: "ANALYZE", href: "/predictions" },
   { id: "prepare-for", phrases: ["what should i prepare for", "what to prepare for"], label: "What should I prepare for?", description: "Open the future timeline in Predictions", intent: "VIEW", href: "/predictions" },
   { id: "postpone-what-if", phrases: ["what happens if i postpone this", "what if i postpone"], label: "What happens if I postpone this?", description: "Open the Digital Twin simulator", intent: "SIMULATE", href: "/simulation" },
+  { id: "automation-center", phrases: ["automation center", "what is mastery doing", "active automations"], label: "Open Automation Center", description: "The controlled operating loop, conflicts, and audit log", intent: "VIEW", href: "/automation" },
+  { id: "pause-automation", phrases: ["pause all automation", "stop automation", "kill switch"], label: "Pause all automation", description: "Open Automation Center to activate the kill switch", intent: "VIEW", href: "/automation" },
 ];
 
 function normalize(text: string): string {

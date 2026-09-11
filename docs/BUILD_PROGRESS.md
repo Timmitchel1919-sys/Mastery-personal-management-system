@@ -21,6 +21,71 @@ Living build tracker. Updated at the end of every layer.
 
 ---
 
+## Active work — Layer V: Controlled Autonomous Personal Operating Loop
+
+**Scope:** a governance extension at `/automation` over Layer R's autonomy engine — not a
+second execution engine. Adds Level 4 conditional autonomy, a conflict engine, a
+consecutive-failure circuit breaker, dry-run previews, a tamper-evident audit log, and the
+single `evaluateGateway` entry point every proposal must pass through. Level 5 (full
+autonomy) is explicitly not implemented.
+
+**Changed / added files:**
+- `src/features/governance/governance-model.ts` (+ `.test.ts`, 20 cases) —
+  `evaluateConditionalAutonomy`, `detectActionConflicts`, `evaluateCircuitBreaker`,
+  `dryRunAction`, `evaluateGateway`, `appendAuditEvent`/`verifyAuditIntegrity`
+  (FNV-1a hash chain).
+- `src/features/governance/automation-policy.ts` (+ `.test.ts`, 8 cases) — deterministic
+  natural-language → `PolicyDraft` (3 recognized phrase families), `describePolicyPreview`,
+  `reviseDraft` (versioned), `testPolicyDraft` (no-op evaluation).
+- `src/features/governance/use-governance.ts` — composes `useAutonomy` (R) + Level 4 rules
+  + audit log + policy drafts, all localStorage.
+- `src/features/governance/components/AutomationCenterView.tsx` (+ `.test.tsx`, 7 cases) —
+  the `/automation` screen.
+- `src/features/governance/index.ts`; `src/app/(app)/automation/page.tsx`.
+- `src/config/navigation.ts` — `AUTOMATION_ITEM`; `src/components/layout/sidebar-nav.tsx`
+  — sidebar entry below Predictions (both rails).
+- `src/features/command/command-router.ts` (+ tests) — "automation center", "pause all
+  automation" phrases.
+- `docs/CHANGELOG.md`.
+
+**Verification:** `npm run typecheck` ✅ · `npm run lint` ✅ (0/0) · `npm test` ✅ · `npm run build` ✅
+
+**Manual test steps:**
+1. Sign in, open **Automation Center** from the sidebar (below Predictions) or visit
+   `/automation`. The summary strip shows running/awaiting-approval/completed/failed
+   counts plus conflicts and tripped circuit breakers.
+2. Type "Every weekday remind me to review my goals." in Create an automation → Preview
+   policy → a draft appears with a plain-language preview ("…MASTERY will create an
+   internal reminder. Every occurrence will wait for your approval…") and its conditions.
+   Test policy evaluates without creating anything; Activate turns it into a real
+   Layer R `AutomationRule`.
+3. Type something unrecognized (e.g. a financial request) → no draft is created — the
+   parser never falls back to an unrestricted interpretation.
+4. The audit log lists governance events (ACTION_PROPOSED, POLICY_CHANGED, …) with an
+   integrity line; tampering with a stored record (dev tools → localStorage) flips it to
+   "Integrity check failed".
+5. Press `Ctrl/Cmd+K`, type "automation center" or "pause all automation" → both route
+   here (the router itself never pauses anything directly).
+6. Confirm Trust Center (`/operations`) still owns the autonomy-level and permission-matrix
+   controls — Automation Center links there rather than duplicating them.
+
+**Known limitations:**
+- Conditional-autonomy rules, the audit chain, and policy drafts are per-device
+  (localStorage), consistent with every prior advisory/governance layer this session;
+  server-side enforcement of the same policy is the natural next step when a real backend
+  authorization service exists.
+- Natural-language automation recognizes 3 phrase families deterministically; it is not an
+  open-ended parser by design (§31: never translate free-form language into unrestricted
+  execution). Extending recognized phrases means extending the pattern table, not adding
+  an LLM call.
+- The conflict engine and circuit breaker operate on Layer R's in-memory queue for the
+  current session; a queue that resets on reload does not carry conflict/breaker state
+  forward beyond what the persisted history already encodes.
+- 3D Brain autonomous-loop states (MONITORING/PROPOSING/AWAITING_APPROVAL/…) are not added
+  in this pass — the existing brain-state signals continue to drive the Brain.
+
+---
+
 ## Active work — Layer U: Predictive Personal Operating System
 
 **Scope:** a synthesis and horizon layer at `/predictions` — not a new prediction engine.
@@ -532,6 +597,21 @@ no repository access from presentation.
 ---
 
 ## Layer log
+
+### 2026-09-11 — Layer V: Controlled Autonomous Personal Operating Loop
+
+Added `/automation` — a governance extension over Layer R's autonomy engine, not a second
+execution engine. `governance-model.ts` adds Level 4 conditional autonomy (never for
+prohibited/high-risk types), a same-entity conflict engine, a 3-consecutive-failure
+circuit breaker, dry-run previews, and `evaluateGateway` — the single entry point every
+proposal (human or future AI Workforce) must pass through, which can only narrow or gate
+what R already allows, never bypass a DENY. A hash-chained, tamper-evident audit log
+covers the spec's event vocabulary. `automation-policy.ts` turns 3 recognized phrase
+families into a versioned, human-previewed `PolicyDraft` — deterministic, no LLM call, and
+unrecognized text never falls back to unrestricted execution. `AutomationCenterView` +
+`AUTOMATION_ITEM` in the sidebar below Predictions; 2 new command-router phrases. Level 5
+(full autonomy) is explicitly not implemented anywhere. 35 new tests (20 governance model +
+8 automation policy + 7 view). typecheck / lint / test / build green.
 
 ### 2026-09-11 — Layer U: Predictive Personal Operating System
 

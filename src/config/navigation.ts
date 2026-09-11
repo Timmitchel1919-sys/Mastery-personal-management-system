@@ -128,6 +128,13 @@ export const PREDICTIONS_ITEM: NavItem = {
   description: "Forecasts, early warnings, and a future timeline — never presented as fact",
 };
 
+export const AUTOMATION_ITEM: NavItem = {
+  label: "Automation Center",
+  href: "/automation",
+  icon: Zap,
+  description: "The controlled autonomous operating loop — conflicts, circuit breakers, audit log",
+};
+
 export const NAV_SECTIONS: NavSection[] = [
   {
     id: "plan",
@@ -281,6 +288,7 @@ export const ALL_NAV_ITEMS: NavItem[] = (() => {
     OPERATIONS_ITEM,
     ADAPTATION_ITEM,
     PREDICTIONS_ITEM,
+    AUTOMATION_ITEM,
     ...NAV_SECTIONS.flatMap((section) => [
       {
         label: section.label,

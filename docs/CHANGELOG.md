@@ -6,6 +6,67 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer V — Controlled Autonomous Personal Operating Loop — 2026-09-11
+
+**Added**
+- `src/features/governance/governance-model.ts` — a *governance extension* over Layer R,
+  not a second execution engine. Reuses R's action catalog, `classifyAction`, and
+  `evaluatePolicy` unchanged, and adds exactly what R does not have: `evaluateConditionalAutonomy`
+  (LEVEL 4 — a predefined action auto-executes only when its user-defined condition holds,
+  never for a prohibited or high/critical-risk type); `detectActionConflicts` (same-entity
+  duplicate or opposing in-flight actions → paused, never both running);
+  `evaluateCircuitBreaker` (3 consecutive failures of an action type → paused for review,
+  never retried indefinitely); `dryRunAction` ("here is what MASTERY would change" —
+  mutates nothing); and `evaluateGateway`, the single controlled entry point every
+  proposal must pass through (kill switch → circuit breaker → conflict → R's own policy
+  decision → Level 4 upgrade, in that order — it can only narrow what R allows or upgrade
+  an approval-required decision under an explicit condition, never bypass a DENY). An
+  append-only, hash-chained audit log (`appendAuditEvent` / `verifyAuditIntegrity`, FNV-1a
+  — tamper-evident, not cryptographic security, since the client is not the security
+  boundary) covers the spec's `ACTION_PROPOSED…AUTONOMY_PAUSED` event vocabulary.
+- `src/features/governance/governance-model.test.ts` — 20 cases across conditional
+  autonomy, conflict detection, circuit breaker, dry run, the gateway's full decision
+  table, and audit chain integrity (including tamper detection).
+- `src/features/governance/automation-policy.ts` (+ `.test.ts`, 8 cases) — deterministic
+  phrase recognition (no LLM call from the client) turning a recognized request ("every
+  weekday remind me to review my goals", "automatically organize my low-priority tasks",
+  "keep my Friday afternoon available for deep work") into a `PolicyDraft` —
+  INTENT → POLICY → CONDITIONS → ACTION — with a mandatory human-readable preview
+  (`describePolicyPreview`), version-on-edit (`reviseDraft`, never mutates history), and a
+  no-op `testPolicyDraft` that evaluates without creating or executing anything.
+  Unrecognized text returns `null` rather than falling back to an unrestricted
+  interpretation.
+- `src/features/governance/use-governance.ts` — composes Layer R's `useAutonomy` and adds
+  the Level 4 rule store, the audit log, and policy drafts (all localStorage, consistent
+  with prior layers); `submit()` is the UI-facing gateway call.
+- `src/features/governance/components/AutomationCenterView.tsx` (+ `.test.tsx`, 7 cases) —
+  the `/automation` screen: the operating-loop summary, conflicts, tripped circuit
+  breakers, pending approvals (reusing R's `ApprovalCard`), the action queue, automation
+  creation from a phrase with policy preview/activate/test, and the audit log with an
+  integrity status line. Cross-links to the Trust Center for the underlying policy engine
+  rather than duplicating its permission matrix.
+- `AUTOMATION_ITEM` in the sidebar below Predictions; 2 new command-router phrases
+  ("automation center", "pause all automation") — the latter navigates to the Automation
+  Center rather than pausing directly, consistent with the router's navigation-only
+  contract.
+
+**Changed**
+- Nothing removed, no duplicate execution infrastructure. Level 5 (full autonomy) is not
+  implemented anywhere in this module, by design.
+
+**Safety / grounding**
+- The gateway can only ever narrow or gate what Layer R's policy engine already allows —
+  it never grants an action R would deny, and the Level 4 upgrade path explicitly excludes
+  prohibited and high/critical-risk action types regardless of configured conditions.
+- The audit log is append-only in application flow (no update/delete path exists) and
+  self-verifiable; a broken chain is surfaced, not silently accepted.
+
+**Verified**
+- `npm run typecheck`
+- `npm run lint`
+- `npm test`
+- `npm run build`
+
 ### Layer U — Predictive Personal Operating System — 2026-09-11
 
 **Added**
