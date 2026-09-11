@@ -16,6 +16,7 @@ import {
 import { BreadcrumbTrail, PageContainer, PageHeader } from "@/components/layout";
 import { EmptyState } from "@/components/shared";
 import { Button, SegmentedControl, SegmentedControlItem, Skeleton } from "@/components/ui";
+import { RelevantContextPanel } from "@/features/context";
 import { cn } from "@/lib/utils";
 import {
   STRATEGY_CONFIDENCE_LABEL,
@@ -545,6 +546,12 @@ export function StrategyView() {
               <ReviewBlock kind={reviewKind} review={currentReview} />
             </div>
           </Panel>
+
+          <RelevantContextPanel
+            scope={{ module: "strategy" }}
+            title="Relevant context for this review"
+            limit={6}
+          />
 
           {/* Portfolio (progressive disclosure) */}
           <Panel

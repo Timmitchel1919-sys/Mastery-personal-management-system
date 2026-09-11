@@ -22,6 +22,9 @@ let value: {
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/strategy" }));
 vi.mock("../use-strategy", () => ({ useStrategy: () => value }));
+vi.mock("@/features/context", () => ({
+  RelevantContextPanel: () => <div data-testid="relevant-context" />,
+}));
 
 import { StrategyView } from "./StrategyView";
 

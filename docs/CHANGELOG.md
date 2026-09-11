@@ -6,6 +6,61 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer P — Knowledge & Personal Context Engine — 2026-09-10
+
+**Added**
+- `src/features/context/context-model.ts` — a pure, reference-based context index over the
+  user's own MASTERY history plus their explicit notes. `buildContextIndex` normalises
+  goals / plans / tasks / decisions / journal / explicit notes into `ContextItem`s that
+  point at records rather than copying them; `deriveRelationships` connects them by their
+  existing IDs (task→goal, goal→plan, decision→goal, reflection→goal, note→anything);
+  `queryContext` scores relevance deterministically (DIRECT / HIGH / MEDIUM / LOW, explicit
+  user context outranks inferred, temporal windows current/today/recent/historical) with a
+  plain reason on every result; `detectContextConflicts` reports (never resolves)
+  disagreements such as an explicit constraint date vs a goal's target; `assembleAiContext`
+  returns the *minimum necessary* bundle (direct/high only, capped by item and char count)
+  and says "No relevant history found." rather than letting a caller fabricate history.
+  The engine infers nothing sensitive — only functional application context.
+- `src/features/context/context-model.test.ts` — 16 cases: indexing by reference,
+  archival/confidence, irrelevant exclusion, relationship derivation, relevance ranking,
+  explicit priority, temporal windows, deterministic search, conflict detection (report
+  only), AI assembly minimisation + hallucination protection, relevance explanation.
+- `src/features/context/user-context-store.ts` (+ `.test.ts`, 4 cases) — per-viewer
+  localStorage store for explicit notes (add / edit / archive / delete / link / unlink) and
+  "mark irrelevant" markers the engine honours.
+- `src/features/context/use-context.ts` — `useKnowledgeContext` composes the existing
+  domain hooks + one batched plan read and exposes `{ index, relationships, conflicts,
+  query, assembleForAi, userContext, reload }`.
+- `src/features/context/components/RelevantContextPanel.tsx` (+ `.test.tsx`, 4 cases) — a
+  reusable scoped "what history is relevant here" panel: relevance badge, a why-am-I-seeing-
+  this line, an open-source link, and a mark-not-relevant control; renders "No relevant
+  history found." when empty. A `compact` variant for dense surfaces.
+- `src/features/context/components/KnowledgeHubView.tsx` (+ `.test.tsx`, 4 cases) — the
+  `/knowledge` screen: deterministic search, conflict alerts, an explicit-context editor,
+  Lessons, Reflections, Project history, and a restore list for hidden records.
+- `src/app/(app)/knowledge/page.tsx`; `KNOWLEDGE_ITEM` in `src/config/navigation.ts` wired
+  into the sidebar below Strategy.
+- Command Center gets a compact `RelevantContextPanel`; the Strategy view gets a scoped one
+  for the strategic review.
+
+**Changed**
+- Nothing removed. No vector database, no new search engine — deterministic search reuses
+  the existing journal-search pattern; semantic search stays an unbuilt enhancement, not a
+  dependency.
+
+**Safety / grounding**
+- All context is user-scoped by construction (the engine only sees data the caller already
+  loaded for the signed-in user). No cross-user retrieval, search, or learning.
+- Minimum-necessary context to AI; explicit user context always outranks inferred;
+  conflicts are surfaced, never auto-resolved; the user can correct, unlink, hide, archive,
+  or delete any context.
+
+**Verified**
+- `npm run typecheck`
+- `npm run lint`
+- `npm test`
+- `npm run build`
+
 ### Layer O — Adaptive Personal Strategy Engine — 2026-09-10
 
 **Added**

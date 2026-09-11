@@ -93,6 +93,13 @@ export const STRATEGY_ITEM: NavItem = {
   description: "Adaptive strategy engine — alignment, drift, options, trade-offs, reviews",
 };
 
+export const KNOWLEDGE_ITEM: NavItem = {
+  label: "Knowledge Hub",
+  href: "/knowledge",
+  icon: BookOpen,
+  description: "Your searchable MASTERY knowledge — notes, lessons, context, project history",
+};
+
 export const NAV_SECTIONS: NavSection[] = [
   {
     id: "plan",
@@ -241,6 +248,7 @@ export const ALL_NAV_ITEMS: NavItem[] = (() => {
     BRAIN_HUB_ITEM,
     COMMAND_CENTER_ITEM,
     STRATEGY_ITEM,
+    KNOWLEDGE_ITEM,
     ...NAV_SECTIONS.flatMap((section) => [
       {
         label: section.label,

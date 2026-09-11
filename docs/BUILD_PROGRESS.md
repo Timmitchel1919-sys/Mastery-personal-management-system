@@ -21,6 +21,67 @@ Living build tracker. Updated at the end of every layer.
 
 ---
 
+## Active work — Layer P: Knowledge & Personal Context Engine
+
+**Scope:** a unified, reference-based context layer at `/knowledge` that answers "what
+information is relevant to what I am doing right now?" — deterministic first, user-owned,
+user-controlled. It improves relevance without hidden profiling: it infers nothing
+sensitive and stores references, not copies. No vector DB; deterministic search reuses the
+existing journal-search pattern.
+
+**Changed / added files:**
+- `src/features/context/context-model.ts` (+ `.test.ts`, 16 cases) — `buildContextIndex`,
+  `deriveRelationships`, `queryContext` (deterministic DIRECT/HIGH/MEDIUM/LOW with a reason,
+  explicit > inferred, temporal windows), `detectContextConflicts` (report only),
+  `assembleAiContext` (minimum necessary + "No relevant history found."), `classifyWindow`,
+  `explainRelevance`.
+- `src/features/context/user-context-store.ts` (+ `.test.ts`, 4 cases) — per-viewer
+  explicit-notes + mark-irrelevant store (localStorage).
+- `src/features/context/use-context.ts` — `useKnowledgeContext` composes useGoals / useTasks
+  / useJournal / useDecisions / useUserContext + one batched plan read.
+- `src/features/context/components/RelevantContextPanel.tsx` (+ `.test.tsx`, 4 cases) —
+  reusable scoped panel with relevance badge, explanation, open-source link,
+  mark-not-relevant; `compact` variant.
+- `src/features/context/components/KnowledgeHubView.tsx` (+ `.test.tsx`, 4 cases) — the
+  `/knowledge` screen (search, conflicts, explicit-context editor, lessons, reflections,
+  project history, restore list).
+- `src/features/context/index.ts`; `src/app/(app)/knowledge/page.tsx`.
+- `src/config/navigation.ts` — `KNOWLEDGE_ITEM`; `src/components/layout/sidebar-nav.tsx` —
+  sidebar entry below Strategy (both rails).
+- `src/features/command-center/components/CommandCenterView.tsx` — compact
+  `RelevantContextPanel`; `src/features/strategy/components/StrategyView.tsx` — scoped
+  `RelevantContextPanel` for the strategic review. (Both test files get a mock.)
+- `docs/CHANGELOG.md`.
+
+**Verification:** `npm run typecheck` ✅ · `npm run lint` ✅ (0/0) · `npm test` ✅ · `npm run build` ✅
+
+**Manual test steps:**
+1. Sign in, open **Knowledge Hub** from the sidebar (below Strategy) or visit `/knowledge`.
+2. Type ≥2 chars in search → deterministic matches across goals / plans / tasks / notes /
+   decisions / reflections; no AI, no external call.
+3. Add an explicit context note (title + details + tags) → it appears under Important
+   context and can be archived or deleted.
+4. Open a goal-heavy area and check the Strategy view's "Relevant context for this review"
+   panel and the Command Center's compact context strip — each row shows a relevance badge,
+   a why-am-I-seeing-this line, an open-source link, and a "not relevant" control.
+5. Mark a row not relevant → it disappears from context surfaces and shows in the Knowledge
+   Hub "Hidden from context" list with a Restore action.
+6. If an explicit note records a constraint date that differs from a linked goal's target,
+   the Knowledge Hub shows a "Conflicting context" alert — MASTERY does not resolve it.
+7. Keyboard: search box, note editor, and every control are real inputs / buttons / links.
+
+**Known limitations:**
+- Explicit notes and mark-irrelevant markers are per-device (localStorage), consistent with
+  the decisions / personalization layers; a server-scoped store is a later migration.
+- Semantic search is intentionally not built — no embedding infrastructure exists and the
+  spec says not to add a heavyweight vector DB; deterministic search is the baseline.
+- `assembleAiContext` is wired and tested but there is no AI chat surface in the repo yet
+  to consume it; it is the minimum-necessary boundary for when one lands.
+- 3D Brain context visualisation is left to the existing brain-state relationship rendering;
+  Layer P adds the 2D knowledge surfaces the spec requires as the non-3D path.
+
+---
+
 ## Active work — Layer O: Adaptive Personal Strategy Engine
 
 **Scope:** a strictly advisory strategy layer at `/strategy` that answers "where am I /
@@ -152,6 +213,19 @@ no repository access from presentation.
 ---
 
 ## Layer log
+
+### 2026-09-10 — Layer P: Knowledge & Personal Context Engine
+
+Added `/knowledge` — a reference-based context index over the user's own MASTERY history
+plus explicit notes. Pure `context-model.ts` (`buildContextIndex` / `deriveRelationships` /
+`queryContext` / `detectContextConflicts` / `assembleAiContext`) + `useUserContext`
+localStorage store + `useKnowledgeContext` composer + `KnowledgeHubView` +
+reusable `RelevantContextPanel` (used in the Strategy view and, compact, in the Command
+Center). Deterministic relevance with a plain reason on every result; explicit user context
+outranks inferred; temporal windows; conflicts surfaced not resolved; AI assembly capped to
+the minimum necessary and honest about "No relevant history found." No vector DB; no new
+search engine; no cross-user anything. Sidebar entry below Strategy. 28 new tests
+(16 model + 4 store + 4 panel + 4 hub). typecheck / lint / test / build green.
 
 ### 2026-09-10 — Layer O: Adaptive Personal Strategy Engine
 
