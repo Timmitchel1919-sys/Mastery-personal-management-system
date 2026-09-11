@@ -13,6 +13,7 @@ vi.mock("@/features/strategy", () => ({ StrategySignalsPanel: () => <div data-te
 vi.mock("@/features/context", () => ({ RelevantContextPanel: () => <div data-testid="relevant-context" /> }));
 vi.mock("@/features/autonomy", () => ({ PendingApprovalsPanel: () => <div data-testid="pending-approvals" /> }));
 vi.mock("@/features/adaptation", () => ({ AdaptationSignalsPanel: () => <div data-testid="adaptation-signals" /> }));
+vi.mock("@/features/foresight", () => ({ ForesightSignalsPanel: () => <div data-testid="foresight-signals" /> }));
 
 import { CommandCenterView } from "./CommandCenterView";
 

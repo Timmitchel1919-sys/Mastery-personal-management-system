@@ -121,6 +121,13 @@ export const ADAPTATION_ITEM: NavItem = {
   description: "Continuous adaptation — signals, health, and evidence-backed proposals",
 };
 
+export const PREDICTIONS_ITEM: NavItem = {
+  label: "Predictions",
+  href: "/predictions",
+  icon: TrendingUp,
+  description: "Forecasts, early warnings, and a future timeline — never presented as fact",
+};
+
 export const NAV_SECTIONS: NavSection[] = [
   {
     id: "plan",
@@ -273,6 +280,7 @@ export const ALL_NAV_ITEMS: NavItem[] = (() => {
     SIMULATION_ITEM,
     OPERATIONS_ITEM,
     ADAPTATION_ITEM,
+    PREDICTIONS_ITEM,
     ...NAV_SECTIONS.flatMap((section) => [
       {
         label: section.label,

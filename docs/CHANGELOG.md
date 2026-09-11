@@ -6,6 +6,65 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer U — Predictive Personal Operating System — 2026-09-11
+
+**Added**
+- `src/features/foresight/foresight-model.ts` — a synthesis and horizon layer, not a new
+  prediction engine: it reuses Layer J's deterministic `PredictiveSignal`s, Layer O's
+  strategy scenarios, Layer Q's digital-twin capacity + historical calibration, and Layer
+  S's project/plan health, folding them into one horizon-bucketed (today / next-7-days /
+  next-30-days / next-90-days / long-term), kind-labelled `Forecast[]`. Every forecast is
+  explicitly `OBSERVED_FACT | PREDICTION | PROJECTION | RECOMMENDATION` — never merged —
+  with a `recommendation` field kept visually and structurally separate from the
+  `statement`. `refreshForecastStatus` marks forecasts `stale`/`expired` rather than
+  silently reusing them. `buildEarlyWarnings` (6 warning kinds, capped, only
+  meaningful-impact/confidence forecasts — never one per insignificant event) and
+  `buildFutureTimeline` (ACTUAL confirmed dates vs PREDICTED/PROJECTED forecasts, kept
+  semantically distinct) round out the model. `summarizeCalibration` computes accuracy
+  only from user-confirmed outcomes — never fabricated, `null` until something is
+  evaluated.
+- `src/features/foresight/foresight-model.test.ts` — 23 cases across type/kind/horizon
+  mapping, deduplication, sort ordering, staleness/expiry, warning filtering + capping,
+  timeline bucketing + ACTUAL/PREDICTED separation, and calibration honesty.
+- `src/features/foresight/calibration-store.ts` (+ `.test.ts`, 3 cases) — a per-viewer
+  localStorage calibration log: forecasts are recorded once (idempotent), outcomes are
+  user-confirmed (`CORRECT | PARTIALLY_CORRECT | INCORRECT | UNRESOLVED`) since no
+  automated ground truth exists for most forecast types — honest rather than invented.
+- `src/features/foresight/use-foresight.ts` — composes `useAdaptation` (which already
+  composes Strategy/Twin/Context/Decisions/Autonomy), `usePredictions`, and one small
+  extra read (goals/tasks with real dates, for the timeline's ACTUAL side).
+- `src/features/foresight/components/ForesightView.tsx` (+ `.test.tsx`, 5 cases) — the
+  `/predictions` screen: early warnings, future timeline, forecast cards (what / based on
+  what / confidence / assumptions / separate recommendation, with View details / Simulate
+  / Review), and a calibration summary.
+- `src/features/foresight/components/ForesightSignalsPanel.tsx` (+ `.test.tsx`, 3 cases) —
+  compact Command Center surface (top warning + forecast count).
+- `PREDICTIONS_ITEM` in the sidebar below Adaptation; the Command Center gets the
+  foresight-signals strip.
+- `src/features/command/command-router.ts` gains 5 predictive phrases ("what is likely to
+  happen this week", "which goals are at risk", "will I finish this project on time",
+  "what should I prepare for" → Predictions; "what happens if I postpone this" →
+  Simulation, not Predictions) + 2 new router tests.
+
+**Changed**
+- Nothing removed. No duplicate predictive infrastructure — Layer J's `prediction-model.ts`
+  is unchanged and remains the single source of deterministic signal generation.
+
+**Safety / grounding**
+- Predictions are never presented as guaranteed outcomes: every forecast carries
+  confidence, evidence, and assumptions, and strategic/long-horizon forecasts get lower
+  confidence than short-horizon operational ones by construction (scenario `limited-data`
+  horizon and low sample-size calibration both map to `low` confidence).
+- Calibration accuracy is `null` — not zero, not fabricated — until the user confirms an
+  outcome; it never feeds back into `buildForecasts` automatically ("never blindly
+  increase confidence").
+
+**Verified**
+- `npm run typecheck`
+- `npm run lint`
+- `npm test`
+- `npm run build`
+
 ### Layer T — Personal Command & Experience Intelligence — 2026-09-11
 
 **Added**

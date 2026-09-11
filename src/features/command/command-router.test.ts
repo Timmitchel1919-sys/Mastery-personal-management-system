@@ -29,6 +29,17 @@ describe("matchCommand", () => {
   });
 });
 
+describe("predictive commands (Layer U)", () => {
+  it("routes forward-looking questions to Predictions", () => {
+    expect(resolveCommand("which goals are at risk")?.href).toBe("/predictions");
+    expect(resolveCommand("what should i prepare for")?.href).toBe("/predictions");
+  });
+
+  it("routes a what-if postponement question to Simulation, not Predictions", () => {
+    expect(resolveCommand("what happens if i postpone this")?.href).toBe("/simulation");
+  });
+});
+
 describe("resolveCommand", () => {
   it("returns the single best command above the confidence floor", () => {
     expect(resolveCommand("review my goals")?.id).toBe("review-goals");

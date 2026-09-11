@@ -21,6 +21,67 @@ Living build tracker. Updated at the end of every layer.
 
 ---
 
+## Active work — Layer U: Predictive Personal Operating System
+
+**Scope:** a synthesis and horizon layer at `/predictions` — not a new prediction engine.
+Reuses Layer J's deterministic signals, Layer O's strategy scenarios, Layer Q's twin
+capacity + calibration, and Layer S's project/plan health; adds horizon buckets, the
+mandatory OBSERVED_FACT/PREDICTION/PROJECTION/RECOMMENDATION distinction, early warnings,
+a future timeline (ACTUAL vs PREDICTED/PROJECTED), and user-confirmed calibration.
+
+**Changed / added files:**
+- `src/features/foresight/foresight-model.ts` (+ `.test.ts`, 23 cases) — `buildForecasts`,
+  `refreshForecastStatus`, `buildEarlyWarnings`, `buildFutureTimeline`,
+  `summarizeCalibration`.
+- `src/features/foresight/calibration-store.ts` (+ `.test.ts`, 3 cases) — user-confirmed
+  outcome log (localStorage).
+- `src/features/foresight/use-foresight.ts` — composes `useAdaptation` + `usePredictions`
+  + goals/tasks for the timeline's actual dates.
+- `src/features/foresight/components/ForesightView.tsx` (+ `.test.tsx`, 5 cases) — the
+  `/predictions` screen.
+- `src/features/foresight/components/ForesightSignalsPanel.tsx` (+ `.test.tsx`, 3 cases) —
+  compact Command Center surface.
+- `src/features/foresight/index.ts`; `src/app/(app)/predictions/page.tsx`.
+- `src/config/navigation.ts` — `PREDICTIONS_ITEM`; `src/components/layout/sidebar-nav.tsx`
+  — sidebar entry below Adaptation (both rails).
+- `src/features/command-center/components/CommandCenterView.tsx` — foresight-signals strip
+  (+ test mock).
+- `src/features/command/command-router.ts` (+ tests) — 5 predictive phrases routed to
+  `/predictions` or `/simulation`.
+- `docs/CHANGELOG.md`.
+
+**Verification:** `npm run typecheck` ✅ · `npm run lint` ✅ (0/0) · `npm test` ✅ · `npm run build` ✅
+
+**Manual test steps:**
+1. Sign in, open **Predictions** from the sidebar (below Adaptation) or visit
+   `/predictions`. Early warnings show only meaningful, actionable forecasts; the future
+   timeline separates ACTUAL (confirmed dates) from PREDICTED/PROJECTED entries by bucket.
+2. Expand a forecast card → evidence ("based on"), assumptions, confidence, and — only
+   when one exists — a separately labelled recommendation.
+3. Press `Ctrl/Cmd+K` and type "which goals are at risk" or "what should I prepare for" →
+   routes to Predictions; type "what happens if I postpone this" → routes to Simulation.
+4. Open the Command Center → a compact "Predictions" strip shows the top warning and
+   forecast count (absent when nothing meaningful).
+5. Calibration shows "No confirmed outcomes yet" until an outcome is explicitly recorded —
+   never a fabricated accuracy number.
+6. Turn predictions off in Settings, or let Intelligence error → forecasts sourced from
+   Strategy/Twin/Adaptation health still work; only the Layer-J-sourced forecasts drop.
+
+**Known limitations:**
+- Calibration is user-confirmed, not automatically verified — there is no scheduled job
+  that checks a past forecast against what actually happened; the UI provides the log and
+  a place to record it, honestly, rather than fabricating automated verification.
+- `PROJECT_COMPLETION` / `WORKLOAD` forecasts reuse Layer S's project/plan health
+  (task-count and status based) rather than a dedicated estimated-completion-date model —
+  consistent with "only implement types supported by actual available data."
+- `SCHEDULE_CONFLICT` forecasts are not separately generated in this pass — Layer J does
+  not yet produce a distinct schedule-conflict signal (only `schedule-overload`, mapped to
+  `CAPACITY_RISK`); the type and warning kind exist for when one is added.
+- 3D Brain "FORECASTING" state is not added in this pass — the existing brain-state signals
+  continue to drive the Brain.
+
+---
+
 ## Active work — Layer T: Personal Command & Experience Intelligence
 
 **Scope:** unify the existing intelligence systems (N–S) into one coherent experience
@@ -471,6 +532,19 @@ no repository access from presentation.
 ---
 
 ## Layer log
+
+### 2026-09-11 — Layer U: Predictive Personal Operating System
+
+Added `/predictions` — a synthesis/horizon layer over Layer J's predictive signals, Layer
+O's strategy scenarios, Layer Q's twin capacity + calibration, and Layer S's project/plan
+health (no duplicate prediction engine). `foresight-model.ts` produces horizon-bucketed,
+kind-labelled forecasts (`OBSERVED_FACT`/`PREDICTION`/`PROJECTION`/`RECOMMENDATION`,
+strictly separated), staleness/expiry tracking, capped early warnings, an ACTUAL-vs-
+PREDICTED future timeline, and honest user-confirmed calibration (`null` accuracy until
+confirmed, never fabricated). `useForesight` composer + `ForesightView` +
+`ForesightSignalsPanel` in the Command Center + 5 new predictive phrases in the Layer T
+command router. Sidebar entry below Adaptation. 34 new tests (23 model + 3 calibration
+store + 5 view + 3 signals panel). typecheck / lint / test / build green.
 
 ### 2026-09-11 — Layer T: Personal Command & Experience Intelligence
 

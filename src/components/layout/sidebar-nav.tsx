@@ -12,6 +12,7 @@ import {
   DASHBOARD_ITEM,
   KNOWLEDGE_ITEM,
   OPERATIONS_ITEM,
+  PREDICTIONS_ITEM,
   SIMULATION_ITEM,
   STRATEGY_ITEM,
   NAV_SECTIONS,
@@ -213,6 +214,7 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
   const simulationActive = isNavItemActive(pathname, SIMULATION_ITEM.href);
   const operationsActive = isNavItemActive(pathname, OPERATIONS_ITEM.href);
   const adaptationActive = isNavItemActive(pathname, ADAPTATION_ITEM.href);
+  const predictionsActive = isNavItemActive(pathname, PREDICTIONS_ITEM.href);
 
   return (
     <nav aria-label={t("nav.primary")} className="flex flex-1 flex-col gap-2 overflow-y-auto p-3">
@@ -363,6 +365,25 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
             item={ADAPTATION_ITEM}
             label={label(ADAPTATION_ITEM.href, ADAPTATION_ITEM.label)}
             active={adaptationActive}
+            onNavigate={onNavigate}
+          />
+        </NavCard>
+      )}
+
+      {collapsed ? (
+        <NavLink
+          item={PREDICTIONS_ITEM}
+          label={label(PREDICTIONS_ITEM.href, PREDICTIONS_ITEM.label)}
+          active={predictionsActive}
+          collapsed
+          onNavigate={onNavigate}
+        />
+      ) : (
+        <NavCard active={predictionsActive}>
+          <NavCardLink
+            item={PREDICTIONS_ITEM}
+            label={label(PREDICTIONS_ITEM.href, PREDICTIONS_ITEM.label)}
+            active={predictionsActive}
             onNavigate={onNavigate}
           />
         </NavCard>

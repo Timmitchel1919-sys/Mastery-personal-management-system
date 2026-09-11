@@ -39,6 +39,11 @@ export const COMMAND_CATALOG: CommandDefinition[] = [
   { id: "knowledge", phrases: ["search my knowledge", "knowledge hub", "my notes"], label: "Open Knowledge Hub", description: "Search notes, lessons, and history", intent: "SEARCH", href: "/knowledge" },
   { id: "trust-center", phrases: ["what is mastery allowed to do", "trust center", "automation permissions"], label: "Open Trust Center", description: "Autonomy level, permissions, approvals", intent: "VIEW", href: "/operations" },
   { id: "add-task", phrases: ["add a task", "new task", "create task"], label: "Add a task", description: "Open Tasks", intent: "CREATE", href: "/act/tasks" },
+  { id: "likely-this-week", phrases: ["what is likely to happen this week", "what's likely this week", "forecast this week"], label: "What's likely to happen this week?", description: "Open early warnings in Predictions", intent: "ANALYZE", href: "/predictions" },
+  { id: "goals-at-risk", phrases: ["which goals are at risk", "goals at risk", "at-risk goals"], label: "Which goals are at risk?", description: "Open goal trajectory in Predictions", intent: "ANALYZE", href: "/predictions" },
+  { id: "finish-on-time", phrases: ["will i finish this project on time", "will i finish on time", "project on time"], label: "Will I finish on time?", description: "Open project forecasts in Predictions", intent: "ANALYZE", href: "/predictions" },
+  { id: "prepare-for", phrases: ["what should i prepare for", "what to prepare for"], label: "What should I prepare for?", description: "Open the future timeline in Predictions", intent: "VIEW", href: "/predictions" },
+  { id: "postpone-what-if", phrases: ["what happens if i postpone this", "what if i postpone"], label: "What happens if I postpone this?", description: "Open the Digital Twin simulator", intent: "SIMULATE", href: "/simulation" },
 ];
 
 function normalize(text: string): string {

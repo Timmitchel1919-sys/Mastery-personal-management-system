@@ -20,6 +20,7 @@ import { AdaptationSignalsPanel } from "@/features/adaptation";
 import { PendingApprovalsPanel } from "@/features/autonomy";
 import { BrainHub } from "@/features/brain-hub";
 import { RelevantContextPanel } from "@/features/context";
+import { ForesightSignalsPanel } from "@/features/foresight";
 import { StrategySignalsPanel } from "@/features/strategy";
 import { cn } from "@/lib/utils";
 import {
@@ -378,6 +379,9 @@ export function CommandCenterView() {
 
           {/* LEVEL 7 (Strategy) — high-relevance strategic signal only */}
           <StrategySignalsPanel />
+
+          {/* Predictions — top early warning + active forecast count */}
+          <ForesightSignalsPanel />
 
           {/* Continuous adaptation — top signal + proposals awaiting review */}
           <AdaptationSignalsPanel />
