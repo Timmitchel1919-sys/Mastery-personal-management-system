@@ -6,6 +6,53 @@ layers; each entry maps to a layer.
 
 ## [Unreleased]
 
+### Layer T — Personal Command & Experience Intelligence — 2026-09-11
+
+**Added**
+- `src/features/command/command-router.ts` (+ `.test.ts`, 10 cases) — a deterministic,
+  navigation-only Personal Command Layer. `COMMAND_CATALOG` maps the spec's canonical
+  phrases ("show my priorities", "plan my day", "review my goals", "simulate this
+  change", "start a focus session", "show my weekly performance", …) to existing routes;
+  `matchCommand` scores exact / prefix / substring / word-overlap matches (no AI model);
+  `resolveCommand` returns the single best match above a confidence floor;
+  `isNavigationSafe` makes the safety property checkable — every command resolves to an
+  internal route, never an external URL. Every built-in command is `intent: "VIEW"`-class
+  navigation; nothing here validates, simulates, approves, or executes — a future intent
+  that changes data must go through Layer R's policy engine, not this router.
+- `src/features/command/components/SystemStatus.tsx` (+ `.test.tsx`, 4 cases) — a
+  lightweight, always-on status indicator (All systems normal / AI limited / Sync issue /
+  Automation paused) reusing Autonomy's pause flag and Intelligence's status — two
+  already-loaded hooks, no new fetch. Wired into the Topbar.
+- `src/features/command/components/ModuleContextStrip.tsx` (+ `.test.tsx`, 4 cases) —
+  scoped contextual intelligence: the single most relevant Adaptation signal for the
+  module currently open (Goals sees GOAL/PROGRESS signals, Focus sees FOCUS/CAPACITY,
+  etc.), linking into `/adaptation`. Renders nothing when no signal applies — a targeted
+  risk line, not a second insight panel. Wired into `ModuleEnvironment`, alongside the
+  existing module-scoped `IntelligencePanel`.
+- The Command Palette (`Ctrl/Cmd+K`, pre-existing) gains an "Ask MASTERY" group built from
+  `COMMAND_CATALOG`, searchable by the same phrases a user would type or say.
+
+**Changed**
+- Nothing removed, no rewrite of the Brain Hub / module-orbit navigation, no new global
+  state store. The Command Palette's existing "Navigate" group already covered every
+  Layer N–S route via `ALL_NAV_ITEMS` (each layer registered its `NavItem` there when it
+  shipped) — Layer T's job was to add the phrase-level command layer and scoped context on
+  top, not rebuild search or navigation.
+
+**Safety / grounding**
+- The command router is structurally incapable of mutating data — its only output is a
+  route. Natural-language interpretation, when it exists, still has to pass through
+  validation → policy → simulation-if-needed → approval, per the layer's own contract; this
+  layer does not add an execution path.
+- `SystemStatus` and `ModuleContextStrip` never expose infrastructure detail beyond the
+  four documented states / the signal's own statement and evidence.
+
+**Verified**
+- `npm run typecheck`
+- `npm run lint`
+- `npm test`
+- `npm run build`
+
 ### Layer S — Continuous Adaptation & Personal Operating Intelligence — 2026-09-11
 
 **Added**

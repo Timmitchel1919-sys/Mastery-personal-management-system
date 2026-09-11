@@ -21,6 +21,68 @@ Living build tracker. Updated at the end of every layer.
 
 ---
 
+## Active work — Layer T: Personal Command & Experience Intelligence
+
+**Scope:** unify the existing intelligence systems (N–S) into one coherent experience
+without rewriting the Brain Hub / module-orbit navigation or building duplicate modules.
+A deterministic Personal Command Layer, a scoped contextual-intelligence strip in the
+module environment, and a lightweight system-status indicator — all reusing existing
+routes, hooks, and components.
+
+**Changed / added files:**
+- `src/features/command/command-router.ts` (+ `.test.ts`, 10 cases) — `COMMAND_CATALOG`,
+  `matchCommand`, `resolveCommand`, `isNavigationSafe`. Every built-in command is
+  navigation-only (`intent: "VIEW"`-class); the router cannot mutate data.
+- `src/features/command/components/SystemStatus.tsx` (+ `.test.tsx`, 4 cases) — reuses
+  `useAutonomy().paused` + `useIntelligence().status/error`; wired into the Topbar.
+- `src/features/command/components/ModuleContextStrip.tsx` (+ `.test.tsx`, 4 cases) —
+  reuses `useAdaptation().signals` filtered per module; wired into `ModuleEnvironment`.
+- `src/features/command/index.ts`.
+- `src/components/layout/command-palette.tsx` — new "Ask MASTERY" command group from
+  `COMMAND_CATALOG` (the existing "Navigate" group already covered every N–S route via
+  `ALL_NAV_ITEMS`, populated when each of those layers shipped).
+- `src/components/layout/topbar.tsx` — `SystemStatus` indicator.
+- `src/features/brain-hub/components/ModuleEnvironment.tsx` (+ test) — `ModuleContextStrip`.
+- `src/features/brain-hub/components/BrainHub.test.tsx`,
+  `src/components/marketing/LandingBrainExperience.test.tsx` — mock `@/features/command`
+  (both render `ModuleEnvironment`/`BrainHub` and needed the same isolation the existing
+  `@/features/intelligence` mock already provided).
+- `docs/CHANGELOG.md`.
+
+**Verification:** `npm run typecheck` ✅ · `npm run lint` ✅ (0/0) · `npm test` ✅ · `npm run build` ✅
+
+**Manual test steps:**
+1. Press `Ctrl/Cmd+K` anywhere in the app → an "Ask MASTERY" group appears above
+   "Navigate"; typing "plan my day", "review my goals", "simulate this change", or "start
+   a focus session" surfaces the matching command and Enter navigates there.
+2. Open the Topbar on a wide screen → a small status indicator reads "All systems normal"
+   (green). Pause automations in the Trust Center → it switches to "Automation paused".
+3. Open the Brain Hub, select a module with an active Adaptation signal (e.g. Goals when a
+   goal is stalled) → a gold-bordered context strip appears above the submodule cards with
+   the signal and a "Review in Adaptation" link; a module with no relevant signal shows
+   nothing extra.
+4. Confirm existing Brain Hub, Command Center, Strategy, Knowledge, Simulation, Trust
+   Center, and Adaptation navigation and tests are unaffected.
+
+**Known limitations:**
+- The Personal Command Layer is phrase-matching only — no LLM-backed natural-language
+  interpretation is wired in (none of the client-side architecture calls an AI provider
+  directly; that stays server-side per `CLAUDE.md` §5). When one lands, it must route
+  through validate → policy → simulate-if-needed → approve → execute, not bypass this
+  router.
+- Global entity search (goals/tasks/notes grouped by type) is not added to the Command
+  Palette in this pass — `useKnowledgeContext`'s deterministic search already exists in
+  the Knowledge Hub; wiring it into the palette is a natural, low-risk follow-up.
+- A dedicated onboarding/first-run tour, a unified notification center, and a unified
+  activity stream (§39, §41, §42) are not built — no persistent, cross-layer event log
+  exists yet to back them honestly; each layer's own history (Actions, Autonomy, Decisions)
+  remains the source of truth until one is added.
+- 3D Brain state vocabulary (ANALYZING/SIMULATING/ADAPTING/…) is not extended in this pass
+  — the existing brain-state signals (idle/active/attention) continue to drive the Brain;
+  a fuller state machine is left to a later, dedicated pass.
+
+---
+
 ## Active work — Layer S: Continuous Adaptation & Personal Operating Intelligence
 
 **Scope:** a closed-loop synthesis layer at `/adaptation` — observe → interpret → evaluate
@@ -409,6 +471,20 @@ no repository access from presentation.
 ---
 
 ## Layer log
+
+### 2026-09-11 — Layer T: Personal Command & Experience Intelligence
+
+Unified the N–S intelligence layers into one experience without a Brain Hub rewrite.
+`command-router.ts` (deterministic, navigation-only Personal Command Layer — phrase
+matching, no AI, structurally incapable of mutating data) wired into the existing Command
+Palette as an "Ask MASTERY" group. `SystemStatus` (Topbar) synthesises Autonomy's pause
+flag + Intelligence's status into one of four honest states. `ModuleContextStrip`
+(`ModuleEnvironment`) surfaces the single most relevant Adaptation signal per module,
+linking to `/adaptation`, rendering nothing when irrelevant. The Command Palette's
+"Navigate" group already covered every Command Center/Strategy/Knowledge/Simulation/Trust
+Center/Adaptation route via `ALL_NAV_ITEMS` from when each layer shipped. 18 new tests
+(10 router + 4 status + 4 context strip); three existing test files updated with a
+`@/features/command` mock. typecheck / lint / test / build green.
 
 ### 2026-09-11 — Layer S: Continuous Adaptation & Personal Operating Intelligence
 

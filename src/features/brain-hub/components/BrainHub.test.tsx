@@ -7,6 +7,9 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push }), usePathname: ()
 vi.mock("@/features/intelligence", () => ({
   IntelligencePanel: () => <div data-testid="module-intelligence-panel" />,
 }));
+vi.mock("@/features/command", () => ({
+  ModuleContextStrip: () => <div data-testid="module-context-strip" />,
+}));
 
 import { BrainHub } from "./BrainHub";
 

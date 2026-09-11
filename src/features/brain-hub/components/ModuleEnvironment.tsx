@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button, Skeleton } from "@/components/ui";
 import { EmptyState, ErrorState } from "@/components/shared";
+import { ModuleContextStrip } from "@/features/command";
 import { IntelligencePanel } from "@/features/intelligence";
 import type { BrainHubPhase, BrainModuleId } from "../brain-navigation";
 import { moduleDef } from "../module-registry";
@@ -91,6 +92,7 @@ export function ModuleEnvironment({
         />
       ) : (
         <>
+          <ModuleContextStrip moduleId={moduleId} />
           <ul className="mastery-expand grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {mod.submodules.map((submodule) => (
               <li key={submodule.id} className="min-w-0">

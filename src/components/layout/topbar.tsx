@@ -4,6 +4,7 @@ import { Menu } from "lucide-react";
 import { IconButton } from "@/components/ui";
 import { InstallAppButton } from "@/components/pwa/install-app-button";
 import { UserMenu } from "@/features/auth";
+import { SystemStatus } from "@/features/command";
 import { LiveClock } from "./live-clock";
 import { SearchTrigger } from "./search-trigger";
 import { useShell } from "./shell-context";
@@ -29,6 +30,7 @@ export function Topbar() {
         <LiveClock />
       </div>
 
+      <SystemStatus />
       <SearchTrigger />
       <InstallAppButton
         className="hidden md:inline-flex"

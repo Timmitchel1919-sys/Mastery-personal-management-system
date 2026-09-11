@@ -2,8 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
-import { LogOut, Monitor, Moon, Search, Sun } from "lucide-react";
+import { LogOut, Monitor, Moon, Search, Sparkles, Sun } from "lucide-react";
 import { ALL_NAV_ITEMS } from "@/config/navigation";
+import { COMMAND_CATALOG } from "@/features/command";
 import { useAuth } from "@/providers/auth-provider";
 import { useTheme } from "@/providers/theme-provider";
 import { useShell } from "./shell-context";
@@ -44,6 +45,21 @@ export function CommandPalette() {
         <Command.Empty className="text-muted px-3 py-6 text-center text-sm">
           No results.
         </Command.Empty>
+
+        <Command.Group heading="Ask MASTERY">
+          {COMMAND_CATALOG.map((command) => (
+            <Command.Item
+              key={command.id}
+              value={`${command.label} ${command.phrases.join(" ")} ${command.description}`}
+              onSelect={() => run(() => router.push(command.href))}
+              className={ITEM_CLASS}
+            >
+              <Sparkles className="text-muted size-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 truncate">{command.label}</span>
+              <span className="text-subtle hidden text-xs sm:inline">{command.description}</span>
+            </Command.Item>
+          ))}
+        </Command.Group>
 
         <Command.Group heading="Navigate">
           {ALL_NAV_ITEMS.map((item) => {
