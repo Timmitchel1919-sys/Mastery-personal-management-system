@@ -44,12 +44,12 @@ jobs:
           NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL || 'https://mastery-personal-mgmt-system.web.app' }}
       - name: Bundle budget (Layer 23)
         run: npm run analyze
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: export
           path: out
           retention-days: 3
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: coverage
@@ -114,7 +114,7 @@ jobs:
         run: >-
           npx firebase emulators:exec --only auth,firestore,storage
           --project demo-mastery "npm run test:e2e"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
